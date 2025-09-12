@@ -79,33 +79,54 @@ class PopHealthObservatory:
         return candidates[0]
 
     def download_data(self, cycle: str, component: str) -> pd.DataFrame:
+        """Download data for a specific component and cycle with flexible URL handling.
+        
+        This method tries multiple URL patterns to handle the different formats used across NHANES cycles.
+        """
         key = f"{cycle}_{component}"
         if key in self.data_cache:
             return self.data_cache[key]
-        # Build candidate list (reconstruct like in get_data_url but include fallback variants)
-        letter = self.cycle_suffix_map.get(cycle)
-        if not letter:
-            print(f"[WARN] Unknown cycle mapping for {cycle}; cannot download {component}.")
-            return pd.DataFrame()
-        candidates = [
+            
+        letter = self.cycle_suffix_map.get(cycle, '')
+        cycle_year = cycle.split('-')[0] if '-' in cycle else cycle
+        
+        # Define URL patterns to try (in order of preference)
+        url_patterns = [
+            # 2021+ pattern with Public subdirectory
+            f"{self.alt_base_url}/{cycle_year}/DataFiles/{component}_{letter}.xpt",
+            # Standard pattern (2007-2018)
             f"{self.base_url}/{cycle}/{component}_{letter}.XPT",
-            f"{self.alt_base_url}/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt",
-            f"{self.alt_base_url}/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.XPT",
+            # Lowercase variant
+            f"{self.base_url}/{cycle}/{component}_{letter}.xpt",
+            # Pre-2007 pattern (lowercase component)
+            f"{self.base_url}/{cycle}/{component.lower()}_{letter}.XPT",
+            # Pre-2007 pattern (lowercase component and extension)
+            f"{self.base_url}/{cycle}/{component.lower()}_{letter}.xpt",
+            # Alternative Data/Nhanes path
+            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.XPT",
+            # Variant with cycle year suffix
+            f"{self.base_url}/{cycle}/{component}_{cycle[-2:]}.XPT",
         ]
-        last_error = None
-        for url in candidates:
+        
+        # Try each URL pattern
+        errors = []
+        
+        for url in url_patterns:
             try:
-                r = requests.get(url, timeout=30)
-                if r.status_code == 404:
-                    continue
-                r.raise_for_status()
-                df = pd.read_sas(io.BytesIO(r.content), format='xport')
-                self.data_cache[key] = df
-                return df
+                print(f"Trying {component} URL: {url}")
+                response = requests.get(url, timeout=30)
+                
+                if response.status_code == 200:
+                    print(f"✓ Success loading {component} from: {url}")
+                    df = pd.read_sas(io.BytesIO(response.content), format='xport')
+                    self.data_cache[key] = df
+                    return df
+                else:
+                    errors.append(f"Status {response.status_code} from {url}")
             except Exception as e:
-                last_error = e
-                continue
-        print(f"[WARN] Failed to download {component} for {cycle}. Tried: {len(candidates)} URLs. Last error: {last_error}")
+                errors.append(f"Error with {url}: {str(e)}")
+        
+        print(f"Failed to download {component} for {cycle}. Errors: {errors}")
         return pd.DataFrame()
 
     # Reuse logic from legacy NHANESExplorer below for compatibility
@@ -114,28 +135,44 @@ class NHANESExplorer(PopHealthObservatory):
     """Backward compatible class name; extends PopHealthObservatory."""
     # Methods identical to earlier implementation for now
     def get_demographics_data(self, cycle: str = '2017-2018') -> pd.DataFrame:
-        # For newer cycles (2021+), use the direct public data file path that's proven to work
-        if cycle.startswith('2021'):
-            component = self.components['demographics']
-            letter = self.cycle_suffix_map.get(cycle, 'L')  # Default to 'L' for 2021-2022
-            direct_url = f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt"
-            
+        """Get demographics data for a specific cycle with proper URL handling.
+        
+        NHANES changed URL patterns over time, so we try multiple patterns in sequence.
+        """
+        component = self.components['demographics']
+        letter = self.cycle_suffix_map.get(cycle, '')
+        
+        # List of URL patterns to try (in order of preference)
+        url_patterns = [
+            # Newest pattern (2021+) - confirmed working
+            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt",
+            # Older cycles (pre-2021) - standard pattern
+            f"https://wwwn.cdc.gov/Nchs/Nhanes/{cycle}/{component}_{letter}.XPT",
+            # Other variations
+            f"https://wwwn.cdc.gov/Nchs/Nhanes/{cycle.replace('-', '')}/{component}_{cycle[-2:]}.XPT",
+            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.XPT",
+            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.xpt",
+        ]
+        
+        # Try each URL pattern
+        demo_df = pd.DataFrame()
+        errors = []
+        
+        for url in url_patterns:
             try:
-                print(f"Downloading demographics from direct URL: {direct_url}")
-                response = requests.get(direct_url, timeout=30)
+                print(f"Trying demographics URL: {url}")
+                response = requests.get(url, timeout=30)
                 if response.status_code == 200:
+                    print(f"✓ Success loading demographics from: {url}")
                     demo_df = pd.read_sas(io.BytesIO(response.content), format='xport')
+                    break
                 else:
-                    print(f"Failed to download demographics. Status code: {response.status_code}")
-                    demo_df = pd.DataFrame()
+                    errors.append(f"Status {response.status_code} from {url}")
             except Exception as e:
-                print(f"Error downloading demographics: {e}")
-                demo_df = pd.DataFrame()
-        else:
-            # For older cycles, use existing download_data method
-            demo_df = self.download_data(cycle, self.components['demographics'])
-            
+                errors.append(f"Error with {url}: {str(e)}")
+        
         if demo_df.empty:
+            print(f"Failed to download demographics for {cycle}. Errors: {errors}")
             return demo_df
         demo_vars = {
             'SEQN': 'participant_id',
