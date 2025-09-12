@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 import requests
 import io
-import matplotlib.pyplot as plt
-import seaborn as sns
 import warnings
 from typing import Optional, Dict, List
 
@@ -131,7 +129,13 @@ class NHANESExplorer(PopHealthObservatory):
     def create_demographic_visualization(self, df: pd.DataFrame, metric: str, demographic: str):
         if metric not in df.columns or demographic not in df.columns:
             return
-        fig, axes = plt.subplots(1,2, figsize=(15,6))
+        try:
+            import matplotlib.pyplot as plt  # type: ignore
+            import seaborn as sns  # type: ignore
+        except Exception as e:
+            print(f"Visualization dependencies not available: {e}")
+            return
+        fig, axes = plt.subplots(1, 2, figsize=(15, 6))
         sub = df[[demographic, metric]].dropna()
         sns.boxplot(data=sub, x=demographic, y=metric, ax=axes[0])
         axes[0].set_title(f'{metric} by {demographic}')
@@ -141,7 +145,8 @@ class NHANESExplorer(PopHealthObservatory):
         axes[1].set_title(f'Mean {metric} by {demographic}')
         axes[1].tick_params(axis='x', rotation=45)
         axes[1].set_ylabel(f'Mean {metric}')
-        plt.tight_layout(); plt.show()
+        plt.tight_layout()
+        plt.show()
 
     def generate_summary_report(self, df: pd.DataFrame) -> str:
         report = ["PopHealth Observatory Summary Report", "="*40, f"Total Participants: {len(df):,}", f"Total Variables: {len(df.columns)}", ""]
