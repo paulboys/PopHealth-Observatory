@@ -1,4 +1,4 @@
-from nhanes_explorer import NHANESExplorer
+from pophealth_observatory import NHANESExplorer
 
 def main():
     """Demonstrate NHANES data exploration capabilities."""
@@ -6,7 +6,7 @@ def main():
     # Initialize the explorer
     explorer = NHANESExplorer()
     
-    print("NHANES Data Explorer")
+    print("PopHealth Observatory Demo")
     print("=" * 50)
     
     # Create merged dataset for latest cycle
