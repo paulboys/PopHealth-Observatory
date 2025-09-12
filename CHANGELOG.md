@@ -1,5 +1,8 @@
 ## Changelog
 
+### [0.1.1] - 2025-09-12
+Added PyPI publish automation (token-based) and lint/coverage enhancements in CI.
+
 ### [0.1.0] - 2025-09-12
 Initial release.
 
