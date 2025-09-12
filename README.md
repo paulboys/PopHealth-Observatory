@@ -22,18 +22,25 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 
 ## Installation
 
-1. Clone this repository:
+### From Source (Development)
+
+1. Clone:
    ```
-   git clone https://github.com/your-username/pophealth-observatory.git
-   cd pophealth-observatory
+   git clone https://github.com/paulboys/PopHealth-Observatory.git
+   cd PopHealth-Observatory
+   ```
+2. (Recommended) Create & activate a virtual environment.
+3. Install in editable mode with dev extras:
+   ```
+   pip install -e .[dev]
    ```
 
-2. (Optional) Create and activate a virtual environment.
-
-3. Install required packages:
-   ```
-   pip install -r requirements.txt
-   ```
+### (Future) From PyPI
+Once published:
+```
+pip install pophealth-observatory
+```
+Until then, use the source install above.
 
 ## Quick Start
 
@@ -95,8 +102,27 @@ The current implementation exposes the following NHANES components:
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
 ## Contributing
+Contributions are welcome. Open issues for: feature requests, new NHANES components, performance improvements, documentation gaps. Use conventional commits where possible.
 
-Contributions are welcome. Feel free to open issues for: feature requests, dataset component additions, performance improvements, or documentation gaps. Submit a Pull Request following conventional commit style if possible.
+### Dev Workflow
+```bash
+# Lint
+ruff check .
+
+# Format (check) / apply
+black --check .
+black .
+
+# Run tests with coverage
+pytest -q
+coverage run -m pytest && coverage report -m
+```
+
+### Pull Requests
+- Keep changes focused
+- Add/extend tests for new logic
+- Update `CHANGELOG.md` if user-facing changes
+- Ensure CI passes (lint, tests, build)
 
 ## Acknowledgments & Disclaimer
 
