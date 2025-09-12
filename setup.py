@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="nhanes-explorer",
+    name="pophealth-observatory",
     version="0.1.0",
-    author="NHANES Explorer Team",
+    author="PopHealth Observatory Team",
     author_email="your.email@example.com",
-    description="A tool for exploring NHANES health and nutrition data",
+    description="Open-source population health & nutrition analytics toolkit (current focus: NHANES)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/nhanes-explorer",
+    url="https://github.com/yourusername/pophealth-observatory",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

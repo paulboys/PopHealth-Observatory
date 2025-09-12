@@ -6,8 +6,8 @@ Follow these steps to create a GitHub repository for your NHANES Data Explorer p
 
 1. Go to [GitHub](https://github.com/) and sign in to your account.
 2. Click the "+" button in the top-right corner and select "New repository".
-3. Name your repository (e.g., "nhanes-explorer").
-4. Add a description: "A comprehensive tool for exploring health and nutrition metrics from NHANES data".
+3. Name your repository: `pophealth-observatory`.
+4. Add a description (suggested): `Open-source population health & nutrition analytics toolkit (NHANES focus).`
 5. Choose whether to make it public or private.
 6. Check "Initialize this repository with a README" (we'll replace it later).
 7. Select "MIT License" from the license dropdown.
@@ -17,21 +17,25 @@ Follow these steps to create a GitHub repository for your NHANES Data Explorer p
 
 Open a terminal in your NHANES Data Explorer directory and run the following commands:
 
+git commit -m "Initial commit: NHANES Data Explorer"
 ```powershell
-# Initialize a Git repository
+# Initialize (if not already)
 git init
 
-# Add all files to the staging area
+# Add all files
 git add .
 
-# Make the initial commit
-git commit -m "Initial commit: NHANES Data Explorer"
+# Commit (skip if already committed)
+git commit -m "Initial commit: PopHealth Observatory"
 
-# Add the GitHub repository as a remote
-git remote add origin https://github.com/YOUR-USERNAME/nhanes-explorer.git
+# Add remote (replace YOUR-USERNAME)
+git remote add origin https://github.com/YOUR-USERNAME/pophealth-observatory.git
 
-# Push to GitHub
-git push -u origin master
+# Ensure branch name is main
+git branch -M main
+
+# Push
+git push -u origin main
 ```
 
 Replace `YOUR-USERNAME` with your actual GitHub username.
@@ -51,7 +55,7 @@ To create a simple website for your project:
 3. Under "Source", select the branch you want to publish (e.g., "master").
 4. Click "Save".
 
-Your project will be published at `https://YOUR-USERNAME.github.io/nhanes-explorer/`.
+Your project will be published at `https://YOUR-USERNAME.github.io/pophealth-observatory/`.
 
 ## 5. Share your repository
 
