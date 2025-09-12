@@ -126,7 +126,7 @@ coverage run -m pytest && coverage report -m
 
 ## Acknowledgments & Disclaimer
 
-- Data provided by the [National Health and Nutrition Examination Survey](https://www.cdc.gov/nchs/nhanes/index.htm)
+- Data provided by the [National Health and Nutrition Examination Survey](https://www.cdc.gov/nchs/nhanes/?CDC_AAref_Val=https://www.cdc.gov/nchs/nhanes/index.htm)
 - Centers for Disease Control and Prevention (CDC) / National Center for Health Statistics (NCHS)
 
 PopHealth Observatory is an independent open-source project and is not affiliated with, endorsed by, or sponsored by CDC or NCHS. Always review official NHANES documentation for variable definitions and analytic guidance, especially regarding complex survey design and weighting.
