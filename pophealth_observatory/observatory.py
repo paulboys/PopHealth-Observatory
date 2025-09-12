@@ -16,9 +16,36 @@ warnings.filterwarnings('ignore')
 class PopHealthObservatory:
     """Core observatory class for population health survey data (initial focus: NHANES)."""
     def __init__(self):
+        # Primary cycle base for direct cycle folder structure (older & standard pattern)
         self.base_url = "https://wwwn.cdc.gov/Nchs/Nhanes"
+        # Alternate base (newer public data file listing structure observed for recent cycles)
+        self.alt_base_url = "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public"
         self.data_cache: Dict[str, pd.DataFrame] = {}
-        self.available_cycles = ['2017-2018', '2015-2016', '2013-2014', '2011-2012', '2009-2010']
+        self.available_cycles = [
+            '2021-2022',  # recent combined cycle (post-pandemic)
+            '2019-2020',
+            '2017-2018',
+            '2015-2016',
+            '2013-2014',
+            '2011-2012',
+            '2009-2010'
+        ]
+        # Map survey cycle to NHANES file letter suffix (partial set; extend as needed)
+        self.cycle_suffix_map = {
+            '2021-2022': 'L',
+            '2019-2020': 'K',  # partial / limited release
+            '2017-2018': 'J',
+            '2015-2016': 'I',
+            '2013-2014': 'H',
+            '2011-2012': 'G',
+            '2009-2010': 'F',
+            # Earlier examples (not currently in available_cycles):
+            '2007-2008': 'E',
+            '2005-2006': 'D',
+            '2003-2004': 'C',
+            '2001-2002': 'B',
+            '1999-2000': 'A'
+        }
         self.components = {
             'demographics': 'DEMO',
             'body_measures': 'BMX',
@@ -32,22 +59,54 @@ class PopHealthObservatory:
         }
 
     def get_data_url(self, cycle: str, component: str) -> str:
-        cycle_code = cycle.replace('-', '')
-        return f"{self.base_url}/{cycle_code}/{component}_{cycle_code[2:]}.XPT"
+        """Return the best-guess URL for a given cycle/component.
+
+        NHANES file naming convention pairs a survey cycle with a letter code (e.g., 2017-2018 -> J)
+        Files then follow pattern: <COMPONENT>_<LETTER>.XPT inside a folder named by full cycle
+        (older pattern) or under the newer public data path.
+        """
+        letter = self.cycle_suffix_map.get(cycle)
+        if not letter:
+            raise ValueError(f"No letter suffix mapping for cycle '{cycle}'. Update cycle_suffix_map.")
+        # Candidate URL patterns (order matters). We'll try each until one works in download.
+        candidates = [
+            f"{self.base_url}/{cycle}/{component}_{letter}.XPT",  # standard
+            # Some recent hosting patterns use year start folder and DataFiles subfolder
+            f"{self.alt_base_url}/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt",  # alt lower-case ext
+            f"{self.alt_base_url}/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.XPT",  # alt upper-case ext
+        ]
+        # Return first candidate; download will iterate if needed (implemented there)
+        return candidates[0]
 
     def download_data(self, cycle: str, component: str) -> pd.DataFrame:
         key = f"{cycle}_{component}"
         if key in self.data_cache:
             return self.data_cache[key]
-        url = self.get_data_url(cycle, component)
-        try:
-            r = requests.get(url, timeout=30)
-            r.raise_for_status()
-            df = pd.read_sas(io.BytesIO(r.content), format='xport')
-            self.data_cache[key] = df
-            return df
-        except Exception:
+        # Build candidate list (reconstruct like in get_data_url but include fallback variants)
+        letter = self.cycle_suffix_map.get(cycle)
+        if not letter:
+            print(f"[WARN] Unknown cycle mapping for {cycle}; cannot download {component}.")
             return pd.DataFrame()
+        candidates = [
+            f"{self.base_url}/{cycle}/{component}_{letter}.XPT",
+            f"{self.alt_base_url}/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt",
+            f"{self.alt_base_url}/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.XPT",
+        ]
+        last_error = None
+        for url in candidates:
+            try:
+                r = requests.get(url, timeout=30)
+                if r.status_code == 404:
+                    continue
+                r.raise_for_status()
+                df = pd.read_sas(io.BytesIO(r.content), format='xport')
+                self.data_cache[key] = df
+                return df
+            except Exception as e:
+                last_error = e
+                continue
+        print(f"[WARN] Failed to download {component} for {cycle}. Tried: {len(candidates)} URLs. Last error: {last_error}")
+        return pd.DataFrame()
 
     # Reuse logic from legacy NHANESExplorer below for compatibility
 
