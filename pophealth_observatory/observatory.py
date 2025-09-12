@@ -114,7 +114,27 @@ class NHANESExplorer(PopHealthObservatory):
     """Backward compatible class name; extends PopHealthObservatory."""
     # Methods identical to earlier implementation for now
     def get_demographics_data(self, cycle: str = '2017-2018') -> pd.DataFrame:
-        demo_df = self.download_data(cycle, self.components['demographics'])
+        # For newer cycles (2021+), use the direct public data file path that's proven to work
+        if cycle.startswith('2021'):
+            component = self.components['demographics']
+            letter = self.cycle_suffix_map.get(cycle, 'L')  # Default to 'L' for 2021-2022
+            direct_url = f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt"
+            
+            try:
+                print(f"Downloading demographics from direct URL: {direct_url}")
+                response = requests.get(direct_url, timeout=30)
+                if response.status_code == 200:
+                    demo_df = pd.read_sas(io.BytesIO(response.content), format='xport')
+                else:
+                    print(f"Failed to download demographics. Status code: {response.status_code}")
+                    demo_df = pd.DataFrame()
+            except Exception as e:
+                print(f"Error downloading demographics: {e}")
+                demo_df = pd.DataFrame()
+        else:
+            # For older cycles, use existing download_data method
+            demo_df = self.download_data(cycle, self.components['demographics'])
+            
         if demo_df.empty:
             return demo_df
         demo_vars = {
