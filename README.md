@@ -136,3 +136,5 @@ PopHealth Observatory is an independent open-source project and is not affiliate
 Tagline: Population health analytics from acquisition to insight.
 
 Suggested GitHub Topics: `population-health`, `epidemiology`, `public-health`, `nutrition`, `analytics`, `data-science`, `health-disparities`, `python`, `nhanes`, `visualization`
+
+© 2025 Paul Boys and PopHealth Observatory contributors

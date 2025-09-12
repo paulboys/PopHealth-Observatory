@@ -11,7 +11,7 @@ setup(
     description="Open-source population health & nutrition analytics toolkit (current focus: NHANES)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/pophealth-observatory",
+    url="https://github.com/paulboys/PopHealth-Observatory",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
