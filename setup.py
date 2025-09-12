@@ -28,4 +28,8 @@ setup(
         "plotly>=5.3.0",
         "ipywidgets>=7.6.0",
     ],
+    extras_require={
+        "dev": ["pytest>=7.0.0", "build", "twine"],
+    },
+    include_package_data=True,
 )
