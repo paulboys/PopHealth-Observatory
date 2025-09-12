@@ -38,7 +38,7 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 ## Quick Start
 
 ```python
-from nhanes_explorer import NHANESExplorer
+from pophealth_observatory import NHANESExplorer
 
 # Initialize the explorer (NHANES-focused implementation)
 explorer = NHANESExplorer()
