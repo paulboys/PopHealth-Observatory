@@ -1,3 +1,9 @@
+"""PopHealth Observatory core and NHANESExplorer implementation.
+
+SPDX-License-Identifier: MIT
+Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
+"""
+
 import pandas as pd
 import numpy as np
 import requests

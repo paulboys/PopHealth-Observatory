@@ -1,11 +1,18 @@
+"""Entry point demo for PopHealth Observatory.
+
+SPDX-License-Identifier: MIT
+Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
+"""
+
 from pophealth_observatory import NHANESExplorer
+
 
 def main():
     """Demonstrate NHANES data exploration capabilities."""
-    
+
     # Initialize the explorer
     explorer = NHANESExplorer()
-    
+
     print("PopHealth Observatory Demo")
     print("=" * 50)
     
