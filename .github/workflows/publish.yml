@@ -1,12 +1,19 @@
-name: Publish to PyPI
+name: Build, Publish & Docs
 
 on:
   push:
+    branches: [ main ]
     tags:
       - 'v*'
 
+concurrency:
+  group: pages-build-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-and-publish:
@@ -38,26 +45,26 @@ jobs:
 
       - name: Generate site (MkDocs)
         run: |
+          python -m pip install --upgrade pip
           pip install .[docs]
+          mkdocs --version
           mkdocs build --strict
-        continue-on-error: true
+
+      - name: List site output (debug)
+        run: |
+          echo 'Generated files:'
+          find site -maxdepth 2 -type f | head -50
 
       - name: Upload site artifact
-        if: success()
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy-pages:
-    if: startsWith(github.ref, 'refs/tags/v')
     needs: build-and-publish
-    permissions:
-      pages: write
-      id-token: write
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
