@@ -6,4 +6,6 @@ Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 
 from .observatory import NHANESExplorer, PopHealthObservatory
 
-__all__ = ["PopHealthObservatory", "NHANESExplorer"]
+__version__ = "0.1.4"
+
+__all__ = ["PopHealthObservatory", "NHANESExplorer", "__version__"]

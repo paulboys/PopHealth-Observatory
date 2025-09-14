@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pophealth-observatory"
-version = "0.1.3"
+version = "0.1.4"
 description = "Open-source population health & nutrition analytics toolkit (NHANES focus)"
 readme = "README.md"
 authors = [{name="PopHealth Observatory Team"}]
