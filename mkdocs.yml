@@ -1,0 +1,30 @@
+site_name: PopHealth Observatory
+site_description: Open-source population health & nutrition analytics toolkit
+site_url: https://paulboys.github.io/PopHealth-Observatory/
+repo_url: https://github.com/paulboys/PopHealth-Observatory
+repo_name: paulboys/PopHealth-Observatory
+copyright: "© 2025 PopHealth Observatory"
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Usage:
+      - Quick Start: usage/quickstart.md
+      - Manifest: usage/manifest.md
+  - API Reference: api.md
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/paulboys/PopHealth-Observatory
