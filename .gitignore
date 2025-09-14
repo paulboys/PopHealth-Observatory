@@ -74,6 +74,8 @@ Thumbs.db
 
 # Data files
 *.csv
+!data/reference/pesticide_reference.csv
+!data/reference/*.yml
 *.xpt
 *.sas7bdat
 *.pkl

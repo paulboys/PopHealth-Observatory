@@ -1,0 +1,20 @@
+analyte_name,parent_pesticide,metabolite_class,cas_rn,parent_cas_rn,epa_pc_code,pubchem_cid,typical_matrix,unit,nhanes_lod,first_cycle_measured,last_cycle_measured,current_measurement_flag,notes
+DMP,Multiple OPs,DAP,814-24-8,,NA,11640,urine,ug/L,,1999,2022,true,Dimethylphosphate; non-specific OP metabolite
+DMTP,Multiple OPs,DAP,756-80-9,,NA,12357,urine,ug/L,,1999,2022,true,Dimethylthiophosphate
+DMDTP,Multiple OPs,DAP,756-81-0,,NA,12355,urine,ug/L,,1999,2022,true,Dimethyldithiophosphate
+DEP,Multiple OPs,DAP,598-02-7,,NA,12271,urine,ug/L,,1999,2022,true,Diethylphosphate
+DETP,Multiple OPs,DAP,2465-65-8,,NA,12354,urine,ug/L,,1999,2022,true,Diethylthiophosphate
+DEDTP,Multiple OPs,DAP,298-06-6,,NA,164721,urine,ug/L,,1999,2022,true,Diethyldithiophosphate
+TCPy,Chlorpyrifos,Specific,6515-38-4,2921-88-2,059101,2730,urine,ug/L,,1999,2022,true,3,5,6-Trichloro-2-pyridinol
+3-PBA,Multiple Pyrethroids,Pyrethroid,3739-38-6,,NA,643975,urine,ug/L,,2001,2022,true,Common pyrethroid metabolite
+cis-DCCA,Permethrin/Cypermethrin,Pyrethroid,53179-07-0,,NA,23668749,urine,ug/L,,2001,2022,true,Cis isomer
+trans-DCCA,Permethrin/Cypermethrin,Pyrethroid,55719-85-2,,NA,145742,urine,ug/L,,2001,2022,true,Trans isomer
+4-F-3-PBA,Deltamethrin,Pyrethroid,96282-05-0,52918-63-5,097805,104828,urine,ug/L,,2009,2022,true,Fluorophenoxy metabolite
+2,4-D,2,4-D,Parent,94-75-7,94-75-7,030501,1486,urine,ug/L,,2001,2022,true,Herbicide acid
+Glyphosate,Glyphosate,Parent,1071-83-6,1071-83-6,103601,3496,urine,ug/L,,2013,2022,false,Limited cycles or special studies
+AMPA,Glyphosate,Metabolite,1066-51-9,1071-83-6,NA,14700,urine,ug/L,,2013,2022,false,Glyphosate metabolite
+p,p'-DDE,DDT,Organochlorine,72-55-9,50-29-3,059201,3036,serum,ng/g lipid,,1999,2022,true,Persistent metabolite
+HCB,HCB,Organochlorine,118-74-1,118-74-1,063601,5681,serum,ng/g lipid,,1999,2022,true,Hexachlorobenzene
+β-HCH,Lindane,Organochlorine,319-85-7,58-89-9,052901,8273,serum,ng/g lipid,,1999,2022,true,Beta isomer
+ETU,Mancozeb,Fungicide,96-45-7,8018-01-7,014504,3396,urine,ug/L,,2001,2022,false,Ethylene thiourea
+THPI,Captan,Fungicide,1861-32-1,133-06-2,012901,5284592,urine,ug/L,,2005,2022,false,Captan metabolite
