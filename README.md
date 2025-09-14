@@ -19,6 +19,7 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 - **Visualization Suite**: Boxplots, distributions, stratified means, interactive widgets
 - **Extensible Architecture**: Plug in additional NHANES components or other survey sources
 - **Reproducible Reporting**: Programmatic summary report generation
+- **Rich Metadata Manifest**: Enumerate all component table rows with standardized schema & filtering
 
 ## Installation
 
@@ -63,6 +64,76 @@ print(bmi_by_race)
 # Create visualization
 explorer.create_demographic_visualization(data, 'bmi', 'race_ethnicity_label')
 ```
+
+## Metadata Manifest (NHANES Component Tables)
+
+The explorer can build a structured manifest of NHANES component listing tables (Demographics, Examination, Laboratory, Dietary, Questionnaire) including:
+
+Fields per row:
+- `year_raw`, `year_normalized` (e.g. `2005_2006`)
+- `data_file_name`
+- `doc_file_url`, `doc_file_label`
+- `data_file_url`, `data_file_label`
+- `data_file_type` (XPT | ZIP | FTP | OTHER)
+- `data_file_size` (e.g. `3.4 MB` if present)
+- `date_published`
+- `original_filename`, `derived_local_filename` (cycle-year appended for XPT when possible)
+
+Schema control:
+- Top-level manifest includes `schema_version` (semantic version; current: `1.0.0`) and `generated_at` (UTC ISO timestamp).
+- Future structural changes will increment the manifest schema version (MAJOR = breaking, MINOR = additive, PATCH = non-breaking fixes).
+
+### Generate a Manifest
+
+```python
+from pophealth_observatory.observatory import NHANESExplorer
+e = NHANESExplorer()
+manifest = e.get_detailed_component_manifest(
+   components=['Demographics','Laboratory'],
+   file_types=['XPT'],            # optional filter
+   year_range=('2005','2014'),    # inclusive overlap on normalized spans
+   as_dataframe=True              # attach pandas DataFrame
+)
+print(manifest['schema_version'], manifest['total_file_rows'])
+print(manifest['summary_counts'])
+df = manifest['dataframe']
+print(df.head())
+```
+
+### Persist to JSON
+
+```python
+e.save_detailed_component_manifest(
+   'nhanes_manifest.json',
+   file_types=['XPT','ZIP'],
+   year_range=('1999','2022')
+)
+```
+
+### Overriding Schema Version (Advanced)
+
+You can pass a custom `schema_version` if producing a forked or experimental layout:
+
+```python
+e.get_detailed_component_manifest(schema_version='1.1.0-exp')
+```
+
+### Caching & Refresh
+
+- Component listing HTML pages are cached in-memory per session.
+- Use `force_refresh=True` to re-fetch a component page.
+
+### Filtering Logic
+
+- `year_range=('2005','2010')` keeps any row whose normalized span overlaps that interval.
+- `file_types=['XPT']` restricts to XPT transport files.
+
+### Summary Structure
+
+`summary_counts` is a nested dict: `{ component: { data_file_type: count } }` for quick inventory.
+
+---
+
 
 ## Example Analyses
 
