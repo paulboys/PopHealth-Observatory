@@ -9,7 +9,12 @@ import numpy as np
 import requests
 import io
 import warnings
-from typing import Optional, Dict, List
+import re
+import os
+from datetime import datetime, timezone
+from dataclasses import dataclass
+from urllib.parse import urljoin
+from typing import Optional, Dict, List, Any
 
 warnings.filterwarnings('ignore')
 
@@ -134,6 +139,260 @@ class PopHealthObservatory:
 class NHANESExplorer(PopHealthObservatory):
     """Backward compatible class name; extends PopHealthObservatory."""
     # Methods identical to earlier implementation for now
+    # --- Enhanced metadata parsing helpers (integrated from notebook Section 14a) ---
+    _YEAR_RANGE_REGEX = re.compile(r"(20\d{2})\s*[-–]\s*(20\d{2})")
+    _SIZE_TOKEN_REGEX = re.compile(r"(\d+(?:\.\d+)?)\s*(KB|MB|GB|TB)", re.I)
+    _MANIFEST_SCHEMA_VERSION = "1.0.0"
+
+    def _normalize_year_span(self, year_text: str) -> str:
+        if not year_text:
+            return ""
+        yt = year_text.strip().replace('\u2013', '-').replace('\u2014', '-')
+        m = self._YEAR_RANGE_REGEX.search(yt)
+        if m:
+            return f"{m.group(1)}_{m.group(2)}"
+        nums = re.findall(r"20\d{2}", yt)
+        if len(nums) >= 2:
+            return f"{nums[0]}_{nums[1]}"
+        return yt.replace('-', '_').replace(' ', '_')
+
+    def _derive_local_filename(self, remote_url: str, year_norm: str) -> Optional[str]:
+        if not remote_url:
+            return None
+        base = os.path.basename(remote_url)
+        if not base.lower().endswith('.xpt'):
+            return None
+        stem = base[:-4]
+        m = re.match(r"^([A-Za-z0-9]+?)(?:_[A-Z])$", stem)
+        core = m.group(1) if m else stem
+        if year_norm:
+            return f"{core}_{year_norm}.xpt"
+        return f"{core}.xpt"
+
+    def _classify_data_file(self, href: str, label: str) -> str:
+        h = (href or '').lower()
+        l = (label or '').lower()
+        if h.endswith('.xpt') or '[xpt' in l:
+            return 'XPT'
+        if h.endswith('.zip') or '[zip' in l:
+            return 'ZIP'
+        if h.startswith('ftp://') or h.startswith('ftps://') or 'ftp' in h or '[ftp' in l:
+            return 'FTP'
+        return 'OTHER'
+
+    def _extract_size(self, label: str) -> Optional[str]:
+        if not label:
+            return None
+        m = self._SIZE_TOKEN_REGEX.search(label)
+        if m:
+            val, unit = m.groups()
+            return f"{val} {unit.upper()}"
+        return None
+
+    def _parse_component_table(self, html: str, page_url: str) -> List[Dict[str, Any]]:
+        try:
+            from bs4 import BeautifulSoup  # local import to avoid hard dependency at import time
+        except ImportError:
+            print("BeautifulSoup (bs4) not installed; metadata table parsing unavailable.")
+            return []
+        soup = BeautifulSoup(html, 'html.parser')
+        tables = soup.find_all('table')
+        target_table = None
+        for tbl in tables:
+            header_texts = [th.get_text(strip=True) for th in tbl.find_all('th')]
+            lower_join = ' '.join(h.lower() for h in header_texts)
+            if ('year' in lower_join or 'years' in lower_join) and 'data file' in lower_join and 'doc' in lower_join:
+                target_table = tbl
+                break
+        if not target_table:
+            return []
+        headers = [th.get_text(strip=True) for th in target_table.find_all('th')]
+        header_index_map = {i: h for i, h in enumerate(headers)}
+        records: List[Dict[str, Any]] = []
+        for tr in target_table.find_all('tr'):
+            tds = tr.find_all('td')
+            if not tds:
+                continue
+            col_map: Dict[str, Any] = {}
+            for idx, td in enumerate(tds):
+                key = header_index_map.get(idx, f"col{idx}")
+                col_map[key] = td
+            year_cell = col_map.get('Years') or col_map.get('Year')
+            data_name_cell = col_map.get('Data File Name')
+            doc_cell = col_map.get('Doc File')
+            data_cell = col_map.get('Data File')
+            date_pub_cell = col_map.get('Date Published')
+            if not (year_cell and data_cell):
+                continue
+            year_raw = year_cell.get_text(' ', strip=True)
+            year_norm = self._normalize_year_span(year_raw)
+            data_file_name = data_name_cell.get_text(' ', strip=True) if data_name_cell else ''
+            doc_a = doc_cell.find('a', href=True) if doc_cell else None
+            data_a = data_cell.find('a', href=True)
+            if not data_a:
+                continue
+            doc_href = urljoin(page_url, doc_a['href']) if doc_a else None
+            doc_label = doc_a.get_text(' ', strip=True) if doc_a else None
+            data_href = urljoin(page_url, data_a['href'])
+            data_label = data_a.get_text(' ', strip=True)
+            file_type = self._classify_data_file(data_href, data_label)
+            size_token = self._extract_size(data_label)
+            original_filename = os.path.basename(data_href) if file_type in ('XPT','ZIP') else None
+            derived_local_filename = self._derive_local_filename(data_href, year_norm) if file_type == 'XPT' else original_filename
+            date_published = date_pub_cell.get_text(' ', strip=True) if date_pub_cell else ''
+            records.append({
+                'year_raw': year_raw,
+                'year_normalized': year_norm,
+                'data_file_name': data_file_name,
+                'doc_file_url': doc_href,
+                'doc_file_label': doc_label,
+                'data_file_url': data_href,
+                'data_file_label': data_label,
+                'data_file_type': file_type,
+                'data_file_size': size_token,
+                'date_published': date_published,
+                'original_filename': original_filename,
+                'derived_local_filename': derived_local_filename,
+            })
+        return records
+
+    def _fetch_component_page(self, component_name: str) -> Optional[str]:
+        """Attempt to locate the NHANES component listing page HTML for a broad component category.
+
+        Uses heuristic keyword mapping; minimal viable integration (extend as needed).
+        """
+        # Simple in-memory cache
+        if not hasattr(self, '_component_page_cache'):
+            self._component_page_cache: Dict[str, str] = {}
+        if component_name in self._component_page_cache:
+            return self._component_page_cache[component_name]
+        # Basic mapping; can be extended or discovered dynamically.
+        keyword_map = {
+            'Demographics': 'Demographics',
+            'Examination': 'Examination',
+            'Laboratory': 'Laboratory',
+            'Dietary': 'Dietary',
+            'Questionnaire': 'Questionnaire'
+        }
+        base_listing = "https://wwwn.cdc.gov/nchs/nhanes/Default.aspx"
+        # Direct deep-link patterns observed (these may evolve):
+        # We'll try a small set of known anchor patterns first.
+        trial_urls = [
+            f"https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component={component_name}",
+            base_listing,
+        ]
+        for u in trial_urls:
+            for attempt in range(3):  # retry with backoff
+                try:
+                    resp = requests.get(u, timeout=25)
+                    if resp.status_code == 200 and 'nhanes' in resp.text.lower():
+                        if u == base_listing and component_name.lower() not in resp.text.lower():
+                            break  # try next URL
+                        self._component_page_cache[component_name] = resp.text
+                        return resp.text
+                except Exception:
+                    pass
+                # simple exponential backoff
+                import time as _t
+                _t.sleep(0.5 * (2 ** attempt))
+        return None
+
+    def get_detailed_component_manifest(self,
+                                        components: Optional[List[str]] = None,
+                                        as_dataframe: bool = False,
+                                        year_range: Optional[tuple[str,str]] = None,
+                                        file_types: Optional[List[str]] = None,
+                                        force_refresh: bool = False,
+                                        schema_version: Optional[str] = None) -> Dict[str, Any]:
+        """Return enriched metadata manifest for selected broad component pages.
+
+        Parameters
+        ----------
+        components : list[str] or None
+            Subset of component pages among: Demographics, Examination, Laboratory, Dietary, Questionnaire.
+            If None, all are attempted.
+        as_dataframe : bool
+            If True, attaches flattened DataFrame under key 'dataframe'.
+        year_range : (start_year, end_year) optional str tuple
+            If provided, filters rows whose normalized span overlaps inclusive range.
+        file_types : list[str] optional
+            Filter to only these data_file_type values (e.g. ['XPT','ZIP']).
+        force_refresh : bool
+            If True, bypass cached component page HTML.
+
+        Returns
+        -------
+        dict manifest containing per-component records and summary counts.
+        """
+        target_components = components or ['Demographics','Examination','Laboratory','Dietary','Questionnaire']
+        detailed: Dict[str, List[Dict[str, Any]]] = {}
+        for comp in target_components:
+            if force_refresh and hasattr(self, '_component_page_cache') and comp in self._component_page_cache:
+                self._component_page_cache.pop(comp, None)
+            html = self._fetch_component_page(comp)
+            if not html:
+                detailed[comp] = []
+                continue
+            try:
+                records = self._parse_component_table(html, f"https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component={comp}")
+            except Exception:
+                records = []
+            detailed[comp] = records
+        # Flatten & summarize
+        flat_rows = [dict(component=k, **rec) for k, rows in detailed.items() for rec in rows]
+        # Filtering
+        if year_range:
+            ys, ye = year_range
+            def overlaps(r):
+                span = r.get('year_normalized','')
+                if '_' in span:
+                    try:
+                        a,b = span.split('_',1)
+                        return (a <= ye) and (b >= ys)
+                    except Exception:
+                        return False
+                return False
+            flat_rows = [r for r in flat_rows if overlaps(r)]
+        if file_types:
+            ftset = {f.upper() for f in file_types}
+            flat_rows = [r for r in flat_rows if r.get('data_file_type') in ftset]
+        summary = {}
+        for row in flat_rows:
+            summary.setdefault(row['component'], {}).setdefault(row['data_file_type'], 0)
+            summary[row['component']][row['data_file_type']] += 1
+        manifest = {
+            'schema_version': schema_version or self._MANIFEST_SCHEMA_VERSION,
+            'generated_at': datetime.now(timezone.utc).isoformat(),
+            'detailed_year_records': detailed,
+            'summary_counts': summary,
+            'component_count': len(detailed),
+            'total_file_rows': len(flat_rows)
+        }
+        if as_dataframe:
+            try:
+                manifest['dataframe'] = pd.DataFrame(flat_rows)
+            except Exception:
+                pass
+        return manifest
+
+    def save_detailed_component_manifest(self, path: str, **manifest_kwargs) -> str:
+        """Generate and persist a detailed component manifest to JSON.
+
+        Parameters
+        ----------
+        path : str
+            Output JSON file path.
+        **manifest_kwargs : kwargs passed to get_detailed_component_manifest.
+        """
+        manifest = self.get_detailed_component_manifest(**manifest_kwargs)
+        try:
+            import json
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(manifest, f, indent=2)
+        except Exception as e:
+            raise RuntimeError(f"Failed writing manifest to {path}: {e}")
+        return path
+
     def get_demographics_data(self, cycle: str = '2017-2018') -> pd.DataFrame:
         """Get demographics data for a specific cycle with proper URL handling.
         
