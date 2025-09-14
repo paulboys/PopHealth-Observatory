@@ -228,6 +228,56 @@ The current implementation exposes the following NHANES components:
 - Optional DuckDB / Parquet caching for large multi-cycle assemblies
 - CLI interface for scripted batch exports
 
+## Retrieval-Augmented Generation (RAG) Scaffolding (Experimental)
+
+An LLM-agnostic RAG layer is scaffolded to let users experiment with question answering over
+curated pesticide narrative snippets without requiring a local GPU or committing to a specific
+model provider.
+
+Key pieces:
+- `pesticide_ingestion.py` – builds JSONL snippet files from raw narrative text.
+- `pophealth_observatory.rag` package – lightweight embedding + retrieval utilities.
+   - `RAGConfig` – paths & settings.
+   - `DummyEmbedder` – deterministic CPU-only test embedder (no external downloads).
+   - `SentenceTransformerEmbedder` – optional (install with `pip install pophealth-observatory[rag]`).
+   - `RAGPipeline` – orchestrates loading snippets, embedding (with caching), retrieval, and prompt assembly.
+
+Usage example (after generating a snippets JSONL using the ingestion scaffold):
+
+```python
+from pathlib import Path
+from pophealth_observatory.rag import RAGConfig, RAGPipeline, DummyEmbedder
+
+cfg = RAGConfig(
+      snippets_path=Path('data/processed/pesticides/snippets_pdp_sample.jsonl'),
+      embeddings_path=Path('data/processed/pesticides/emb_cache'),
+)
+pipeline = RAGPipeline(cfg, DummyEmbedder())
+pipeline.prepare()  # loads snippets & builds or loads cached embeddings
+
+def echo_generator(question, snippets, prompt):
+      # In real usage, call your LLM API or local model here.
+      return f"(stub) {len(snippets)} snippets considered"
+
+result = pipeline.generate("What are DMP trends?", echo_generator, top_k=3)
+print(result['answer'])
+```
+
+To use real embeddings:
+```bash
+pip install "pophealth-observatory[rag]"
+```
+Then substitute `DummyEmbedder()` with:
+```python
+from pophealth_observatory.rag import SentenceTransformerEmbedder
+pipeline = RAGPipeline(cfg, SentenceTransformerEmbedder())
+```
+
+Provide any LLM by passing a generator function: `(question, snippets, prompt) -> answer`.
+
+Future directions: FAISS-based index (already partially supported via optional dependency),
+hybrid lexical + vector retrieval, snippet ranking refinement, streaming answer helpers.
+
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

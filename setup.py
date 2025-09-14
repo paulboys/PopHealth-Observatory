@@ -16,7 +16,7 @@ DESCRIPTION = (
 
 setup(
     name="pophealth-observatory",
-    version="0.1.4",  # keep in sync with pyproject.toml
+    version="0.2.0",  # keep in sync with pyproject.toml
     author="PopHealth Observatory Team",
     author_email="your.email@example.com",
     description=DESCRIPTION,

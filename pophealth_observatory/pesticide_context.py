@@ -73,7 +73,16 @@ class PesticideAnalyte:
 
 
 def _normalize(s: str) -> str:
-    return s.strip().lower().replace("-", "").replace("_", "")
+    """Normalize strings for loose matching.
+
+    Previous implementation only removed hyphens/underscores which failed a test
+    expecting partial matches for names containing commas/apostrophes (e.g., "p,p'-DDE").
+    We now collapse to lowercase alphanumerics to make substring suggestion logic
+    more robust for metabolite names.
+    """
+    import re  # local import to avoid global cost
+
+    return re.sub(r"[^a-z0-9]", "", s.lower())
 
 
 def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]:
