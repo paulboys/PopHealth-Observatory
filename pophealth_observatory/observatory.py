@@ -137,7 +137,14 @@ class PopHealthObservatory:
     # Reuse logic from legacy NHANESExplorer below for compatibility
 
 class NHANESExplorer(PopHealthObservatory):
-    """Backward compatible class name; extends PopHealthObservatory."""
+    """NHANES-focused explorer extending :class:`PopHealthObservatory`.
+
+    Provides:
+    - Robust cycle/component XPT downloads (inherited)
+    - Metadata table parsing producing rich manifest entries
+    - Convenience analytic helpers (merging, summaries, visuals)
+    - Manifest persistence with schema versioning & filtering
+    """
     # Methods identical to earlier implementation for now
     # --- Enhanced metadata parsing helpers (integrated from notebook Section 14a) ---
     _YEAR_RANGE_REGEX = re.compile(r"(20\d{2})\s*[-–]\s*(20\d{2})")
@@ -145,6 +152,11 @@ class NHANESExplorer(PopHealthObservatory):
     _MANIFEST_SCHEMA_VERSION = "1.0.0"
 
     def _normalize_year_span(self, year_text: str) -> str:
+        """Normalize raw year span text into canonical ``YYYY_YYYY`` form.
+
+        Handles en-dash variations and falls back to safe underscore replacement
+        if two four-digit years are not clearly extracted.
+        """
         if not year_text:
             return ""
         yt = year_text.strip().replace('\u2013', '-').replace('\u2014', '-')
@@ -157,6 +169,11 @@ class NHANESExplorer(PopHealthObservatory):
         return yt.replace('-', '_').replace(' ', '_')
 
     def _derive_local_filename(self, remote_url: str, year_norm: str) -> Optional[str]:
+        """Derive a canonical local filename for an XPT file with year span.
+
+        Returns None for non-XPT resources (ZIP / FTP / OTHER). Strips trailing
+        single-letter suffix (e.g., ``DEMO_H`` -> ``DEMO``) before appending years.
+        """
         if not remote_url:
             return None
         base = os.path.basename(remote_url)
@@ -170,6 +187,10 @@ class NHANESExplorer(PopHealthObservatory):
         return f"{core}.xpt"
 
     def _classify_data_file(self, href: str, label: str) -> str:
+        """Classify file anchor into a coarse type.
+
+        Priority order: XPT > ZIP > FTP > OTHER based on URL/label heuristics.
+        """
         h = (href or '').lower()
         l = (label or '').lower()
         if h.endswith('.xpt') or '[xpt' in l:
@@ -181,6 +202,10 @@ class NHANESExplorer(PopHealthObservatory):
         return 'OTHER'
 
     def _extract_size(self, label: str) -> Optional[str]:
+        """Extract human-readable size token (e.g. ``"3.4 MB"``) from link label.
+
+        Returns None if no recognizable size pattern present.
+        """
         if not label:
             return None
         m = self._SIZE_TOKEN_REGEX.search(label)
@@ -190,8 +215,14 @@ class NHANESExplorer(PopHealthObservatory):
         return None
 
     def _parse_component_table(self, html: str, page_url: str) -> List[Dict[str, Any]]:
+        """Parse a component listing table into structured dictionaries.
+
+        Returns a list of row dicts with normalized year span, links, file
+        classification, size token, original & derived filenames.
+        Silently returns empty list if table structure not found or bs4 missing.
+        """
         try:
-            from bs4 import BeautifulSoup  # local import to avoid hard dependency at import time
+            from bs4 import BeautifulSoup  # type: ignore
         except ImportError:
             print("BeautifulSoup (bs4) not installed; metadata table parsing unavailable.")
             return []
@@ -257,10 +288,7 @@ class NHANESExplorer(PopHealthObservatory):
         return records
 
     def _fetch_component_page(self, component_name: str) -> Optional[str]:
-        """Attempt to locate the NHANES component listing page HTML for a broad component category.
-
-        Uses heuristic keyword mapping; minimal viable integration (extend as needed).
-        """
+        """Fetch component page HTML with simple multi-URL retry & cache."""
         # Simple in-memory cache
         if not hasattr(self, '_component_page_cache'):
             self._component_page_cache: Dict[str, str] = {}
@@ -304,25 +332,35 @@ class NHANESExplorer(PopHealthObservatory):
                                         file_types: Optional[List[str]] = None,
                                         force_refresh: bool = False,
                                         schema_version: Optional[str] = None) -> Dict[str, Any]:
-        """Return enriched metadata manifest for selected broad component pages.
+        """Build enriched metadata manifest for selected component pages.
 
         Parameters
         ----------
-        components : list[str] or None
+        components : list[str] | None
             Subset of component pages among: Demographics, Examination, Laboratory, Dietary, Questionnaire.
             If None, all are attempted.
         as_dataframe : bool
             If True, attaches flattened DataFrame under key 'dataframe'.
-        year_range : (start_year, end_year) optional str tuple
-            If provided, filters rows whose normalized span overlaps inclusive range.
-        file_types : list[str] optional
+        year_range : tuple[str,str] | None
+            Inclusive start/end years; rows overlapping this span retained.
+        file_types : list[str] | None
             Filter to only these data_file_type values (e.g. ['XPT','ZIP']).
         force_refresh : bool
             If True, bypass cached component page HTML.
+        schema_version : str | None
+            Override emitted schema version tag (advanced / experimental).
 
         Returns
         -------
-        dict manifest containing per-component records and summary counts.
+        dict
+            Manifest containing per-component records and summary counts.
+            Top-level keys:
+              - schema_version
+              - generated_at (UTC ISO8601)
+              - detailed_year_records (raw grouped rows)
+              - summary_counts (nested counts by component and file type)
+              - component_count
+              - total_file_rows (post-filter)
         """
         target_components = components or ['Demographics','Examination','Laboratory','Dietary','Questionnaire']
         detailed: Dict[str, List[Dict[str, Any]]] = {}
@@ -348,6 +386,7 @@ class NHANESExplorer(PopHealthObservatory):
                 if '_' in span:
                     try:
                         a,b = span.split('_',1)
+                        # Keep row if interval [a,b] intersects [ys,ye]
                         return (a <= ye) and (b >= ys)
                     except Exception:
                         return False
@@ -355,6 +394,7 @@ class NHANESExplorer(PopHealthObservatory):
             flat_rows = [r for r in flat_rows if overlaps(r)]
         if file_types:
             ftset = {f.upper() for f in file_types}
+            # Restrict to desired file types (e.g., only XPT rows)
             flat_rows = [r for r in flat_rows if r.get('data_file_type') in ftset]
         summary = {}
         for row in flat_rows:
@@ -382,7 +422,8 @@ class NHANESExplorer(PopHealthObservatory):
         ----------
         path : str
             Output JSON file path.
-        **manifest_kwargs : kwargs passed to get_detailed_component_manifest.
+        **manifest_kwargs : Any
+            Forwarded to ``get_detailed_component_manifest``.
         """
         manifest = self.get_detailed_component_manifest(**manifest_kwargs)
         try:
@@ -394,10 +435,7 @@ class NHANESExplorer(PopHealthObservatory):
         return path
 
     def get_demographics_data(self, cycle: str = '2017-2018') -> pd.DataFrame:
-        """Get demographics data for a specific cycle with proper URL handling.
-        
-        NHANES changed URL patterns over time, so we try multiple patterns in sequence.
-        """
+        """Download and harmonize demographics (DEMO) data for a cycle."""
         component = self.components['demographics']
         letter = self.cycle_suffix_map.get(cycle, '')
         
@@ -452,6 +490,7 @@ class NHANESExplorer(PopHealthObservatory):
         return demo_clean
 
     def get_body_measures(self, cycle: str = '2017-2018') -> pd.DataFrame:
+        """Return body measures (BMX) with derived BMI categories."""
         bmx_df = self.download_data(cycle, self.components['body_measures'])
         if bmx_df.empty:
             return bmx_df
@@ -463,6 +502,7 @@ class NHANESExplorer(PopHealthObservatory):
         return body_clean
 
     def get_blood_pressure(self, cycle: str = '2017-2018') -> pd.DataFrame:
+        """Return BPX readings plus averaged and categorized blood pressure."""
         bp_df = self.download_data(cycle, self.components['blood_pressure'])
         if bp_df.empty:
             return bp_df
@@ -487,6 +527,7 @@ class NHANESExplorer(PopHealthObservatory):
         return bp_clean
 
     def create_merged_dataset(self, cycle: str = '2017-2018') -> pd.DataFrame:
+        """Merge DEMO, BMX, BPX slices on participant_id."""
         print(f"Creating merged dataset for {cycle}...")
         demo_df = self.get_demographics_data(cycle)
         body_df = self.get_body_measures(cycle)
@@ -500,6 +541,7 @@ class NHANESExplorer(PopHealthObservatory):
         return merged
 
     def analyze_by_demographics(self, df: pd.DataFrame, metric: str, demographic: str) -> pd.DataFrame:
+        """Group metric by demographic and compute standard descriptive stats."""
         if metric not in df.columns or demographic not in df.columns:
             return pd.DataFrame()
         sub = df[[demographic, metric]].dropna()
@@ -508,6 +550,7 @@ class NHANESExplorer(PopHealthObservatory):
         return stats
 
     def create_demographic_visualization(self, df: pd.DataFrame, metric: str, demographic: str):
+        """Boxplot + mean bar chart for metric by demographic (if available)."""
         if metric not in df.columns or demographic not in df.columns:
             return
         try:
@@ -530,6 +573,7 @@ class NHANESExplorer(PopHealthObservatory):
         plt.show()
 
     def generate_summary_report(self, df: pd.DataFrame) -> str:
+        """Generate textual summary of demographics & selected health metrics."""
         report = ["PopHealth Observatory Summary Report", "="*40, f"Total Participants: {len(df):,}", f"Total Variables: {len(df.columns)}", ""]
         if 'age_years' in df.columns:
             age_stats = df['age_years'].describe()

@@ -23,6 +23,42 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 
 ## Installation
 
+## Repository Structure
+
+```
+├─ apps/                       # End-user applications (Streamlit, future CLI wrappers)
+│  └─ streamlit_app.py         # Interactive NHANES exploration UI
+├─ examples/                   # Simple executable usage examples
+│  └─ demo.py                  # Former main.py demonstration script
+├─ manifests/                  # Generated manifest JSON artifacts (not source code)
+│  └─ component_files_manifest_...json
+├─ notebooks/                  # Exploratory & development Jupyter notebooks
+│  ├─ nhanes_demographics_link_finder.ipynb
+│  ├─ nhanes_explorer_demo.ipynb
+│  ├─ nhanes_url_testing.ipynb
+│  ├─ observatory_exploration.ipynb
+│  └─ README.md
+├─ pophealth_observatory/      # Library source (core observatory & explorer classes)
+├─ tests/                      # Automated tests (unit / integration)
+├─ requirements.txt            # Python dependencies
+├─ pyproject.toml / setup.py   # Packaging configuration
+├─ CHANGELOG.md                # Versioned change log
+└─ README.md                   # Project documentation (this file)
+```
+
+### Apps Directory
+
+`apps/streamlit_app.py` provides an interactive interface to:
+- Select NHANES cycle and view merged demographics + clinical metrics
+- Slice metrics by demographic categories with summary statistics
+- Inspect laboratory and questionnaire file inventory via manifest sampling
+- Preview raw merged data (first N rows) for QA
+
+Future additions may include:
+- CLI data export tool (e.g., `apps/nhanes_export.py`)
+- Dashboard variants (e.g., multi-page Streamlit or FastAPI backend)
+
+
 ### From Source (Development)
 
 1. Clone:
@@ -64,6 +100,25 @@ print(bmi_by_race)
 # Create visualization
 explorer.create_demographic_visualization(data, 'bmi', 'race_ethnicity_label')
 ```
+
+## Interactive App (Streamlit)
+
+An interactive exploration UI is provided via `streamlit_app.py`.
+
+Run locally:
+```bash
+streamlit run streamlit_app.py
+```
+
+Features:
+- Select NHANES cycle
+- Choose metric & demographic for aggregation (mean / median / count)
+- View summary table & bar chart
+- Inspect laboratory & questionnaire manifest sample (schema-aligned)
+- Optional raw data preview (first 500 rows)
+
+Requirements: `streamlit` (installed via `requirements.txt`).
+
 
 ## Metadata Manifest (NHANES Component Tables)
 
