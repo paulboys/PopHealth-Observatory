@@ -1,5 +1,10 @@
 # PopHealth Observatory
 
+![PyPI Version](https://img.shields.io/pypi/v/pophealth-observatory.svg)
+![Python Versions](https://img.shields.io/pypi/pyversions/pophealth-observatory.svg)
+![License](https://img.shields.io/github/license/paulboys/PopHealth-Observatory.svg)
+![Docs](https://img.shields.io/badge/docs-online-blue.svg)
+
 Actionable population health & nutrition analytics: acquisition → harmonization → stratified insights → visualization.
 
 PopHealth Observatory is an open-source toolkit for exploring population health and nutrition metrics using publicly available survey microdata (current focus: NHANES). It streamlines secure data acquisition, cleaning, demographic stratification, trend analysis, and visualization—designed for reproducible epidemiologic and health disparities research.
