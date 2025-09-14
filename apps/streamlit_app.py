@@ -3,7 +3,7 @@
 SPDX-License-Identifier: MIT
 """
 import streamlit as st
-import pandas as pd
+
 from pophealth_observatory.observatory import NHANESExplorer
 
 st.set_page_config(page_title="PopHealth Observatory Explorer", layout="wide")
@@ -15,7 +15,10 @@ def load_cycle(cycle: str):
     return explorer, merged
 
 st.title("PopHealth Observatory Explorer")
-st.caption("Explore NHANES demographics, examination, laboratory, and questionnaire-derived metrics.")
+st.caption(
+    "Explore NHANES demographics, examination, laboratory, and "
+    "questionnaire-derived metrics."
+)
 
 # Sidebar controls
 with st.sidebar:
@@ -56,7 +59,12 @@ else:
 
 # Laboratory & Questionnaire manifest insight
 st.subheader("Component File Inventory (Quick Manifest)")
-manifest = explorer.get_detailed_component_manifest(components=['Laboratory','Questionnaire'], file_types=['XPT'], year_range=('1999','2022'), as_dataframe=True)
+manifest = explorer.get_detailed_component_manifest(
+    components=['Laboratory', 'Questionnaire'],
+    file_types=['XPT'],
+    year_range=('1999', '2022'),
+    as_dataframe=True,
+)
 summary = manifest['summary_counts']
 st.json(summary)
 

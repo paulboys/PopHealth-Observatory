@@ -4,6 +4,6 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 """
 
-from .observatory import PopHealthObservatory, NHANESExplorer
+from .observatory import NHANESExplorer, PopHealthObservatory
 
 __all__ = ["PopHealthObservatory", "NHANESExplorer"]

@@ -1,9 +1,11 @@
-import pytest
-import sys, pathlib
+import pathlib
+import sys
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from pophealth_observatory import NHANESExplorer
+
+from pophealth_observatory import NHANESExplorer  # noqa: E402
 
 
 def test_instantiate():

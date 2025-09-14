@@ -4,17 +4,17 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 """
 
-import pandas as pd
-import numpy as np
-import requests
 import io
-import warnings
-import re
 import os
+import re
+import warnings
 from datetime import datetime, timezone
-from dataclasses import dataclass
+from typing import Any
 from urllib.parse import urljoin
-from typing import Optional, Dict, List, Any
+
+import numpy as np
+import pandas as pd
+import requests
 
 warnings.filterwarnings('ignore')
 
@@ -25,7 +25,8 @@ class PopHealthObservatory:
         self.base_url = "https://wwwn.cdc.gov/Nchs/Nhanes"
         # Alternate base (newer public data file listing structure observed for recent cycles)
         self.alt_base_url = "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public"
-        self.data_cache: Dict[str, pd.DataFrame] = {}
+        # In‑memory cache for downloaded component XPTs
+        self.data_cache = {}  # cache: cycle_component -> DataFrame
         self.available_cycles = [
             '2021-2022',  # recent combined cycle (post-pandemic)
             '2019-2020',
@@ -168,7 +169,7 @@ class NHANESExplorer(PopHealthObservatory):
             return f"{nums[0]}_{nums[1]}"
         return yt.replace('-', '_').replace(' ', '_')
 
-    def _derive_local_filename(self, remote_url: str, year_norm: str) -> Optional[str]:
+    def _derive_local_filename(self, remote_url: str, year_norm: str) -> str | None:
         """Derive a canonical local filename for an XPT file with year span.
 
         Returns None for non-XPT resources (ZIP / FTP / OTHER). Strips trailing
@@ -192,16 +193,16 @@ class NHANESExplorer(PopHealthObservatory):
         Priority order: XPT > ZIP > FTP > OTHER based on URL/label heuristics.
         """
         h = (href or '').lower()
-        l = (label or '').lower()
-        if h.endswith('.xpt') or '[xpt' in l:
+        label_lower = (label or '').lower()
+        if h.endswith('.xpt') or '[xpt' in label_lower:
             return 'XPT'
-        if h.endswith('.zip') or '[zip' in l:
+        if h.endswith('.zip') or '[zip' in label_lower:
             return 'ZIP'
-        if h.startswith('ftp://') or h.startswith('ftps://') or 'ftp' in h or '[ftp' in l:
+        if h.startswith('ftp://') or h.startswith('ftps://') or 'ftp' in h or '[ftp' in label_lower:
             return 'FTP'
         return 'OTHER'
 
-    def _extract_size(self, label: str) -> Optional[str]:
+    def _extract_size(self, label: str) -> str | None:
         """Extract human-readable size token (e.g. ``"3.4 MB"``) from link label.
 
         Returns None if no recognizable size pattern present.
@@ -214,7 +215,7 @@ class NHANESExplorer(PopHealthObservatory):
             return f"{val} {unit.upper()}"
         return None
 
-    def _parse_component_table(self, html: str, page_url: str) -> List[Dict[str, Any]]:
+    def _parse_component_table(self, html: str, page_url: str) -> list[dict[str, Any]]:
         """Parse a component listing table into structured dictionaries.
 
         Returns a list of row dicts with normalized year span, links, file
@@ -239,12 +240,12 @@ class NHANESExplorer(PopHealthObservatory):
             return []
         headers = [th.get_text(strip=True) for th in target_table.find_all('th')]
         header_index_map = {i: h for i, h in enumerate(headers)}
-        records: List[Dict[str, Any]] = []
+        records: list[dict[str, Any]] = []
         for tr in target_table.find_all('tr'):
             tds = tr.find_all('td')
             if not tds:
                 continue
-            col_map: Dict[str, Any] = {}
+            col_map: dict[str, Any] = {}
             for idx, td in enumerate(tds):
                 key = header_index_map.get(idx, f"col{idx}")
                 col_map[key] = td
@@ -268,8 +269,14 @@ class NHANESExplorer(PopHealthObservatory):
             data_label = data_a.get_text(' ', strip=True)
             file_type = self._classify_data_file(data_href, data_label)
             size_token = self._extract_size(data_label)
-            original_filename = os.path.basename(data_href) if file_type in ('XPT','ZIP') else None
-            derived_local_filename = self._derive_local_filename(data_href, year_norm) if file_type == 'XPT' else original_filename
+            original_filename = (
+                os.path.basename(data_href) if file_type in ('XPT', 'ZIP') else None
+            )
+            derived_local_filename = (
+                self._derive_local_filename(data_href, year_norm)
+                if file_type == 'XPT'
+                else original_filename
+            )
             date_published = date_pub_cell.get_text(' ', strip=True) if date_pub_cell else ''
             records.append({
                 'year_raw': year_raw,
@@ -287,21 +294,15 @@ class NHANESExplorer(PopHealthObservatory):
             })
         return records
 
-    def _fetch_component_page(self, component_name: str) -> Optional[str]:
+    def _fetch_component_page(self, component_name: str) -> str | None:
         """Fetch component page HTML with simple multi-URL retry & cache."""
         # Simple in-memory cache
         if not hasattr(self, '_component_page_cache'):
-            self._component_page_cache: Dict[str, str] = {}
+            self._component_page_cache: dict[str, str] = {}
         if component_name in self._component_page_cache:
             return self._component_page_cache[component_name]
-        # Basic mapping; can be extended or discovered dynamically.
-        keyword_map = {
-            'Demographics': 'Demographics',
-            'Examination': 'Examination',
-            'Laboratory': 'Laboratory',
-            'Dietary': 'Dietary',
-            'Questionnaire': 'Questionnaire'
-        }
+    # Basic mapping; can be extended or discovered dynamically.
+    # Removed unused keyword_map (was previously assigned but not used)
         base_listing = "https://wwwn.cdc.gov/nchs/nhanes/Default.aspx"
         # Direct deep-link patterns observed (these may evolve):
         # We'll try a small set of known anchor patterns first.
@@ -326,12 +327,12 @@ class NHANESExplorer(PopHealthObservatory):
         return None
 
     def get_detailed_component_manifest(self,
-                                        components: Optional[List[str]] = None,
+                                        components: list[str] | None = None,
                                         as_dataframe: bool = False,
-                                        year_range: Optional[tuple[str,str]] = None,
-                                        file_types: Optional[List[str]] = None,
+                                        year_range: tuple[str, str] | None = None,
+                                        file_types: list[str] | None = None,
                                         force_refresh: bool = False,
-                                        schema_version: Optional[str] = None) -> Dict[str, Any]:
+                                        schema_version: str | None = None) -> dict[str, Any]:
         """Build enriched metadata manifest for selected component pages.
 
         Parameters
@@ -362,8 +363,10 @@ class NHANESExplorer(PopHealthObservatory):
               - component_count
               - total_file_rows (post-filter)
         """
-        target_components = components or ['Demographics','Examination','Laboratory','Dietary','Questionnaire']
-        detailed: Dict[str, List[Dict[str, Any]]] = {}
+        target_components = components or [
+            'Demographics', 'Examination', 'Laboratory', 'Dietary', 'Questionnaire'
+        ]
+        detailed: dict[str, list[dict[str, Any]]] = {}
         for comp in target_components:
             if force_refresh and hasattr(self, '_component_page_cache') and comp in self._component_page_cache:
                 self._component_page_cache.pop(comp, None)
@@ -372,41 +375,51 @@ class NHANESExplorer(PopHealthObservatory):
                 detailed[comp] = []
                 continue
             try:
-                records = self._parse_component_table(html, f"https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component={comp}")
+                records = self._parse_component_table(
+                    html,
+                    f"https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component={comp}"
+                )
             except Exception:
                 records = []
             detailed[comp] = records
+
         # Flatten & summarize
-        flat_rows = [dict(component=k, **rec) for k, rows in detailed.items() for rec in rows]
-        # Filtering
+        flat_rows = [dict(component=comp, **rec) for comp, rows in detailed.items() for rec in rows]
+
+        # Year range filtering (interval overlap)
         if year_range:
             ys, ye = year_range
-            def overlaps(r):
-                span = r.get('year_normalized','')
+
+            def overlaps(r: dict[str, Any]) -> bool:
+                span = r.get('year_normalized', '')
                 if '_' in span:
                     try:
-                        a,b = span.split('_',1)
-                        # Keep row if interval [a,b] intersects [ys,ye]
+                        a, b = span.split('_', 1)
                         return (a <= ye) and (b >= ys)
                     except Exception:
                         return False
                 return False
+
             flat_rows = [r for r in flat_rows if overlaps(r)]
+
+        # File type filter
         if file_types:
             ftset = {f.upper() for f in file_types}
-            # Restrict to desired file types (e.g., only XPT rows)
             flat_rows = [r for r in flat_rows if r.get('data_file_type') in ftset]
-        summary = {}
+
+        # Summary counts
+        summary: dict[str, dict[str, int]] = {}
         for row in flat_rows:
             summary.setdefault(row['component'], {}).setdefault(row['data_file_type'], 0)
             summary[row['component']][row['data_file_type']] += 1
+
         manifest = {
             'schema_version': schema_version or self._MANIFEST_SCHEMA_VERSION,
             'generated_at': datetime.now(timezone.utc).isoformat(),
             'detailed_year_records': detailed,
             'summary_counts': summary,
             'component_count': len(detailed),
-            'total_file_rows': len(flat_rows)
+            'total_file_rows': len(flat_rows),
         }
         if as_dataframe:
             try:
@@ -431,7 +444,7 @@ class NHANESExplorer(PopHealthObservatory):
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(manifest, f, indent=2)
         except Exception as e:
-            raise RuntimeError(f"Failed writing manifest to {path}: {e}")
+            raise RuntimeError(f"Failed writing manifest to {path}: {e}") from e
         return path
 
     def get_demographics_data(self, cycle: str = '2017-2018') -> pd.DataFrame:
@@ -481,11 +494,22 @@ class NHANESExplorer(PopHealthObservatory):
             'WTMEC2YR': 'exam_weight',
         }
         available = [c for c in demo_vars if c in demo_df.columns]
-        demo_clean = demo_df[available].copy().rename(columns={k: v for k, v in demo_vars.items() if k in available})
+        demo_clean = (
+            demo_df[available]
+            .copy()
+            .rename(columns={k: v for k, v in demo_vars.items() if k in available})
+        )
         if 'gender' in demo_clean.columns:
             demo_clean['gender_label'] = demo_clean['gender'].map({1: 'Male', 2: 'Female'})
         if 'race_ethnicity' in demo_clean.columns:
-            race_labels = {1: 'Mexican American',2: 'Other Hispanic',3: 'Non-Hispanic White',4: 'Non-Hispanic Black',6: 'Non-Hispanic Asian',7: 'Other/Multi-racial'}
+            race_labels = {
+                1: 'Mexican American',
+                2: 'Other Hispanic',
+                3: 'Non-Hispanic White',
+                4: 'Non-Hispanic Black',
+                6: 'Non-Hispanic Asian',
+                7: 'Other/Multi-racial',
+            }
             demo_clean['race_ethnicity_label'] = demo_clean['race_ethnicity'].map(race_labels)
         return demo_clean
 
@@ -494,11 +518,26 @@ class NHANESExplorer(PopHealthObservatory):
         bmx_df = self.download_data(cycle, self.components['body_measures'])
         if bmx_df.empty:
             return bmx_df
-        body_vars = {'SEQN': 'participant_id','BMXWT': 'weight_kg','BMXHT': 'height_cm','BMXBMI': 'bmi','BMXWAIST': 'waist_cm'}
+        body_vars = {
+            'SEQN': 'participant_id',
+            'BMXWT': 'weight_kg',
+            'BMXHT': 'height_cm',
+            'BMXBMI': 'bmi',
+            'BMXWAIST': 'waist_cm',
+        }
         available = [c for c in body_vars if c in bmx_df.columns]
-        body_clean = bmx_df[available].copy().rename(columns={k: v for k, v in body_vars.items() if k in available})
+        body_clean = (
+            bmx_df[available]
+            .copy()
+            .rename(columns={k: v for k, v in body_vars.items() if k in available})
+        )
         if 'bmi' in body_clean.columns:
-            body_clean['bmi_category'] = pd.cut(body_clean['bmi'], bins=[0, 18.5, 25, 30, float('inf')], labels=['Underweight','Normal','Overweight','Obese'], right=False)
+            body_clean['bmi_category'] = pd.cut(
+                body_clean['bmi'],
+                bins=[0, 18.5, 25, 30, float('inf')],
+                labels=['Underweight', 'Normal', 'Overweight', 'Obese'],
+                right=False,
+            )
         return body_clean
 
     def get_blood_pressure(self, cycle: str = '2017-2018') -> pd.DataFrame:
@@ -506,9 +545,21 @@ class NHANESExplorer(PopHealthObservatory):
         bp_df = self.download_data(cycle, self.components['blood_pressure'])
         if bp_df.empty:
             return bp_df
-        bp_vars = {'SEQN': 'participant_id','BPXSY1': 'systolic_bp_1','BPXDI1': 'diastolic_bp_1','BPXSY2': 'systolic_bp_2','BPXDI2': 'diastolic_bp_2','BPXSY3': 'systolic_bp_3','BPXDI3': 'diastolic_bp_3'}
+        bp_vars = {
+            'SEQN': 'participant_id',
+            'BPXSY1': 'systolic_bp_1',
+            'BPXDI1': 'diastolic_bp_1',
+            'BPXSY2': 'systolic_bp_2',
+            'BPXDI2': 'diastolic_bp_2',
+            'BPXSY3': 'systolic_bp_3',
+            'BPXDI3': 'diastolic_bp_3',
+        }
         available = [c for c in bp_vars if c in bp_df.columns]
-        bp_clean = bp_df[available].copy().rename(columns={k: v for k, v in bp_vars.items() if k in available})
+        bp_clean = (
+            bp_df[available]
+            .copy()
+            .rename(columns={k: v for k, v in bp_vars.items() if k in available})
+        )
         systolic_cols = [c for c in bp_clean.columns if 'systolic' in c]
         diastolic_cols = [c for c in bp_clean.columns if 'diastolic' in c]
         if systolic_cols:
@@ -519,10 +570,23 @@ class NHANESExplorer(PopHealthObservatory):
             conditions = [
                 (bp_clean['avg_systolic'] < 120) & (bp_clean['avg_diastolic'] < 80),
                 (bp_clean['avg_systolic'] < 130) & (bp_clean['avg_diastolic'] < 80),
-                ((bp_clean['avg_systolic'] >= 130) & (bp_clean['avg_systolic'] < 140)) | ((bp_clean['avg_diastolic'] >= 80) & (bp_clean['avg_diastolic'] < 90)),
-                (bp_clean['avg_systolic'] >= 140) | (bp_clean['avg_diastolic'] >= 90)
+                (
+                    (bp_clean['avg_systolic'] >= 130)
+                    & (bp_clean['avg_systolic'] < 140)
+                )
+                | (
+                    (bp_clean['avg_diastolic'] >= 80)
+                    & (bp_clean['avg_diastolic'] < 90)
+                ),
+                (bp_clean['avg_systolic'] >= 140)
+                | (bp_clean['avg_diastolic'] >= 90),
             ]
-            choices = ['Normal','Elevated','Stage 1 Hypertension','Stage 2 Hypertension']
+            choices = [
+                'Normal',
+                'Elevated',
+                'Stage 1 Hypertension',
+                'Stage 2 Hypertension',
+            ]
             bp_clean['bp_category'] = np.select(conditions, choices, default='Unknown')
         return bp_clean
 
@@ -545,7 +609,11 @@ class NHANESExplorer(PopHealthObservatory):
         if metric not in df.columns or demographic not in df.columns:
             return pd.DataFrame()
         sub = df[[demographic, metric]].dropna()
-        stats = sub.groupby(demographic)[metric].agg(['count','mean','median','std','min','max']).round(2)
+        stats = (
+            sub.groupby(demographic)[metric]
+            .agg(['count', 'mean', 'median', 'std', 'min', 'max'])
+            .round(2)
+        )
         stats.columns = ['Count','Mean','Median','Std Dev','Min','Max']
         return stats
 
@@ -574,31 +642,47 @@ class NHANESExplorer(PopHealthObservatory):
 
     def generate_summary_report(self, df: pd.DataFrame) -> str:
         """Generate textual summary of demographics & selected health metrics."""
-        report = ["PopHealth Observatory Summary Report", "="*40, f"Total Participants: {len(df):,}", f"Total Variables: {len(df.columns)}", ""]
+        report = [
+            "PopHealth Observatory Summary Report",
+            "=" * 40,
+            f"Total Participants: {len(df):,}",
+            f"Total Variables: {len(df.columns)}",
+            "",
+        ]
         if 'age_years' in df.columns:
             age_stats = df['age_years'].describe()
-            report += ["Age Distribution:", f"  Mean age: {age_stats['mean']:.1f} years", f"  Age range: {age_stats['min']:.0f} - {age_stats['max']:.0f} years", ""]
+            report += [
+                "Age Distribution:",
+                f"  Mean age: {age_stats['mean']:.1f} years",
+                f"  Age range: {age_stats['min']:.0f} - {age_stats['max']:.0f} years",
+                "",
+            ]
         if 'gender_label' in df.columns:
             gender_counts = df['gender_label'].value_counts()
             report.append("Gender Distribution:")
-            for g,c in gender_counts.items():
-                pct = (c/len(df))*100
+            for g, c in gender_counts.items():
+                pct = (c / len(df)) * 100
                 report.append(f"  {g}: {c:,} ({pct:.1f}%)")
             report.append("")
         if 'race_ethnicity_label' in df.columns:
             race_counts = df['race_ethnicity_label'].value_counts()
             report.append("Race/Ethnicity Distribution:")
-            for r,c in race_counts.items():
-                pct = (c/len(df))*100
+            for r, c in race_counts.items():
+                pct = (c / len(df)) * 100
                 report.append(f"  {r}: {c:,} ({pct:.1f}%)")
             report.append("")
-        metrics = ['bmi','avg_systolic','avg_diastolic','weight_kg','height_cm']
+        metrics = ['bmi', 'avg_systolic', 'avg_diastolic', 'weight_kg', 'height_cm']
         avail = [m for m in metrics if m in df.columns]
         if avail:
             report.append("Health Metrics Summary:")
             for m in avail:
                 stats = df[m].describe()
                 miss = df[m].isna().sum()
-                report += [f"  {m}:", f"    Mean: {stats['mean']:.2f}", f"    Range: {stats['min']:.2f} - {stats['max']:.2f}", f"    Missing: {miss:,} ({(miss/len(df))*100:.1f}%)"]
+                report += [
+                    f"  {m}:",
+                    f"    Mean: {stats['mean']:.2f}",
+                    f"    Range: {stats['min']:.2f} - {stats['max']:.2f}",
+                    f"    Missing: {miss:,} ({(miss / len(df)) * 100:.1f}%)",
+                ]
             report.append("")
         return "\n".join(report)

@@ -59,11 +59,13 @@ line-length = 100
 target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py310"
+fix = false
+
+[tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = []
-fix = false
 
 [tool.pytest.ini_options]
 minversion = "7.0"
