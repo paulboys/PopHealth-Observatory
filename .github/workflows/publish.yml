@@ -63,6 +63,7 @@ jobs:
   deploy-pages:
     needs: build-and-publish
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
     steps:
