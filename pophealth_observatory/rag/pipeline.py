@@ -1,20 +1,18 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Callable, List, Sequence
-
-import numpy as np
 
 from .config import RAGConfig
 from .embeddings import BaseEmbedder
-from .index import VectorIndex, save_metadata, load_metadata
+from .index import VectorIndex, load_metadata, save_metadata
 
-GeneratorFn = Callable[[str, List[dict], str], str]
+GeneratorFn = Callable[[str, list[dict], str], str]
 # signature: (question, context_snippets, prompt_text) -> answer
 
 
-def _load_snippets(path: Path) -> List[dict]:
+def _load_snippets(path: Path) -> list[dict]:
     data = []
     with path.open(encoding="utf-8") as fh:
         for line in fh:
@@ -50,10 +48,10 @@ class RAGPipeline:
     def __init__(self, config: RAGConfig, embedder: BaseEmbedder):
         self.config = config
         self.embedder = embedder
-        self._snippets: List[dict] = []
+        self._snippets: list[dict] = []
         self._index: VectorIndex | None = None
-        self._texts: List[str] = []
-        self._meta: List[dict] = []
+        self._texts: list[str] = []
+        self._meta: list[dict] = []
 
     # --- Build / load ---
     def load_snippets(self) -> None:
@@ -74,7 +72,7 @@ class RAGPipeline:
         save_metadata(self._texts, self._meta, root)
 
     # --- Retrieval ---
-    def retrieve(self, question: str, top_k: int = 5) -> List[dict]:
+    def retrieve(self, question: str, top_k: int = 5) -> list[dict]:
         q_vec = self.embedder.encode([question])[0]
         assert self._index is not None, "Index not built"
         hits = self._index.query(q_vec, top_k=top_k)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 from abc import ABC, abstractmethod
-from typing import List
 
 import numpy as np
 
@@ -14,7 +13,7 @@ except Exception:  # pragma: no cover
 
 class BaseEmbedder(ABC):
     @abstractmethod
-    def encode(self, texts: List[str]) -> np.ndarray:  # shape: (n, d)
+    def encode(self, texts: list[str]) -> np.ndarray:  # shape: (n, d)
         raise NotImplementedError
 
     @property
@@ -33,7 +32,7 @@ class DummyEmbedder(BaseEmbedder):
     def dimension(self) -> int:  # pragma: no cover - trivial
         return self._dim
 
-    def encode(self, texts: List[str]) -> np.ndarray:
+    def encode(self, texts: list[str]) -> np.ndarray:
         vecs = []
         for t in texts:
             h = hashlib.sha256(t.encode("utf-8")).digest()
@@ -49,7 +48,9 @@ class DummyEmbedder(BaseEmbedder):
 class SentenceTransformerEmbedder(BaseEmbedder):
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         if SentenceTransformer is None:  # pragma: no cover
-            raise RuntimeError("sentence-transformers not installed. Install extras: pip install pophealth-observatory[rag]")
+            raise RuntimeError(
+                "sentence-transformers not installed. Install extras: pip install pophealth-observatory[rag]"
+            )
         self.model_name = model_name
         self._model = SentenceTransformer(model_name)
         # do one dummy to know dimension
@@ -59,5 +60,5 @@ class SentenceTransformerEmbedder(BaseEmbedder):
     def dimension(self) -> int:  # pragma: no cover - simple
         return self._dim
 
-    def encode(self, texts: List[str]) -> np.ndarray:
+    def encode(self, texts: list[str]) -> np.ndarray:
         return np.asarray(self._model.encode(texts, show_progress_bar=False), dtype=np.float32)

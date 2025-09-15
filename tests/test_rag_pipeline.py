@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pophealth_observatory.rag import RAGConfig, RAGPipeline, DummyEmbedder
+from pophealth_observatory.rag import DummyEmbedder, RAGConfig, RAGPipeline
 
 # We'll synthesize a temporary snippet file rather than depend on real ingestion.
 
