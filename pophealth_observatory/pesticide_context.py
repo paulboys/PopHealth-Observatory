@@ -138,14 +138,31 @@ def find_analyte(query: str, analytes: list[PesticideAnalyte]) -> PesticideAnaly
 
 
 def suggest_analytes(partial: str, analytes: list[PesticideAnalyte], limit: int = 5) -> list[str]:
+    """Return up to `limit` analyte (or parent) names containing the normalized partial.
+
+    Strategy:
+      1. Normalize query -> p
+      2. Collect candidate (score, label) for analyte_name and parent_pesticide if they contain p
+      3. Score is length difference to bias toward tighter matches
+      4. De-duplicate while preserving best (lowest) score
+    """
     p = _normalize(partial)
-    scored = []
+    if not p:
+        return []
+    best: dict[str, tuple[int, str]] = {}
     for a in analytes:
-        name_n = _normalize(a.analyte_name)
-        if p in name_n:
-            scored.append((len(name_n) - len(p), a.analyte_name))
-    scored.sort(key=lambda x: x[0])
-    return [s for _, s in scored[:limit]]
+        for label in (a.analyte_name, a.parent_pesticide):
+            if not label:
+                continue
+            norm_label = _normalize(label)
+            if p in norm_label:
+                score = len(norm_label) - len(p)
+                # keep best score per output label
+                cur = best.get(label)
+                if cur is None or score < cur[0]:
+                    best[label] = (score, label)
+    ordered = sorted(best.values(), key=lambda x: x[0])
+    return [lbl for _score, lbl in ordered[:limit]]
 
 
 def get_pesticide_info(query: str) -> dict[str, Any]:
