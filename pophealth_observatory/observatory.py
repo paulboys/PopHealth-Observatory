@@ -16,10 +16,12 @@ import numpy as np
 import pandas as pd
 import requests
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
+
 
 class PopHealthObservatory:
     """Core observatory class for population health survey data (initial focus: NHANES)."""
+
     def __init__(self):
         # Primary cycle base for direct cycle folder structure (older & standard pattern)
         self.base_url = "https://wwwn.cdc.gov/Nchs/Nhanes"
@@ -28,40 +30,40 @@ class PopHealthObservatory:
         # In‑memory cache for downloaded component XPTs
         self.data_cache = {}  # cache: cycle_component -> DataFrame
         self.available_cycles = [
-            '2021-2022',  # recent combined cycle (post-pandemic)
-            '2019-2020',
-            '2017-2018',
-            '2015-2016',
-            '2013-2014',
-            '2011-2012',
-            '2009-2010'
+            "2021-2022",  # recent combined cycle (post-pandemic)
+            "2019-2020",
+            "2017-2018",
+            "2015-2016",
+            "2013-2014",
+            "2011-2012",
+            "2009-2010",
         ]
         # Map survey cycle to NHANES file letter suffix (partial set; extend as needed)
         self.cycle_suffix_map = {
-            '2021-2022': 'L',
-            '2019-2020': 'K',  # partial / limited release
-            '2017-2018': 'J',
-            '2015-2016': 'I',
-            '2013-2014': 'H',
-            '2011-2012': 'G',
-            '2009-2010': 'F',
+            "2021-2022": "L",
+            "2019-2020": "K",  # partial / limited release
+            "2017-2018": "J",
+            "2015-2016": "I",
+            "2013-2014": "H",
+            "2011-2012": "G",
+            "2009-2010": "F",
             # Earlier examples (not currently in available_cycles):
-            '2007-2008': 'E',
-            '2005-2006': 'D',
-            '2003-2004': 'C',
-            '2001-2002': 'B',
-            '1999-2000': 'A'
+            "2007-2008": "E",
+            "2005-2006": "D",
+            "2003-2004": "C",
+            "2001-2002": "B",
+            "1999-2000": "A",
         }
         self.components = {
-            'demographics': 'DEMO',
-            'body_measures': 'BMX',
-            'blood_pressure': 'BPX',
-            'cholesterol': 'TCHOL',
-            'diabetes': 'GLU',
-            'dietary': 'DR1TOT',
-            'physical_activity': 'PAQ',
-            'smoking': 'SMQ',
-            'alcohol': 'ALQ'
+            "demographics": "DEMO",
+            "body_measures": "BMX",
+            "blood_pressure": "BPX",
+            "cholesterol": "TCHOL",
+            "diabetes": "GLU",
+            "dietary": "DR1TOT",
+            "physical_activity": "PAQ",
+            "smoking": "SMQ",
+            "alcohol": "ALQ",
         }
 
     def get_data_url(self, cycle: str, component: str) -> str:
@@ -86,16 +88,16 @@ class PopHealthObservatory:
 
     def download_data(self, cycle: str, component: str) -> pd.DataFrame:
         """Download data for a specific component and cycle with flexible URL handling.
-        
+
         This method tries multiple URL patterns to handle the different formats used across NHANES cycles.
         """
         key = f"{cycle}_{component}"
         if key in self.data_cache:
             return self.data_cache[key]
-            
-        letter = self.cycle_suffix_map.get(cycle, '')
-        cycle_year = cycle.split('-')[0] if '-' in cycle else cycle
-        
+
+        letter = self.cycle_suffix_map.get(cycle, "")
+        cycle_year = cycle.split("-")[0] if "-" in cycle else cycle
+
         # Define URL patterns to try (in order of preference)
         url_patterns = [
             # 2021+ pattern with Public subdirectory
@@ -113,29 +115,30 @@ class PopHealthObservatory:
             # Variant with cycle year suffix
             f"{self.base_url}/{cycle}/{component}_{cycle[-2:]}.XPT",
         ]
-        
+
         # Try each URL pattern
         errors = []
-        
+
         for url in url_patterns:
             try:
                 print(f"Trying {component} URL: {url}")
                 response = requests.get(url, timeout=30)
-                
+
                 if response.status_code == 200:
                     print(f"✓ Success loading {component} from: {url}")
-                    df = pd.read_sas(io.BytesIO(response.content), format='xport')
+                    df = pd.read_sas(io.BytesIO(response.content), format="xport")
                     self.data_cache[key] = df
                     return df
                 else:
                     errors.append(f"Status {response.status_code} from {url}")
             except Exception as e:
                 errors.append(f"Error with {url}: {str(e)}")
-        
+
         print(f"Failed to download {component} for {cycle}. Errors: {errors}")
         return pd.DataFrame()
 
     # Reuse logic from legacy NHANESExplorer below for compatibility
+
 
 class NHANESExplorer(PopHealthObservatory):
     """NHANES-focused explorer extending :class:`PopHealthObservatory`.
@@ -146,6 +149,7 @@ class NHANESExplorer(PopHealthObservatory):
     - Convenience analytic helpers (merging, summaries, visuals)
     - Manifest persistence with schema versioning & filtering
     """
+
     # Methods identical to earlier implementation for now
     # --- Enhanced metadata parsing helpers (integrated from notebook Section 14a) ---
     _YEAR_RANGE_REGEX = re.compile(r"(20\d{2})\s*[-–]\s*(20\d{2})")
@@ -160,14 +164,14 @@ class NHANESExplorer(PopHealthObservatory):
         """
         if not year_text:
             return ""
-        yt = year_text.strip().replace('\u2013', '-').replace('\u2014', '-')
+        yt = year_text.strip().replace("\u2013", "-").replace("\u2014", "-")
         m = self._YEAR_RANGE_REGEX.search(yt)
         if m:
             return f"{m.group(1)}_{m.group(2)}"
         nums = re.findall(r"20\d{2}", yt)
         if len(nums) >= 2:
             return f"{nums[0]}_{nums[1]}"
-        return yt.replace('-', '_').replace(' ', '_')
+        return yt.replace("-", "_").replace(" ", "_")
 
     def _derive_local_filename(self, remote_url: str, year_norm: str) -> str | None:
         """Derive a canonical local filename for an XPT file with year span.
@@ -178,7 +182,7 @@ class NHANESExplorer(PopHealthObservatory):
         if not remote_url:
             return None
         base = os.path.basename(remote_url)
-        if not base.lower().endswith('.xpt'):
+        if not base.lower().endswith(".xpt"):
             return None
         stem = base[:-4]
         m = re.match(r"^([A-Za-z0-9]+?)(?:_[A-Z])$", stem)
@@ -192,15 +196,15 @@ class NHANESExplorer(PopHealthObservatory):
 
         Priority order: XPT > ZIP > FTP > OTHER based on URL/label heuristics.
         """
-        h = (href or '').lower()
-        label_lower = (label or '').lower()
-        if h.endswith('.xpt') or '[xpt' in label_lower:
-            return 'XPT'
-        if h.endswith('.zip') or '[zip' in label_lower:
-            return 'ZIP'
-        if h.startswith('ftp://') or h.startswith('ftps://') or 'ftp' in h or '[ftp' in label_lower:
-            return 'FTP'
-        return 'OTHER'
+        h = (href or "").lower()
+        label_lower = (label or "").lower()
+        if h.endswith(".xpt") or "[xpt" in label_lower:
+            return "XPT"
+        if h.endswith(".zip") or "[zip" in label_lower:
+            return "ZIP"
+        if h.startswith("ftp://") or h.startswith("ftps://") or "ftp" in h or "[ftp" in label_lower:
+            return "FTP"
+        return "OTHER"
 
     def _extract_size(self, label: str) -> str | None:
         """Extract human-readable size token (e.g. ``"3.4 MB"``) from link label.
@@ -227,82 +231,80 @@ class NHANESExplorer(PopHealthObservatory):
         except ImportError:
             print("BeautifulSoup (bs4) not installed; metadata table parsing unavailable.")
             return []
-        soup = BeautifulSoup(html, 'html.parser')
-        tables = soup.find_all('table')
+        soup = BeautifulSoup(html, "html.parser")
+        tables = soup.find_all("table")
         target_table = None
         for tbl in tables:
-            header_texts = [th.get_text(strip=True) for th in tbl.find_all('th')]
-            lower_join = ' '.join(h.lower() for h in header_texts)
-            if ('year' in lower_join or 'years' in lower_join) and 'data file' in lower_join and 'doc' in lower_join:
+            header_texts = [th.get_text(strip=True) for th in tbl.find_all("th")]
+            lower_join = " ".join(h.lower() for h in header_texts)
+            if ("year" in lower_join or "years" in lower_join) and "data file" in lower_join and "doc" in lower_join:
                 target_table = tbl
                 break
         if not target_table:
             return []
-        headers = [th.get_text(strip=True) for th in target_table.find_all('th')]
+        headers = [th.get_text(strip=True) for th in target_table.find_all("th")]
         header_index_map = {i: h for i, h in enumerate(headers)}
         records: list[dict[str, Any]] = []
-        for tr in target_table.find_all('tr'):
-            tds = tr.find_all('td')
+        for tr in target_table.find_all("tr"):
+            tds = tr.find_all("td")
             if not tds:
                 continue
             col_map: dict[str, Any] = {}
             for idx, td in enumerate(tds):
                 key = header_index_map.get(idx, f"col{idx}")
                 col_map[key] = td
-            year_cell = col_map.get('Years') or col_map.get('Year')
-            data_name_cell = col_map.get('Data File Name')
-            doc_cell = col_map.get('Doc File')
-            data_cell = col_map.get('Data File')
-            date_pub_cell = col_map.get('Date Published')
+            year_cell = col_map.get("Years") or col_map.get("Year")
+            data_name_cell = col_map.get("Data File Name")
+            doc_cell = col_map.get("Doc File")
+            data_cell = col_map.get("Data File")
+            date_pub_cell = col_map.get("Date Published")
             if not (year_cell and data_cell):
                 continue
-            year_raw = year_cell.get_text(' ', strip=True)
+            year_raw = year_cell.get_text(" ", strip=True)
             year_norm = self._normalize_year_span(year_raw)
-            data_file_name = data_name_cell.get_text(' ', strip=True) if data_name_cell else ''
-            doc_a = doc_cell.find('a', href=True) if doc_cell else None
-            data_a = data_cell.find('a', href=True)
+            data_file_name = data_name_cell.get_text(" ", strip=True) if data_name_cell else ""
+            doc_a = doc_cell.find("a", href=True) if doc_cell else None
+            data_a = data_cell.find("a", href=True)
             if not data_a:
                 continue
-            doc_href = urljoin(page_url, doc_a['href']) if doc_a else None
-            doc_label = doc_a.get_text(' ', strip=True) if doc_a else None
-            data_href = urljoin(page_url, data_a['href'])
-            data_label = data_a.get_text(' ', strip=True)
+            doc_href = urljoin(page_url, doc_a["href"]) if doc_a else None
+            doc_label = doc_a.get_text(" ", strip=True) if doc_a else None
+            data_href = urljoin(page_url, data_a["href"])
+            data_label = data_a.get_text(" ", strip=True)
             file_type = self._classify_data_file(data_href, data_label)
             size_token = self._extract_size(data_label)
-            original_filename = (
-                os.path.basename(data_href) if file_type in ('XPT', 'ZIP') else None
-            )
+            original_filename = os.path.basename(data_href) if file_type in ("XPT", "ZIP") else None
             derived_local_filename = (
-                self._derive_local_filename(data_href, year_norm)
-                if file_type == 'XPT'
-                else original_filename
+                self._derive_local_filename(data_href, year_norm) if file_type == "XPT" else original_filename
             )
-            date_published = date_pub_cell.get_text(' ', strip=True) if date_pub_cell else ''
-            records.append({
-                'year_raw': year_raw,
-                'year_normalized': year_norm,
-                'data_file_name': data_file_name,
-                'doc_file_url': doc_href,
-                'doc_file_label': doc_label,
-                'data_file_url': data_href,
-                'data_file_label': data_label,
-                'data_file_type': file_type,
-                'data_file_size': size_token,
-                'date_published': date_published,
-                'original_filename': original_filename,
-                'derived_local_filename': derived_local_filename,
-            })
+            date_published = date_pub_cell.get_text(" ", strip=True) if date_pub_cell else ""
+            records.append(
+                {
+                    "year_raw": year_raw,
+                    "year_normalized": year_norm,
+                    "data_file_name": data_file_name,
+                    "doc_file_url": doc_href,
+                    "doc_file_label": doc_label,
+                    "data_file_url": data_href,
+                    "data_file_label": data_label,
+                    "data_file_type": file_type,
+                    "data_file_size": size_token,
+                    "date_published": date_published,
+                    "original_filename": original_filename,
+                    "derived_local_filename": derived_local_filename,
+                }
+            )
         return records
 
     def _fetch_component_page(self, component_name: str) -> str | None:
         """Fetch component page HTML with simple multi-URL retry & cache."""
         # Simple in-memory cache
-        if not hasattr(self, '_component_page_cache'):
+        if not hasattr(self, "_component_page_cache"):
             self._component_page_cache: dict[str, str] = {}
         if component_name in self._component_page_cache:
             return self._component_page_cache[component_name]
-    # Basic mapping; can be extended or discovered dynamically.
-    # Removed unused keyword_map (was previously assigned but not used)
+        # Basic mapping; can be extended or discovered dynamically.
+        # Removed unused keyword_map (was previously assigned but not used)
         base_listing = "https://wwwn.cdc.gov/nchs/nhanes/Default.aspx"
         # Direct deep-link patterns observed (these may evolve):
         # We'll try a small set of known anchor patterns first.
@@ -314,7 +316,7 @@ class NHANESExplorer(PopHealthObservatory):
             for attempt in range(3):  # retry with backoff
                 try:
                     resp = requests.get(u, timeout=25)
-                    if resp.status_code == 200 and 'nhanes' in resp.text.lower():
+                    if resp.status_code == 200 and "nhanes" in resp.text.lower():
                         if u == base_listing and component_name.lower() not in resp.text.lower():
                             break  # try next URL
                         self._component_page_cache[component_name] = resp.text
@@ -323,16 +325,19 @@ class NHANESExplorer(PopHealthObservatory):
                     pass
                 # simple exponential backoff
                 import time as _t
-                _t.sleep(0.5 * (2 ** attempt))
+
+                _t.sleep(0.5 * (2**attempt))
         return None
 
-    def get_detailed_component_manifest(self,
-                                        components: list[str] | None = None,
-                                        as_dataframe: bool = False,
-                                        year_range: tuple[str, str] | None = None,
-                                        file_types: list[str] | None = None,
-                                        force_refresh: bool = False,
-                                        schema_version: str | None = None) -> dict[str, Any]:
+    def get_detailed_component_manifest(
+        self,
+        components: list[str] | None = None,
+        as_dataframe: bool = False,
+        year_range: tuple[str, str] | None = None,
+        file_types: list[str] | None = None,
+        force_refresh: bool = False,
+        schema_version: str | None = None,
+    ) -> dict[str, Any]:
         """Build enriched metadata manifest for selected component pages.
 
         Parameters
@@ -363,12 +368,10 @@ class NHANESExplorer(PopHealthObservatory):
               - component_count
               - total_file_rows (post-filter)
         """
-        target_components = components or [
-            'Demographics', 'Examination', 'Laboratory', 'Dietary', 'Questionnaire'
-        ]
+        target_components = components or ["Demographics", "Examination", "Laboratory", "Dietary", "Questionnaire"]
         detailed: dict[str, list[dict[str, Any]]] = {}
         for comp in target_components:
-            if force_refresh and hasattr(self, '_component_page_cache') and comp in self._component_page_cache:
+            if force_refresh and hasattr(self, "_component_page_cache") and comp in self._component_page_cache:
                 self._component_page_cache.pop(comp, None)
             html = self._fetch_component_page(comp)
             if not html:
@@ -376,8 +379,7 @@ class NHANESExplorer(PopHealthObservatory):
                 continue
             try:
                 records = self._parse_component_table(
-                    html,
-                    f"https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component={comp}"
+                    html, f"https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component={comp}"
                 )
             except Exception:
                 records = []
@@ -391,10 +393,10 @@ class NHANESExplorer(PopHealthObservatory):
             ys, ye = year_range
 
             def overlaps(r: dict[str, Any]) -> bool:
-                span = r.get('year_normalized', '')
-                if '_' in span:
+                span = r.get("year_normalized", "")
+                if "_" in span:
                     try:
-                        a, b = span.split('_', 1)
+                        a, b = span.split("_", 1)
                         return (a <= ye) and (b >= ys)
                     except Exception:
                         return False
@@ -405,25 +407,25 @@ class NHANESExplorer(PopHealthObservatory):
         # File type filter
         if file_types:
             ftset = {f.upper() for f in file_types}
-            flat_rows = [r for r in flat_rows if r.get('data_file_type') in ftset]
+            flat_rows = [r for r in flat_rows if r.get("data_file_type") in ftset]
 
         # Summary counts
         summary: dict[str, dict[str, int]] = {}
         for row in flat_rows:
-            summary.setdefault(row['component'], {}).setdefault(row['data_file_type'], 0)
-            summary[row['component']][row['data_file_type']] += 1
+            summary.setdefault(row["component"], {}).setdefault(row["data_file_type"], 0)
+            summary[row["component"]][row["data_file_type"]] += 1
 
         manifest = {
-            'schema_version': schema_version or self._MANIFEST_SCHEMA_VERSION,
-            'generated_at': datetime.now(timezone.utc).isoformat(),
-            'detailed_year_records': detailed,
-            'summary_counts': summary,
-            'component_count': len(detailed),
-            'total_file_rows': len(flat_rows),
+            "schema_version": schema_version or self._MANIFEST_SCHEMA_VERSION,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "detailed_year_records": detailed,
+            "summary_counts": summary,
+            "component_count": len(detailed),
+            "total_file_rows": len(flat_rows),
         }
         if as_dataframe:
             try:
-                manifest['dataframe'] = pd.DataFrame(flat_rows)
+                manifest["dataframe"] = pd.DataFrame(flat_rows)
             except Exception:
                 pass
         return manifest
@@ -441,17 +443,18 @@ class NHANESExplorer(PopHealthObservatory):
         manifest = self.get_detailed_component_manifest(**manifest_kwargs)
         try:
             import json
-            with open(path, 'w', encoding='utf-8') as f:
+
+            with open(path, "w", encoding="utf-8") as f:
                 json.dump(manifest, f, indent=2)
         except Exception as e:
             raise RuntimeError(f"Failed writing manifest to {path}: {e}") from e
         return path
 
-    def get_demographics_data(self, cycle: str = '2017-2018') -> pd.DataFrame:
+    def get_demographics_data(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Download and harmonize demographics (DEMO) data for a cycle."""
-        component = self.components['demographics']
-        letter = self.cycle_suffix_map.get(cycle, '')
-        
+        component = self.components["demographics"]
+        letter = self.cycle_suffix_map.get(cycle, "")
+
         # List of URL patterns to try (in order of preference)
         url_patterns = [
             # Newest pattern (2021+) - confirmed working
@@ -463,134 +466,115 @@ class NHANESExplorer(PopHealthObservatory):
             f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.XPT",
             f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.xpt",
         ]
-        
+
         # Try each URL pattern
         demo_df = pd.DataFrame()
         errors = []
-        
+
         for url in url_patterns:
             try:
                 print(f"Trying demographics URL: {url}")
                 response = requests.get(url, timeout=30)
                 if response.status_code == 200:
                     print(f"✓ Success loading demographics from: {url}")
-                    demo_df = pd.read_sas(io.BytesIO(response.content), format='xport')
+                    demo_df = pd.read_sas(io.BytesIO(response.content), format="xport")
                     break
                 else:
                     errors.append(f"Status {response.status_code} from {url}")
             except Exception as e:
                 errors.append(f"Error with {url}: {str(e)}")
-        
+
         if demo_df.empty:
             print(f"Failed to download demographics for {cycle}. Errors: {errors}")
             return demo_df
         demo_vars = {
-            'SEQN': 'participant_id',
-            'RIAGENDR': 'gender',
-            'RIDAGEYR': 'age_years',
-            'RIDRETH3': 'race_ethnicity',
-            'DMDEDUC2': 'education',
-            'INDFMPIR': 'poverty_ratio',
-            'WTMEC2YR': 'exam_weight',
+            "SEQN": "participant_id",
+            "RIAGENDR": "gender",
+            "RIDAGEYR": "age_years",
+            "RIDRETH3": "race_ethnicity",
+            "DMDEDUC2": "education",
+            "INDFMPIR": "poverty_ratio",
+            "WTMEC2YR": "exam_weight",
         }
         available = [c for c in demo_vars if c in demo_df.columns]
-        demo_clean = (
-            demo_df[available]
-            .copy()
-            .rename(columns={k: v for k, v in demo_vars.items() if k in available})
-        )
-        if 'gender' in demo_clean.columns:
-            demo_clean['gender_label'] = demo_clean['gender'].map({1: 'Male', 2: 'Female'})
-        if 'race_ethnicity' in demo_clean.columns:
+        demo_clean = demo_df[available].copy().rename(columns={k: v for k, v in demo_vars.items() if k in available})
+        if "gender" in demo_clean.columns:
+            demo_clean["gender_label"] = demo_clean["gender"].map({1: "Male", 2: "Female"})
+        if "race_ethnicity" in demo_clean.columns:
             race_labels = {
-                1: 'Mexican American',
-                2: 'Other Hispanic',
-                3: 'Non-Hispanic White',
-                4: 'Non-Hispanic Black',
-                6: 'Non-Hispanic Asian',
-                7: 'Other/Multi-racial',
+                1: "Mexican American",
+                2: "Other Hispanic",
+                3: "Non-Hispanic White",
+                4: "Non-Hispanic Black",
+                6: "Non-Hispanic Asian",
+                7: "Other/Multi-racial",
             }
-            demo_clean['race_ethnicity_label'] = demo_clean['race_ethnicity'].map(race_labels)
+            demo_clean["race_ethnicity_label"] = demo_clean["race_ethnicity"].map(race_labels)
         return demo_clean
 
-    def get_body_measures(self, cycle: str = '2017-2018') -> pd.DataFrame:
+    def get_body_measures(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Return body measures (BMX) with derived BMI categories."""
-        bmx_df = self.download_data(cycle, self.components['body_measures'])
+        bmx_df = self.download_data(cycle, self.components["body_measures"])
         if bmx_df.empty:
             return bmx_df
         body_vars = {
-            'SEQN': 'participant_id',
-            'BMXWT': 'weight_kg',
-            'BMXHT': 'height_cm',
-            'BMXBMI': 'bmi',
-            'BMXWAIST': 'waist_cm',
+            "SEQN": "participant_id",
+            "BMXWT": "weight_kg",
+            "BMXHT": "height_cm",
+            "BMXBMI": "bmi",
+            "BMXWAIST": "waist_cm",
         }
         available = [c for c in body_vars if c in bmx_df.columns]
-        body_clean = (
-            bmx_df[available]
-            .copy()
-            .rename(columns={k: v for k, v in body_vars.items() if k in available})
-        )
-        if 'bmi' in body_clean.columns:
-            body_clean['bmi_category'] = pd.cut(
-                body_clean['bmi'],
-                bins=[0, 18.5, 25, 30, float('inf')],
-                labels=['Underweight', 'Normal', 'Overweight', 'Obese'],
+        body_clean = bmx_df[available].copy().rename(columns={k: v for k, v in body_vars.items() if k in available})
+        if "bmi" in body_clean.columns:
+            body_clean["bmi_category"] = pd.cut(
+                body_clean["bmi"],
+                bins=[0, 18.5, 25, 30, float("inf")],
+                labels=["Underweight", "Normal", "Overweight", "Obese"],
                 right=False,
             )
         return body_clean
 
-    def get_blood_pressure(self, cycle: str = '2017-2018') -> pd.DataFrame:
+    def get_blood_pressure(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Return BPX readings plus averaged and categorized blood pressure."""
-        bp_df = self.download_data(cycle, self.components['blood_pressure'])
+        bp_df = self.download_data(cycle, self.components["blood_pressure"])
         if bp_df.empty:
             return bp_df
         bp_vars = {
-            'SEQN': 'participant_id',
-            'BPXSY1': 'systolic_bp_1',
-            'BPXDI1': 'diastolic_bp_1',
-            'BPXSY2': 'systolic_bp_2',
-            'BPXDI2': 'diastolic_bp_2',
-            'BPXSY3': 'systolic_bp_3',
-            'BPXDI3': 'diastolic_bp_3',
+            "SEQN": "participant_id",
+            "BPXSY1": "systolic_bp_1",
+            "BPXDI1": "diastolic_bp_1",
+            "BPXSY2": "systolic_bp_2",
+            "BPXDI2": "diastolic_bp_2",
+            "BPXSY3": "systolic_bp_3",
+            "BPXDI3": "diastolic_bp_3",
         }
         available = [c for c in bp_vars if c in bp_df.columns]
-        bp_clean = (
-            bp_df[available]
-            .copy()
-            .rename(columns={k: v for k, v in bp_vars.items() if k in available})
-        )
-        systolic_cols = [c for c in bp_clean.columns if 'systolic' in c]
-        diastolic_cols = [c for c in bp_clean.columns if 'diastolic' in c]
+        bp_clean = bp_df[available].copy().rename(columns={k: v for k, v in bp_vars.items() if k in available})
+        systolic_cols = [c for c in bp_clean.columns if "systolic" in c]
+        diastolic_cols = [c for c in bp_clean.columns if "diastolic" in c]
         if systolic_cols:
-            bp_clean['avg_systolic'] = bp_clean[systolic_cols].mean(axis=1)
+            bp_clean["avg_systolic"] = bp_clean[systolic_cols].mean(axis=1)
         if diastolic_cols:
-            bp_clean['avg_diastolic'] = bp_clean[diastolic_cols].mean(axis=1)
-        if 'avg_systolic' in bp_clean.columns and 'avg_diastolic' in bp_clean.columns:
+            bp_clean["avg_diastolic"] = bp_clean[diastolic_cols].mean(axis=1)
+        if "avg_systolic" in bp_clean.columns and "avg_diastolic" in bp_clean.columns:
             conditions = [
-                (bp_clean['avg_systolic'] < 120) & (bp_clean['avg_diastolic'] < 80),
-                (bp_clean['avg_systolic'] < 130) & (bp_clean['avg_diastolic'] < 80),
-                (
-                    (bp_clean['avg_systolic'] >= 130)
-                    & (bp_clean['avg_systolic'] < 140)
-                )
-                | (
-                    (bp_clean['avg_diastolic'] >= 80)
-                    & (bp_clean['avg_diastolic'] < 90)
-                ),
-                (bp_clean['avg_systolic'] >= 140)
-                | (bp_clean['avg_diastolic'] >= 90),
+                (bp_clean["avg_systolic"] < 120) & (bp_clean["avg_diastolic"] < 80),
+                (bp_clean["avg_systolic"] < 130) & (bp_clean["avg_diastolic"] < 80),
+                ((bp_clean["avg_systolic"] >= 130) & (bp_clean["avg_systolic"] < 140))
+                | ((bp_clean["avg_diastolic"] >= 80) & (bp_clean["avg_diastolic"] < 90)),
+                (bp_clean["avg_systolic"] >= 140) | (bp_clean["avg_diastolic"] >= 90),
             ]
             choices = [
-                'Normal',
-                'Elevated',
-                'Stage 1 Hypertension',
-                'Stage 2 Hypertension',
+                "Normal",
+                "Elevated",
+                "Stage 1 Hypertension",
+                "Stage 2 Hypertension",
             ]
-            bp_clean['bp_category'] = np.select(conditions, choices, default='Unknown')
+            bp_clean["bp_category"] = np.select(conditions, choices, default="Unknown")
         return bp_clean
 
-    def create_merged_dataset(self, cycle: str = '2017-2018') -> pd.DataFrame:
+    def create_merged_dataset(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Merge DEMO, BMX, BPX slices on participant_id."""
         print(f"Creating merged dataset for {cycle}...")
         demo_df = self.get_demographics_data(cycle)
@@ -598,9 +582,9 @@ class NHANESExplorer(PopHealthObservatory):
         bp_df = self.get_blood_pressure(cycle)
         merged = demo_df.copy()
         if not body_df.empty:
-            merged = merged.merge(body_df, on='participant_id', how='left')
+            merged = merged.merge(body_df, on="participant_id", how="left")
         if not bp_df.empty:
-            merged = merged.merge(bp_df, on='participant_id', how='left')
+            merged = merged.merge(bp_df, on="participant_id", how="left")
         print(f"Merged dataset created with {len(merged)} participants and {len(merged.columns)} variables")
         return merged
 
@@ -609,12 +593,8 @@ class NHANESExplorer(PopHealthObservatory):
         if metric not in df.columns or demographic not in df.columns:
             return pd.DataFrame()
         sub = df[[demographic, metric]].dropna()
-        stats = (
-            sub.groupby(demographic)[metric]
-            .agg(['count', 'mean', 'median', 'std', 'min', 'max'])
-            .round(2)
-        )
-        stats.columns = ['Count','Mean','Median','Std Dev','Min','Max']
+        stats = sub.groupby(demographic)[metric].agg(["count", "mean", "median", "std", "min", "max"]).round(2)
+        stats.columns = ["Count", "Mean", "Median", "Std Dev", "Min", "Max"]
         return stats
 
     def create_demographic_visualization(self, df: pd.DataFrame, metric: str, demographic: str):
@@ -630,13 +610,13 @@ class NHANESExplorer(PopHealthObservatory):
         fig, axes = plt.subplots(1, 2, figsize=(15, 6))
         sub = df[[demographic, metric]].dropna()
         sns.boxplot(data=sub, x=demographic, y=metric, ax=axes[0])
-        axes[0].set_title(f'{metric} by {demographic}')
-        axes[0].tick_params(axis='x', rotation=45)
+        axes[0].set_title(f"{metric} by {demographic}")
+        axes[0].tick_params(axis="x", rotation=45)
         means = sub.groupby(demographic)[metric].mean()
-        means.plot(kind='bar', ax=axes[1], color='skyblue')
-        axes[1].set_title(f'Mean {metric} by {demographic}')
-        axes[1].tick_params(axis='x', rotation=45)
-        axes[1].set_ylabel(f'Mean {metric}')
+        means.plot(kind="bar", ax=axes[1], color="skyblue")
+        axes[1].set_title(f"Mean {metric} by {demographic}")
+        axes[1].tick_params(axis="x", rotation=45)
+        axes[1].set_ylabel(f"Mean {metric}")
         plt.tight_layout()
         plt.show()
 
@@ -649,29 +629,29 @@ class NHANESExplorer(PopHealthObservatory):
             f"Total Variables: {len(df.columns)}",
             "",
         ]
-        if 'age_years' in df.columns:
-            age_stats = df['age_years'].describe()
+        if "age_years" in df.columns:
+            age_stats = df["age_years"].describe()
             report += [
                 "Age Distribution:",
                 f"  Mean age: {age_stats['mean']:.1f} years",
                 f"  Age range: {age_stats['min']:.0f} - {age_stats['max']:.0f} years",
                 "",
             ]
-        if 'gender_label' in df.columns:
-            gender_counts = df['gender_label'].value_counts()
+        if "gender_label" in df.columns:
+            gender_counts = df["gender_label"].value_counts()
             report.append("Gender Distribution:")
             for g, c in gender_counts.items():
                 pct = (c / len(df)) * 100
                 report.append(f"  {g}: {c:,} ({pct:.1f}%)")
             report.append("")
-        if 'race_ethnicity_label' in df.columns:
-            race_counts = df['race_ethnicity_label'].value_counts()
+        if "race_ethnicity_label" in df.columns:
+            race_counts = df["race_ethnicity_label"].value_counts()
             report.append("Race/Ethnicity Distribution:")
             for r, c in race_counts.items():
                 pct = (c / len(df)) * 100
                 report.append(f"  {r}: {c:,} ({pct:.1f}%)")
             report.append("")
-        metrics = ['bmi', 'avg_systolic', 'avg_diastolic', 'weight_kg', 'height_cm']
+        metrics = ["bmi", "avg_systolic", "avg_diastolic", "weight_kg", "height_cm"]
         avail = [m for m in metrics if m in df.columns]
         if avail:
             report.append("Health Metrics Summary:")

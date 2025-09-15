@@ -4,6 +4,7 @@ Extracts simple context snippets referencing known pesticide analytes from
 plain-text source documents (e.g., PDP summaries). Future work will extend
 to PDF/HTML parsing and semantic embedding.
 """
+
 from __future__ import annotations
 
 import json

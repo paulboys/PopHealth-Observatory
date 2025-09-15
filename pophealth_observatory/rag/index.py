@@ -38,6 +38,7 @@ def save_metadata(texts: list[str], meta: list[dict], root: Path) -> None:
 
 def load_metadata(root: Path) -> tuple[list[str], list[dict]]:
     import json as _json
+
     texts = _json.loads((root / "texts.json").read_text(encoding="utf-8"))
     meta_wrapped = _json.loads((root / "metadata.json").read_text(encoding="utf-8"))
     return texts, meta_wrapped.get("meta", [])

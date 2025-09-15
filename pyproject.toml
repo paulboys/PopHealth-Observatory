@@ -59,7 +59,7 @@ rag = [
 ]
 
 [tool.black]
-line-length = 100
+line-length = 120
 target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.ruff]

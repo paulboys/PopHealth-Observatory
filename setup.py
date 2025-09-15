@@ -9,10 +9,7 @@ from setuptools import find_packages, setup
 with open("README.md", encoding="utf-8") as fh:  # mode arg optional (ruff UP015)
     long_description = fh.read()
 
-DESCRIPTION = (
-    "Open-source population health & nutrition analytics toolkit "
-    "(current focus: NHANES)"
-)
+DESCRIPTION = "Open-source population health & nutrition analytics toolkit " "(current focus: NHANES)"
 
 setup(
     name="pophealth-observatory",

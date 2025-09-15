@@ -17,6 +17,7 @@ Planned (future iterations):
   - RAG-style context assembly for Q&A
 
 """
+
 from __future__ import annotations
 
 import csv
@@ -106,9 +107,7 @@ def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]
                     nhanes_lod=row.get("nhanes_lod") or None,
                     first_cycle_measured=row.get("first_cycle_measured") or None,
                     last_cycle_measured=row.get("last_cycle_measured") or None,
-                    current_measurement_flag=(
-                        row.get("current_measurement_flag", "").strip().lower() == "true"
-                    ),
+                    current_measurement_flag=(row.get("current_measurement_flag", "").strip().lower() == "true"),
                     notes=row.get("notes") or None,
                 )
             )
