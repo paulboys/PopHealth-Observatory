@@ -33,31 +33,18 @@ jobs:
           ruff check --fix . || true
           black . || true
 
-      - name: Create patch branch
-        id: branch
-        run: |
-          if git diff --quiet; then
-            echo "changes=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          BRANCH="autofix/lint-$(date +%Y%m%d%H%M%S)"
-          git checkout -b "$BRANCH"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -m 'chore: lint autofixes'
-          git push origin "$BRANCH"
-          echo "changes=true" >> $GITHUB_OUTPUT
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-
-      - name: Open / update PR
-        if: steps.branch.outputs.changes == 'true'
+      - name: Create or update PR
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore: lint autofixes'
-          branch: ${{ steps.branch.outputs.branch }}
+          branch: autofix/lint
           title: 'chore: lint autofixes'
-          body: 'Automated Ruff/Black fixes.'
+          body: |
+            Automated Ruff/Black fixes.
+            
+            This PR is automatically updated when new lint issues are detected.
           labels: 'automation,lint'
-          draft: false
+          delete-branch: true
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
