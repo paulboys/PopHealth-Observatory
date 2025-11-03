@@ -22,6 +22,7 @@ nav:
   - Getting Started: getting-started.md
   - Usage:
       - Quick Start: usage/quickstart.md
+      - Data Validation: usage/validation.md
       - Manifest: usage/manifest.md
   - Feature Status: features.md
   - API Reference: api.md

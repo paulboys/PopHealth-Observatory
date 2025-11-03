@@ -94,6 +94,10 @@ from pophealth_observatory import NHANESExplorer
 # Initialize the explorer (NHANES-focused implementation)
 explorer = NHANESExplorer()
 
+# Validate data quality before analysis (recommended)
+validation_report = explorer.validate('2017-2018', ['demographics', 'body_measures'])
+print(f"Data Validation: {validation_report['status']}")  # PASS/WARN/FAIL
+
 # Download and merge demographics, body measures, and blood pressure data
 data = explorer.create_merged_dataset('2017-2018')
 

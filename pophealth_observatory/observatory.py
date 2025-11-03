@@ -666,3 +666,44 @@ class NHANESExplorer(PopHealthObservatory):
                 ]
             report.append("")
         return "\n".join(report)
+
+    def validate(self, cycle: str, components: list[str]) -> dict:
+        """
+        Validate downloaded NHANES data against official CDC metadata.
+
+        Performs programmatic validation by comparing downloaded data against
+        official CDC documentation, including URL correctness and row counts.
+
+        Parameters
+        ----------
+        cycle : str
+            NHANES cycle to validate (e.g., '2017-2018')
+        components : list[str]
+            List of component names to validate (e.g., ['demographics', 'body_measures'])
+
+        Returns
+        -------
+        dict
+            Validation report with overall status and component-level details.
+            Structure: {
+                'cycle': str,
+                'status': str ('PASS'|'WARN'|'FAIL'),
+                'components': {
+                    component_name: {
+                        'status': str,
+                        'checks': {check_name: {status, details, expected, actual}}
+                    }
+                }
+            }
+
+        Examples
+        --------
+        >>> explorer = NHANESExplorer()
+        >>> report = explorer.validate('2017-2018', ['demographics', 'body_measures'])
+        >>> print(report['status'])  # 'PASS' or 'FAIL' or 'WARN'
+        >>> print(report['components']['demographics']['checks']['row_count']['status'])
+        """
+        from .validation import run_validation
+
+        validation_report = run_validation(self, cycle, components)
+        return validation_report.to_dict()
