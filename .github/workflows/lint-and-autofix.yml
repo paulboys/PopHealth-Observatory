@@ -16,8 +16,8 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Reusable setup (dev)
-        uses: ./.github/workflows/reusable-python-setup.yml
+      - name: Python setup (dev)
+        uses: ./.github/actions/python-setup
         with:
           python-version: '3.12'
           install-extras: 'dev'
@@ -32,8 +32,8 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Reusable setup (dev)
-        uses: ./.github/workflows/reusable-python-setup.yml
+      - name: Python setup (dev)
+        uses: ./.github/actions/python-setup
         with:
           python-version: '3.12'
           install-extras: 'dev'

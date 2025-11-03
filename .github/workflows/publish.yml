@@ -19,8 +19,8 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Reusable setup (docs)
-        uses: ./.github/workflows/reusable-python-setup.yml
+      - name: Python setup (docs)
+        uses: ./.github/actions/python-setup
         with:
           python-version: '3.11'
           install-extras: 'docs'
