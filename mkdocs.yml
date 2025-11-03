@@ -23,6 +23,7 @@ nav:
   - Usage:
       - Quick Start: usage/quickstart.md
       - Manifest: usage/manifest.md
+  - Feature Status: features.md
   - API Reference: api.md
 extra:
   social:
