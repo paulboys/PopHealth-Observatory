@@ -1,0 +1,100 @@
+name: Auto Version Bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pophealth_observatory/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'requirements.txt'
+
+jobs:
+  auto-version:
+    runs-on: ubuntu-latest
+    # Skip if commit message contains [skip-version] or version bump commit
+    if: ${{ !contains(github.event.head_commit.message, '[skip-version]') && !contains(github.event.head_commit.message, 'Bump version to') }}
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install bump2version
+        run: pip install bump2version
+      
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Determine version bump type
+        id: bump-type
+        run: |
+          # Check commit message for version bump indicators
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          if [[ "$COMMIT_MSG" =~ \[major\] ]] || [[ "$COMMIT_MSG" =~ BREAKING[[:space:]]CHANGE ]]; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+            echo "Detected MAJOR version bump"
+          elif [[ "$COMMIT_MSG" =~ \[minor\]|\[feature\] ]] || [[ "$COMMIT_MSG" =~ ^feat ]]; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+            echo "Detected MINOR version bump"
+          else
+            echo "bump=patch" >> $GITHUB_OUTPUT
+            echo "Detected PATCH version bump"
+          fi
+      
+      - name: Bump version in pyproject.toml
+        run: |
+          # Extract current version
+          CURRENT_VERSION=$(grep -oP 'version = "\K[^"]+' pyproject.toml)
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Calculate new version
+          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+          
+          if [[ "${{ steps.bump-type.outputs.bump }}" == "major" ]]; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif [[ "${{ steps.bump-type.outputs.bump }}" == "minor" ]]; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+          
+          NEW_VERSION="${major}.${minor}.${patch}"
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Update pyproject.toml
+          sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
+          
+          # Commit and push
+          git add pyproject.toml
+          git commit -m "Bump version to $NEW_VERSION [skip-ci]"
+          git push
+          
+          # Create version tag
+          git tag "v$NEW_VERSION"
+          git push origin "v$NEW_VERSION"
+        id: version-bump
+      
+      - name: Summary
+        run: |
+          echo "✅ Version bumped: ${{ steps.version-bump.outputs.new_version }}"
+          echo "📦 Tag created: v${{ steps.version-bump.outputs.new_version }}"
+          echo "🚀 PyPI publish will trigger automatically via publish.yml"

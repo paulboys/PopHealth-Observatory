@@ -25,6 +25,8 @@ nav:
       - Manifest: usage/manifest.md
   - Feature Status: features.md
   - API Reference: api.md
+  - Contributing:
+      - Versioning & Releases: versioning.md
 extra:
   social:
     - icon: fontawesome/brands/github

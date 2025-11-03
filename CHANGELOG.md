@@ -1,5 +1,19 @@
 ## Changelog
 
+### Version Bump Convention (Automated via CI/CD)
+- **MAJOR** (`x.0.0`): Breaking changes — commit message contains `[major]` or `BREAKING CHANGE`
+- **MINOR** (`0.x.0`): New features — commit message starts with `feat` or contains `[minor]` or `[feature]`
+- **PATCH** (`0.0.x`): Bug fixes, docs, refactoring — all other commits to main
+- Automatic version tagging triggers PyPI publish via existing `publish.yml` workflow
+
+### [0.2.1] - 2025-11-02
+Fixed
+- Constrained setuptools to `<70.0` in build requirements to avoid Metadata-Version 2.4 fields that PyPI doesn't support yet (PEP 639 compatibility issue)
+- Enabled successful PyPI package publishing for version 0.2.1
+
+Added
+- Automated version bumping workflow (`.github/workflows/auto-version.yml`) with semantic commit message parsing
+
 ### [0.2.0] - 2025-09-14
 Added
 - Experimental RAG scaffolding (`pophealth_observatory.rag`): config, dummy embedder, sentence-transformer embedder, cosine index, pipeline orchestration, test coverage.
