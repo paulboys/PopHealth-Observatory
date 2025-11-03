@@ -42,7 +42,7 @@ jobs:
           title: 'chore: lint autofixes'
           body: |
             Automated Ruff/Black fixes.
-            
+
             This PR is automatically updated when new lint issues are detected.
           labels: 'automation,lint'
           delete-branch: true

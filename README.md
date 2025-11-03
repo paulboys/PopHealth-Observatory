@@ -293,6 +293,12 @@ Contributions are welcome. Open issues for: feature requests, new NHANES compone
 
 ### Dev Workflow
 ```bash
+# Install pre-commit hooks (one-time setup)
+pre-commit install
+
+# Hooks run automatically on commit, or manually:
+pre-commit run --all-files
+
 # Lint
 ruff check .
 

@@ -65,22 +65,22 @@ Add these configurations:
     "r.alwaysUseActiveTerminal": true,
     "r.bracketedPaste": true,
     "r.plot.useHttpgd": true,
-    
+
     "python.defaultInterpreterPath": "python",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
-    
+
     "github.copilot.enable": {
         "*": true,
         "r": true,
         "python": true,
         "markdown": true
     },
-    
+
     "files.associations": {
         "*.qmd": "markdown"
     },
-    
+
     "editor.formatOnSave": false,
     "editor.tabSize": 2,
     "[python]": {
@@ -449,30 +449,30 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.4.0'
-      
+
       - name: Install R dependencies
         run: |
           Rscript -e "install.packages(c('languageserver', 'arrow', 'testthat', 'roxygen2'))"
           Rscript -e "BiocManager::install(c('BiocCheck', 'SummarizedExperiment'))"
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install Python dependencies
         run: |
           pip install -r python/requirements.txt
           pip install pytest mypy
-      
+
       - name: Verify BiocCheck
         run: Rscript -e "BiocCheck::BiocCheck('r/')"
-      
+
       - name: Run Python tests
         run: pytest python/tests/
 ```

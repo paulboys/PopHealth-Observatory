@@ -27,6 +27,7 @@ nav:
   - API Reference: api.md
   - Contributing:
       - Versioning & Releases: versioning.md
+      - Pre-commit Hooks: pre-commit.md
   - Project:
       - Roadmap: roadmap.md
       - Changelog: changelog.md

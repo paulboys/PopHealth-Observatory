@@ -281,4 +281,3 @@ Follow .github/copilot-instructions.md; add max_chars param to _format_prompt wi
 Paths via `Path` ✓  | Type hints ✓ | Dataclasses for records ✓ | JSONL outputs ✓ | Regex precompiled ✓ | Tests for pure functions ✓ | R layer future (S4 + Arrow) | Prompt references explicit ✓
 
 Keep this document updated as new components, R code, or data exchange artifacts are introduced.
-
