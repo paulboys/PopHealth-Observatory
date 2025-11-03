@@ -88,6 +88,7 @@ class RAGPipeline:
     embedder : BaseEmbedder
         Embedding provider instance.
     """
+
     def __init__(self, config: RAGConfig, embedder: BaseEmbedder):
         self.config = config
         self.embedder = embedder

@@ -71,6 +71,7 @@ class SentenceTransformerEmbedder(BaseEmbedder):
     RuntimeError
         If sentence-transformers is not installed.
     """
+
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         if SentenceTransformer is None:  # pragma: no cover
             raise RuntimeError(
