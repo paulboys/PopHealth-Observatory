@@ -494,7 +494,12 @@ class NHANESExplorer(PopHealthObservatory):
             "RIDRETH3": "race_ethnicity",
             "DMDEDUC2": "education",
             "INDFMPIR": "poverty_ratio",
-            "WTMEC2YR": "exam_weight",
+            # Survey sample weights (critical for proper statistical analysis)
+            "WTMEC2YR": "exam_weight",  # Examination sample weight (for exam/lab data)
+            "WTINT2YR": "interview_weight",  # Interview sample weight (for questionnaire data)
+            "WTDRD1": "dietary_day1_weight",  # Dietary recall day 1 weight
+            "SDMVPSU": "psu",  # Primary sampling unit (for variance estimation)
+            "SDMVSTRA": "strata",  # Strata (for variance estimation)
         }
         available = [c for c in demo_vars if c in demo_df.columns]
         demo_clean = demo_df[available].copy().rename(columns={k: v for k, v in demo_vars.items() if k in available})
@@ -666,6 +671,121 @@ class NHANESExplorer(PopHealthObservatory):
                 ]
             report.append("")
         return "\n".join(report)
+
+    def get_survey_weight(self, components: list[str]) -> str:
+        """
+        Determine the appropriate survey weight variable for given components.
+
+        NHANES uses different sample weights depending on which components are analyzed.
+        This method recommends the correct weight variable based on CDC guidelines.
+
+        Parameters
+        ----------
+        components : list[str]
+            List of component names being analyzed
+
+        Returns
+        -------
+        str
+            Recommended weight variable name (harmonized column name)
+
+        Examples
+        --------
+        >>> explorer = NHANESExplorer()
+        >>> weight = explorer.get_survey_weight(['demographics', 'body_measures'])
+        >>> print(weight)  # 'exam_weight'
+        >>> weight = explorer.get_survey_weight(['demographics'])
+        >>> print(weight)  # 'interview_weight'
+
+        Notes
+        -----
+        Weight selection hierarchy (per CDC guidelines):
+        - Dietary data → dietary_day1_weight (most restrictive)
+        - Laboratory/Examination data → exam_weight
+        - Interview/Questionnaire only → interview_weight
+        """
+        # Check for dietary components (most restrictive weight)
+        dietary_components = ["dietary"]
+        if any(comp in components for comp in dietary_components):
+            return "dietary_day1_weight"
+
+        # Check for examination/laboratory components
+        exam_components = ["body_measures", "blood_pressure", "laboratory"]
+        if any(comp in components for comp in exam_components):
+            return "exam_weight"
+
+        # Default to interview weight for questionnaire-only analyses
+        return "interview_weight"
+
+    def calculate_weighted_mean(
+        self, data: pd.DataFrame, variable: str, weight_var: str = None, min_weight: float = 0
+    ) -> dict:
+        """
+        Calculate weighted mean of a variable using survey weights.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Dataset containing variable and weights
+        variable : str
+            Name of the variable to calculate mean for
+        weight_var : str, optional
+            Name of weight variable. If None, will auto-detect from data columns.
+        min_weight : float, default=0
+            Minimum weight value to include (exclude zero weights)
+
+        Returns
+        -------
+        dict
+            Dictionary with keys:
+            - weighted_mean : float
+            - unweighted_mean : float
+            - n_obs : int (number of observations used)
+            - sum_weights : float (total weight, for reference)
+
+        Examples
+        --------
+        >>> explorer = NHANESExplorer()
+        >>> data = explorer.create_merged_dataset('2017-2018')
+        >>> result = explorer.calculate_weighted_mean(data, 'avg_systolic', 'exam_weight')
+        >>> print(f"Weighted mean: {result['weighted_mean']:.2f}")
+        """
+        import numpy as np
+
+        # Auto-detect weight variable if not provided
+        if weight_var is None:
+            weight_candidates = ["exam_weight", "interview_weight", "dietary_day1_weight"]
+            for candidate in weight_candidates:
+                if candidate in data.columns:
+                    weight_var = candidate
+                    print(f"Auto-detected weight variable: {weight_var}")
+                    break
+
+        if weight_var is None:
+            raise ValueError("No weight variable found in data. Include weights in demographics data.")
+
+        # Filter to valid observations
+        valid_data = data[
+            (data[variable].notna()) & (data[weight_var].notna()) & (data[weight_var] > min_weight)
+        ].copy()
+
+        if len(valid_data) == 0:
+            raise ValueError(f"No valid observations for variable '{variable}' with weight '{weight_var}'")
+
+        # Calculate weighted mean
+        weighted_mean = np.average(valid_data[variable], weights=valid_data[weight_var])
+
+        # Calculate unweighted mean for comparison
+        unweighted_mean = valid_data[variable].mean()
+
+        return {
+            "weighted_mean": weighted_mean,
+            "unweighted_mean": unweighted_mean,
+            "n_obs": len(valid_data),
+            "sum_weights": valid_data[weight_var].sum(),
+            "variable": variable,
+            "weight_var": weight_var,
+        }
 
     def validate(self, cycle: str, components: list[str]) -> dict:
         """
