@@ -27,6 +27,9 @@ nav:
   - API Reference: api.md
   - Contributing:
       - Versioning & Releases: versioning.md
+  - Project:
+      - Roadmap: roadmap.md
+      - Changelog: changelog.md
 extra:
   social:
     - icon: fontawesome/brands/github

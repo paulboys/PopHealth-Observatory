@@ -204,5 +204,5 @@ Comprehensive breakdown of implemented vs planned capabilities.
 **Last Updated:** 2025-11-02  
 **Version Coverage:** 0.2.0
 
-For implementation timelines, see [ROADMAP.md](../ROADMAP.md).  
-For change history, see [CHANGELOG.md](../CHANGELOG.md).
+For implementation timelines, see [ROADMAP.md](roadmap.md).  
+For change history, see [CHANGELOG.md](changelog.md).
