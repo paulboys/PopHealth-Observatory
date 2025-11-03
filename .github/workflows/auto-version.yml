@@ -80,8 +80,9 @@ jobs:
           echo "New version: $NEW_VERSION"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-          # Update pyproject.toml
-          sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
+          # Update pyproject.toml (escape periods in version for sed)
+          ESCAPED_VERSION=$(echo "$CURRENT_VERSION" | sed 's/\./\\./g')
+          sed -i "s/version = \"${ESCAPED_VERSION}\"/version = \"${NEW_VERSION}\"/" pyproject.toml
 
           # Commit and push
           git add pyproject.toml
