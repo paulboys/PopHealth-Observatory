@@ -32,11 +32,34 @@ class VectorIndex:
 
 
 def save_metadata(texts: list[str], meta: list[dict], root: Path) -> None:
+    """Persist raw texts and metadata JSON alongside embeddings.
+
+    Parameters
+    ----------
+    texts : list[str]
+        Original text content list.
+    meta : list[dict]
+        Corresponding metadata dictionaries.
+    root : Path
+        Directory root for persistence.
+    """
     (root / "metadata.json").write_text(json.dumps({"meta": meta}, ensure_ascii=False, indent=2), encoding="utf-8")
     (root / "texts.json").write_text(json.dumps(texts, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def load_metadata(root: Path) -> tuple[list[str], list[dict]]:
+    """Load previously saved texts and metadata.
+
+    Parameters
+    ----------
+    root : Path
+        Directory containing ``texts.json`` and ``metadata.json``.
+
+    Returns
+    -------
+    tuple[list[str], list[dict]]
+        Tuple of (texts, metadata list).
+    """
     import json as _json
 
     texts = _json.loads((root / "texts.json").read_text(encoding="utf-8"))

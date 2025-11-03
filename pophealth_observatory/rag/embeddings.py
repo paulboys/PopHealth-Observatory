@@ -14,11 +14,24 @@ except Exception:  # pragma: no cover
 class BaseEmbedder(ABC):
     @abstractmethod
     def encode(self, texts: list[str]) -> np.ndarray:  # shape: (n, d)
+        """Encode a list of texts into a 2D float32 numpy array.
+
+        Parameters
+        ----------
+        texts : list[str]
+            Raw input sentences/documents.
+
+        Returns
+        -------
+        numpy.ndarray
+            Matrix of shape (n, d) where d == ``self.dimension``.
+        """
         raise NotImplementedError
 
     @property
     @abstractmethod
     def dimension(self) -> int:
+        """Embedding dimensionality (vector length)."""
         raise NotImplementedError
 
 
@@ -46,6 +59,18 @@ class DummyEmbedder(BaseEmbedder):
 
 
 class SentenceTransformerEmbedder(BaseEmbedder):
+    """Wrapper around a SentenceTransformer model.
+
+    Parameters
+    ----------
+    model_name : str, default="sentence-transformers/all-MiniLM-L6-v2"
+        HuggingFace sentence-transformers model identifier.
+
+    Raises
+    ------
+    RuntimeError
+        If sentence-transformers is not installed.
+    """
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         if SentenceTransformer is None:  # pragma: no cover
             raise RuntimeError(

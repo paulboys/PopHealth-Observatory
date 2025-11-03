@@ -45,21 +45,69 @@ class Snippet:
 
 
 def ensure_dirs() -> None:
+    """Ensure raw and processed pesticide directory structure exists.
+
+    Creates the ``data/raw/pesticides`` and ``data/processed/pesticides``
+    directories if they are missing.
+
+    Returns
+    -------
+    None
+        This function performs filesystem side-effects only.
+    """
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def read_text(path: Path) -> str:
+    """Read a UTF-8 text file robustly.
+
+    Parameters
+    ----------
+    path : Path
+        Path to a plaintext source document.
+
+    Returns
+    -------
+    str
+        Raw file contents (decoding errors ignored).
+    """
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def segment_sentences(text: str) -> list[str]:
-    # Basic split; retains sentences without aggressive abbreviation logic.
+    """Segment raw text into simplistic sentence units.
+
+    Splits on punctuation followed by whitespace / newlines or paragraph
+    breaks. Does not handle abbreviations or honorific edge cases.
+
+    Parameters
+    ----------
+    text : str
+        Input raw textual content.
+
+    Returns
+    -------
+    list[str]
+        List of trimmed sentence strings (empty segments removed).
+    """
     raw = [s.strip() for s in SENTENCE_SPLIT_RE.split(text) if s.strip()]
     return raw
 
 
 def _index_analyte_patterns(analytes: list[PesticideAnalyte]) -> list[tuple[PesticideAnalyte, re.Pattern[str]]]:
+    """Compile regex patterns for analyte and parent pesticide tokens.
+
+    Parameters
+    ----------
+    analytes : list[PesticideAnalyte]
+        Loaded analyte metadata records.
+
+    Returns
+    -------
+    list[tuple[PesticideAnalyte, Pattern]]
+        Tuples of (analyte, compiled case-insensitive whole-word pattern).
+    """
     patterns: list[tuple[PesticideAnalyte, re.Pattern[str]]] = []
     for a in analytes:
         # Build pattern capturing analyte or parent pesticide (word-ish boundaries)
@@ -74,6 +122,25 @@ def _index_analyte_patterns(analytes: list[PesticideAnalyte]) -> list[tuple[Pest
 
 
 def generate_snippets(sentences: list[str], window: int = 1, source_id: str = "sample") -> Iterable[Snippet]:
+    """Yield snippet records for sentences mentioning analyte tokens.
+
+    For each sentence containing any analyte or parent pesticide token, a
+    window of surrounding sentences is captured forming a snippet.
+
+    Parameters
+    ----------
+    sentences : list[str]
+        Pre-segmented sentence list.
+    window : int, default=1
+        Number of sentences to include before and after the hit sentence.
+    source_id : str, default="sample"
+        Identifier used in output filename and snippet metadata.
+
+    Yields
+    ------
+    Snippet
+        Populated snippet dataclass instances.
+    """
     analytes = load_analyte_reference()
     patterns = _index_analyte_patterns(analytes)
     for idx, sent in enumerate(sentences):
@@ -93,6 +160,20 @@ def generate_snippets(sentences: list[str], window: int = 1, source_id: str = "s
 
 
 def write_snippets(snippets: Iterable[Snippet], dest: Path) -> int:
+    """Write snippet objects to a JSONL file.
+
+    Parameters
+    ----------
+    snippets : Iterable[Snippet]
+        Iterable of snippet records.
+    dest : Path
+        Destination path for JSONL output.
+
+    Returns
+    -------
+    int
+        Number of snippets written.
+    """
     count = 0
     with dest.open("w", encoding="utf-8") as fh:
         for snip in snippets:
@@ -102,6 +183,25 @@ def write_snippets(snippets: Iterable[Snippet], dest: Path) -> int:
 
 
 def ingest_text_file(path: Path, source_id: str = "sample", window: int = 1) -> Path:
+    """Ingest a single text file and persist matched analyte snippets.
+
+    High-level convenience orchestrating directory prep, reading, sentence
+    segmentation, snippet generation and JSONL serialization.
+
+    Parameters
+    ----------
+    path : Path
+        Source plaintext file path.
+    source_id : str, default="sample"
+        Identifier used in output filename prefix.
+    window : int, default=1
+        Sentence window size (see ``generate_snippets``).
+
+    Returns
+    -------
+    Path
+        Output JSONL file path containing emitted snippets.
+    """
     ensure_dirs()
     text = read_text(path)
     sentences = segment_sentences(text)

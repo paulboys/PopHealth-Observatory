@@ -22,4 +22,5 @@ class RAGConfig:
     cache: bool = True
 
     def ensure_dirs(self) -> None:
+        """Create embeddings directory if missing."""
         self.embeddings_path.mkdir(parents=True, exist_ok=True)

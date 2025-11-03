@@ -87,6 +87,23 @@ def _normalize(s: str) -> str:
 
 
 def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]:
+    """Load curated pesticide analyte reference CSV into dataclass list.
+
+    Parameters
+    ----------
+    path : Path, default=REFERENCE_CSV
+        Path to the reference CSV file.
+
+    Returns
+    -------
+    list[PesticideAnalyte]
+        Parsed analyte records.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the CSV file does not exist.
+    """
     if not path.exists():  # pragma: no cover
         raise FileNotFoundError(f"Reference CSV not found: {path}")
     records: list[PesticideAnalyte] = []
@@ -115,6 +132,25 @@ def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]
 
 
 def load_source_registry(path: Path = SOURCES_YAML) -> list[dict[str, Any]]:
+    """Load narrative source registry YAML describing external sources.
+
+    Parameters
+    ----------
+    path : Path, default=SOURCES_YAML
+        Path to the YAML registry.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        List of source descriptor dictionaries (may be empty if structure unexpected).
+
+    Raises
+    ------
+    FileNotFoundError
+        If the YAML file is missing.
+    RuntimeError
+        If PyYAML is not installed.
+    """
     if not path.exists():  # pragma: no cover
         raise FileNotFoundError(f"Sources YAML not found: {path}")
     if yaml is None:  # pragma: no cover
@@ -125,6 +161,20 @@ def load_source_registry(path: Path = SOURCES_YAML) -> list[dict[str, Any]]:
 
 
 def find_analyte(query: str, analytes: list[PesticideAnalyte]) -> PesticideAnalyte | None:
+    """Attempt exact analyte or CAS RN match (normalized) including parent pesticide.
+
+    Parameters
+    ----------
+    query : str
+        User input analyte string or CAS RN.
+    analytes : list[PesticideAnalyte]
+        Reference analyte collection.
+
+    Returns
+    -------
+    PesticideAnalyte | None
+        Matching analyte record or None if not found.
+    """
     qn = _normalize(query)
     # Direct cas or name match
     for a in analytes:
@@ -176,6 +226,18 @@ def get_pesticide_info(query: str) -> dict[str, Any]:
 
 
 def as_json(obj: dict[str, Any]) -> str:
+    """Serialize a dictionary to pretty JSON with UTF-8 preservation.
+
+    Parameters
+    ----------
+    obj : dict[str, Any]
+        Arbitrary dictionary.
+
+    Returns
+    -------
+    str
+        JSON string representation.
+    """
     return json.dumps(obj, indent=2, ensure_ascii=False)
 
 
