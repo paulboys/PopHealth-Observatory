@@ -2,6 +2,8 @@
 
 Open-source population health & nutrition analytics toolkit focused initially on NHANES.
 
+![Data Analysis Process Flowchart](assets/images/data_analysis_flowchart.png)
+
 ## Features
 - Resilient multi-pattern XPT downloads
 - Rich metadata manifest generation with filtering
