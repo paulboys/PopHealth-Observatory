@@ -79,12 +79,10 @@ Future additions may include:
    pip install -e .[dev]
    ```
 
-### (Future) From PyPI
-Once published:
+### From PyPI
 ```
 pip install pophealth-observatory
 ```
-Until then, use the source install above.
 
 ## Quick Start
 
@@ -215,9 +213,9 @@ Explore how health indicators vary by educational attainment.
 ## Data Components
 
 Implemented ingestion helpers (download + basic harmonization) currently cover:
-- Demographics (DEMO)
-- Body Measurements (BMX)
-- Blood Pressure (BPX)
+- Demographics (DEMO): Includes derived labels for gender/race and survey weight variables.
+- Body Measurements (BMX): Includes derived BMI categories.
+- Blood Pressure (BPX): Includes derived blood pressure stages and averages.
 
 Additional component codes are mapped internally (see `PopHealthObservatory.components`) but do **not** yet have dedicated loader convenience methods:
 - Cholesterol (TCHOL)
@@ -231,12 +229,13 @@ Planned expansion will add per-component loaders patterned after `get_body_measu
 
 ## Roadmap (Planned Enhancements)
 
-- Additional NHANES components (lab panels, dietary day 2, activity monitors)
-- Weighted analyses helper utilities (survey design integration)
-- Cross-cycle variable harmonization registry
-- BRFSS / other public health dataset adapters
-- Optional DuckDB / Parquet caching for large multi-cycle assemblies
-- CLI interface for scripted batch exports
+- **Programmatic & Analytical Validation**: Enhance the `validate()` method and expand the `reproducibility/` framework.
+- **Survey-Weighted Analysis**: Full support for complex survey design in statistical calculations.
+- **Additional NHANES Components**: Add loaders for lab panels (lipids, glucose), dietary day 2, and activity monitors.
+- **Cross-Cycle Harmonization**: Implement a registry for mapping variables across different survey cycles.
+- **Adapters for Other Surveys**: Extend the framework to support other public health datasets like BRFSS.
+- **Persistent Caching**: Use DuckDB or Parquet for efficient local caching of large datasets.
+- **CLI Interface**: Develop a command-line tool for scripted data exports and manifest generation.
 
 ## Retrieval-Augmented Generation (RAG) Scaffolding (Experimental)
 

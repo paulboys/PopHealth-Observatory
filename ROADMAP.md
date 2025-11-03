@@ -3,10 +3,13 @@
 ## Near-Term (Q4 2025)
 Status legend: (planned) not yet started; (in progress); (done)
 
-- Laboratory panel ingestion expansion (lipids, glucose tolerance, inflammatory markers) (planned)
-- Weighted analysis helper (survey design: strata, PSU, weights abstraction) (planned)
-- Parquet/DuckDB local cache backend (optional persistent layer) (planned)
-- CLI utility (`pophealth-observatory manifest` / `download` commands) (planned)
+- **Programmatic Data Validation**: Implement `validate()` method to check data integrity against CDC metadata.
+- **Analytical Validation Framework**: Establish a process and tools (`reproducibility/`) to validate against published research.
+- **Survey-Weighted Analysis Helpers**: Add helpers for `get_survey_weight()` and `calculate_weighted_mean()`.
+- **Pre-commit Hooks**: Integrate automated linting and formatting.
+- **Laboratory Panel Expansion**: Add dedicated loaders for lipids, glucose, and other common lab panels.
+- **Parquet/DuckDB Caching**: Introduce an optional, persistent local cache for large, multi-cycle datasets.
+- **CLI Utility**: Create a command-line interface for core functions like manifest generation and data downloads.
 - Manifest delta generation (compare schema_version outputs across dates) (planned)
 
 ## Mid-Term (Q1 2026)
