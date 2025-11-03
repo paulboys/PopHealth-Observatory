@@ -19,18 +19,14 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Reusable setup (docs)
+        uses: ./.github/workflows/reusable-python-setup.yml
         with:
           python-version: '3.11'
+          install-extras: 'docs'
 
       - name: Install build backend
-        run: |
-          python -m pip install --upgrade pip
-          pip install build twine
+        run: pip install build twine
 
       - name: Build distributions
         run: python -m build
@@ -50,8 +46,6 @@ jobs:
 
       - name: Generate site (MkDocs)
         run: |
-          python -m pip install --upgrade pip
-          pip install .[docs]
           mkdocs --version
           mkdocs build --strict
 

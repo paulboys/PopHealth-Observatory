@@ -9,6 +9,7 @@ on:
       - 'tests/**'
       - 'pyproject.toml'
       - 'requirements.txt'
+  # Manual trigger still possible via Tags; use [skip-version] in commit message to bypass
 
 jobs:
   auto-version:
