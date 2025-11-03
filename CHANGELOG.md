@@ -5,6 +5,7 @@ Added
 - Experimental RAG scaffolding (`pophealth_observatory.rag`): config, dummy embedder, sentence-transformer embedder, cosine index, pipeline orchestration, test coverage.
 - Optional dependency group `[rag]` with `sentence-transformers` and optional `faiss-cpu`.
 - README documentation for RAG usage and example code.
+ - Comprehensive NumPy-style docstrings added across ingestion, context, and RAG modules (documentation-only change).
 
 Changed
 - Improved pesticide analyte suggestion normalization (robust matching for names like `p,p'-DDE`).
@@ -12,6 +13,7 @@ Changed
 
 Notes
 - This is an experimental feature; API may evolve before a stable 1.x release.
+ - Retrieval prompt truncation behavior documented (max_chars parameter in `_format_prompt`).
 
 ### [0.1.4] - 2025-09-14
 Added

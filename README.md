@@ -206,18 +206,22 @@ Compare systolic and diastolic blood pressure measurements between males and fem
 ### Health Metrics by Education Level
 Explore how health indicators vary by educational attainment.
 
-## Data Components (Current Bundle)
+## Data Components
 
-The current implementation exposes the following NHANES components:
+Implemented ingestion helpers (download + basic harmonization) currently cover:
 - Demographics (DEMO)
 - Body Measurements (BMX)
 - Blood Pressure (BPX)
+
+Additional component codes are mapped internally (see `PopHealthObservatory.components`) but do **not** yet have dedicated loader convenience methods:
 - Cholesterol (TCHOL)
 - Diabetes (GLU)
 - Dietary Intake (DR1TOT)
 - Physical Activity (PAQ)
 - Smoking (SMQ)
 - Alcohol Use (ALQ)
+
+Planned expansion will add per-component loaders patterned after `get_body_measures()` with column selection, semantic renaming, and derived metrics where appropriate.
 
 ## Roadmap (Planned Enhancements)
 
