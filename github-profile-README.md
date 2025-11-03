@@ -1,6 +1,6 @@
 ## PopHealth Observatory (Profile Overview)
 
-![Data Analysis Process Flowchart](docs/assets/images/data_analysis_flowchart.png)
+![PopHealth Observatory Overview](docs/assets/images/PopHealth_Observatory.png)
 
 Population health & nutrition analytics toolkit (NHANES focus) providing:
 - Resilient multi-pattern NHANES XPT downloads

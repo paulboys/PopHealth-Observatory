@@ -11,7 +11,7 @@ PopHealth Observatory is an open-source toolkit for exploring population health 
 
 ## Overview
 
-![Data Analysis Process Flowchart](docs/assets/images/data_analysis_flowchart.png)
+![PopHealth Observatory Overview](docs/assets/images/PopHealth_Observatory.png)
 
 The project provides a Python-based framework for ingesting, harmonizing, and analyzing public health survey data (initially NHANES). NHANES (National Health and Nutrition Examination Survey) is a nationally representative program assessing the health and nutritional status of the U.S. population. PopHealth Observatory abstracts common data wrangling and analytic patterns so you can focus on questions, not boilerplate.
 

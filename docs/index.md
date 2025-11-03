@@ -2,7 +2,7 @@
 
 Open-source population health & nutrition analytics toolkit focused initially on NHANES.
 
-![Data Analysis Process Flowchart](assets/images/data_analysis_flowchart.png)
+![PopHealth Observatory Overview](assets/images/PopHealth_Observatory.png)
 
 ## Features
 - Resilient multi-pattern XPT downloads
