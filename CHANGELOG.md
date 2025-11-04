@@ -8,36 +8,29 @@
 
 ### [Unreleased]
 Added
-- **BRFSSExplorer module** (`pophealth_observatory/brfss.py`) for state-level health indicator access
-  - `get_obesity_data(year=None)` - adult obesity prevalence by state
-  - `get_indicator(class_name, question, year=None)` - generic indicator retrieval
-  - `list_available_indicators()` - discover available BRFSS metrics
-  - `summary(df)` - quick statistics for any indicator DataFrame
-  - In-memory caching to reduce redundant API calls
-  - Robust error handling (network failures, missing data, invalid years)
-- Comprehensive test suite for BRFSS functionality (`tests/test_brfss_explorer.py`)
-  - Happy path, caching behavior, error handling, get_indicator variations
-  - Mock-based testing avoiding live API dependency
+- (placeholder)
+
+### [0.5.0] - 2025-11-04
+Added
+- BRFSSExplorer module (`pophealth_observatory/brfss.py`) introducing first multi-dataset adapter (CDC BRFSS state-level indicators).
+  - `get_obesity_data(year=None)` convenience method.
+  - Generic `get_indicator(class_name, question, year=None)` for arbitrary BRFSS metrics.
+  - `list_available_indicators()` discovery helper.
+  - `summary(df)` quick statistics.
+  - In-memory caching minimizes repeat API calls; resilient error handling (network failures, invalid years).
+- Comprehensive test suite (`tests/test_brfss_explorer.py`) covering caching, indicator retrieval variants, error paths, normalization logic (mocked requests; no live dependency).
 
 Changed
-- Export `BRFSSExplorer` in package `__init__.py` for public API access
-- Updated `notebooks/nhanes_explorer_demo.ipynb` Section 10 to use `BRFSSExplorer` module instead of inline API code
-- Enhanced README.md Multi-Dataset Support section with BRFSS details and usage examples
+- Exported `BRFSSExplorer` via package `__init__.py` to public API.
+- Refactored `notebooks/nhanes_explorer_demo.ipynb` Section 10 to use new module instead of inline prototype code.
+- Expanded README Multi-Dataset Support section with BRFSS quick start examples.
 
 Documentation
-- Created `docs/usage/brfss.md` comprehensive BRFSS usage guide
-  - Rationale (NHANES privacy constraints, BRFSS geographic coverage)
-  - Quick start examples, generic indicator access, visualization patterns
-  - Data structure reference, caching behavior, error handling
-  - Common indicators catalog, NHANES/BRFSS combination strategies
-- Updated `docs/api.md` with full BRFSSExplorer API reference
-  - Method signatures, parameters, return types, examples
-  - Configuration options, data source attribution
+- New guide `docs/usage/brfss.md` (rationale, quick start, indicator catalog, visualization patterns, caching & error handling).
+- Extended `docs/api.md` with BRFSSExplorer method signatures and examples.
 
 Notes
-- First multi-dataset expansion beyond NHANES, enabling geographic health analysis
-- BRFSS complements NHANES: state-level prevalence vs national clinical measurements
-- Aligns with roadmap "Multi-dataset adapters" milestone (moved to "in progress")
+- Establishes geographic prevalence complement to NHANES clinical measures; aligns with roadmap "Multi-dataset adapters" milestone now in progress.
 
 ### [0.4.1] - 2025-11-03
 Docs
