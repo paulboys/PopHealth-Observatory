@@ -6,6 +6,23 @@
 - **PATCH** (`0.0.x`): Bug fixes, docs, refactoring — all other commits to main
 - Automatic version tagging triggers PyPI publish via existing `publish.yml` workflow
 
+### [0.4.1] - 2025-11-03
+Docs
+- Refactored `SETUP_GUIDE.md` into concise human-focused Python setup & usage guide (removed legacy Bioconductor / agent content, added validation + survey weight sections, troubleshooting, FAQ).
+- Updated `README.md` to surface programmatic vs analytical validation layers and experimental survey weight helpers.
+- Updated `docs/features.md` to: (a) remove duplicated legacy sections, (b) rephrase reticulate prohibition to planned Arrow-based R/Python interop, (c) align feature list with current capabilities.
+
+Added
+- Clear articulation of validation layers (programmatic integrity checks vs analytical reproducibility notebooks).
+- Survey weight helper documentation (auto weight selection + weighted mean) flagged as experimental.
+
+Changed
+- Harmonized terminology ("Programmatic Validation" / "Analytical Validation") across docs.
+- Navigation guidance now points users to `SETUP_GUIDE.md` for environment bootstrap.
+
+Notes
+- Version number already at 0.4.0 in `pyproject.toml`; this patch entry records documentation evolution preceding any subsequent functional changes.
+
 ### [0.2.1] - 2025-11-02
 Fixed
 - Constrained setuptools to `<70.0` in build requirements to avoid Metadata-Version 2.4 fields that PyPI doesn't support yet (PEP 639 compatibility issue)
