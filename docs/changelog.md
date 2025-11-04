@@ -23,6 +23,41 @@ Changed
 Notes
 - Version number already at 0.4.0 in `pyproject.toml`; this patch entry records documentation evolution preceding any subsequent functional changes.
 
+### [0.4.0] - 2025-11-02
+Added
+- Programmatic validation framework: `validate()` integrating with new `validation.py` (row count checks, URL/source availability, component-level statuses) plus dataclass-backed report representation.
+- Survey weight helpers: `get_survey_weight()` and `calculate_weighted_mean()` for early-stage weighted analysis.
+- Reproducibility scaffold: `reproducibility/` directory and initial notebook for analytical validation layer.
+- Composite GitHub Action for Python setup (dependency install consolidation across workflows).
+- Documentation: validation concept sections, weighting explanation, roadmap/status updates.
+
+Changed
+- Consolidated CI workflows (lint/autofix, test matrix, publish) reducing duplication and replacing experimental reusable workflow attempt with composite action.
+- Enhanced README and feature docs to distinguish ingestion/harmonization vs validation responsibilities.
+- Strengthened multi-URL download resilience (broader pattern list, clearer diagnostics).
+
+Fixed
+- Resolved auto-version workflow failure caused by `sed` incompatibility on Windows; replaced with pure Python edit approach.
+
+Notes
+- Marks maturation from ingestion-only (0.2.x) to integrity + credibility focus (validation layers).
+
+### [0.3.0] - 2025-10-15
+Added
+- Expanded pesticide snippet ingestion reliability (regex boundary refinements, analyte normalization improvements) preparing for RAG retrieval accuracy.
+- Initial analytical validation planning notes and doc placeholders (pre-implementation of full reproducibility notebook).
+- Streamlined manifest generation filters (year overlap + file type) aligned with forthcoming harmonization registry design.
+
+Changed
+- Refactored observatory internals for clearer separation of I/O vs transformation helpers (foundation for validation integration in 0.4.0).
+- Improved naming & docstring consistency (NumPy style adoption near complete across public API).
+
+Removed
+- Legacy or redundant exploratory notebook code paths superseded by formalized helpers (soft deprecation documented, not breaking API).
+
+Notes
+- Transitional release laying groundwork for validation & weighting; final pre-validation architectural cleanup.
+
 ### [0.2.1] - 2025-11-02
 Fixed
 - Constrained setuptools to `<70.0` in build requirements to avoid Metadata-Version 2.4 fields that PyPI doesn't support yet (PEP 639 compatibility issue)
