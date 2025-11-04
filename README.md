@@ -24,6 +24,7 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 - **Demographic Stratification**: Rapid group-wise descriptive statistics
 - **Cycle Comparison**: Simple cross-cycle trend scaffolding
 - **Visualization Suite**: Boxplots, distributions, stratified means, interactive widgets
+- **Multi-Dataset Support**: NHANES national-level + BRFSS state-level geographic analysis *(initial integration)*
 - **Extensible Architecture**: Plug in additional NHANES components or other survey sources
 - **Reproducible Reporting**: Programmatic summary report generation
 - **Rich Metadata Manifest**: Enumerate all component table rows with standardized schema & filtering

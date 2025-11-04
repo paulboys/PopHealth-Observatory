@@ -20,7 +20,10 @@ Status legend: (planned) not yet started; (in progress); (done)
 - Configurable retention policy for cached artifacts (size/time-based) (planned)
 
 ## Long-Term
-- Multi-dataset adapters (e.g., BRFSS, NHIS) under a unified acquisition API (planned)
+- **Multi-dataset adapters (e.g., BRFSS, NHIS) under a unified acquisition API** *(in progress)*
+  - **Initial BRFSS integration**: Demo notebook now includes real CDC BRFSS state-level obesity data
+  - Demonstrates geographic health analysis complementing NHANES national data
+  - Future: Formalize BRFSS loader class with consistent API
 - Interactive cohort builder (criteria -> derived dataset manifest) (planned)
 - Plugin interface for custom derivations (register metric calculators) (planned)
 - Cloud deployment recipe (serverless manifest builder + cache API) (planned)
