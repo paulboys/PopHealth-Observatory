@@ -136,6 +136,9 @@ The explorer can build a structured manifest of NHANES component listing tables 
 Fields per row:
 - `year_raw`, `year_normalized` (e.g. `2005_2006`)
 - `data_file_name`
+- **Programmatic Validation**: Automated integrity checks (row counts & source availability)
+- **Analytical Validation (in progress)**: Reproducibility notebooks confirm published statistics
+- **Survey Weight Helpers (experimental)**: Auto-recommend weight variable + weighted mean utility
 - `doc_file_url`, `doc_file_label`
 - `data_file_url`, `data_file_label`
 - `data_file_type` (XPT | ZIP | FTP | OTHER)
@@ -226,6 +229,15 @@ Additional component codes are mapped internally (see `PopHealthObservatory.comp
 - Alcohol Use (ALQ)
 
 Planned expansion will add per-component loaders patterned after `get_body_measures()` with column selection, semantic renaming, and derived metrics where appropriate.
+
+### Validation Layers
+
+1. Programmatic: `validate()` checks ingested datasets against CDC metadata (row counts & source availability).
+2. Analytical (expanding): notebooks in `reproducibility/` re-derive published aggregate statistics for credibility.
+
+### Future R Layer (Planned)
+
+An optional R analytics layer will consume parquet outputs via Apache Arrow for advanced survey design handling. It will not rely on `reticulate`; cross-language exchange will remain file-based.
 
 ## Roadmap (Planned Enhancements)
 
