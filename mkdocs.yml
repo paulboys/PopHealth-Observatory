@@ -21,6 +21,7 @@ nav:
   - Home: index.md
   - Setup Guide: setup-guide.md
   - Getting Started: getting-started.md
+  - License: license.md
   - Usage:
       - Quick Start: usage/quickstart.md
       - Data Validation: usage/validation.md

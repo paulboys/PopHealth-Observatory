@@ -165,7 +165,7 @@ See `ROADMAP.md` for: harmonization registry, time trend utilities, caching back
 ---
 ## 15. License
 
-MIT License (see `LICENSE`).
+MIT License – see the [LICENSE](https://github.com/paulboys/PopHealth-Observatory/blob/main/LICENSE) file on GitHub or the in-site copy on the [License page](license.md).
 
 ---
 *Last updated: 2025-11-03*
