@@ -82,3 +82,6 @@ Thumbs.db
 *.h5
 *.feather
 *.parquet
+
+# MkDocs build output
+site/
