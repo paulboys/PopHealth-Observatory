@@ -24,7 +24,10 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 - **Demographic Stratification**: Rapid group-wise descriptive statistics
 - **Cycle Comparison**: Simple cross-cycle trend scaffolding
 - **Visualization Suite**: Boxplots, distributions, stratified means, interactive widgets
-- **Multi-Dataset Support**: NHANES national-level + BRFSS state-level geographic analysis *(initial integration)*
+- **Multi-Dataset Support**:
+  - **NHANES**: National-level clinical measurements and demographics
+  - **BRFSS**: State-level health indicators via `BRFSSExplorer` class (obesity, physical activity, nutrition metrics)
+  - Geographic health analysis combining national trends with state-level prevalence
 - **Extensible Architecture**: Plug in additional NHANES components or other survey sources
 - **Reproducible Reporting**: Programmatic summary report generation
 - **Rich Metadata Manifest**: Enumerate all component table rows with standardized schema & filtering
@@ -112,6 +115,31 @@ print(bmi_by_race)
 
 # Create visualization
 explorer.create_demographic_visualization(data, 'bmi', 'race_ethnicity_label')
+```
+
+### BRFSS State-Level Data
+
+For geographic health analysis, use the `BRFSSExplorer` to access state-level indicators:
+
+```python
+from pophealth_observatory import BRFSSExplorer
+
+# Initialize BRFSS explorer
+brfss = BRFSSExplorer()
+
+# Get latest state-level obesity data
+obesity_data = brfss.get_obesity_data()
+print(brfss.summary(obesity_data))
+
+# Get other indicators
+physical_activity = brfss.get_indicator(
+    class_name='Physical Activity',
+    question='Percent of adults aged 18 years and older who engage in no leisure-time physical activity'
+)
+
+# Discover available indicators
+indicators = brfss.list_available_indicators()
+print(indicators.head(10))
 ```
 
 ## Interactive App (Streamlit)

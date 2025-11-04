@@ -6,6 +6,39 @@
 - **PATCH** (`0.0.x`): Bug fixes, docs, refactoring — all other commits to main
 - Automatic version tagging triggers PyPI publish via existing `publish.yml` workflow
 
+### [Unreleased]
+Added
+- **BRFSSExplorer module** (`pophealth_observatory/brfss.py`) for state-level health indicator access
+  - `get_obesity_data(year=None)` - adult obesity prevalence by state
+  - `get_indicator(class_name, question, year=None)` - generic indicator retrieval
+  - `list_available_indicators()` - discover available BRFSS metrics
+  - `summary(df)` - quick statistics for any indicator DataFrame
+  - In-memory caching to reduce redundant API calls
+  - Robust error handling (network failures, missing data, invalid years)
+- Comprehensive test suite for BRFSS functionality (`tests/test_brfss_explorer.py`)
+  - Happy path, caching behavior, error handling, get_indicator variations
+  - Mock-based testing avoiding live API dependency
+
+Changed
+- Export `BRFSSExplorer` in package `__init__.py` for public API access
+- Updated `notebooks/nhanes_explorer_demo.ipynb` Section 10 to use `BRFSSExplorer` module instead of inline API code
+- Enhanced README.md Multi-Dataset Support section with BRFSS details and usage examples
+
+Documentation
+- Created `docs/usage/brfss.md` comprehensive BRFSS usage guide
+  - Rationale (NHANES privacy constraints, BRFSS geographic coverage)
+  - Quick start examples, generic indicator access, visualization patterns
+  - Data structure reference, caching behavior, error handling
+  - Common indicators catalog, NHANES/BRFSS combination strategies
+- Updated `docs/api.md` with full BRFSSExplorer API reference
+  - Method signatures, parameters, return types, examples
+  - Configuration options, data source attribution
+
+Notes
+- First multi-dataset expansion beyond NHANES, enabling geographic health analysis
+- BRFSS complements NHANES: state-level prevalence vs national clinical measurements
+- Aligns with roadmap "Multi-dataset adapters" milestone (moved to "in progress")
+
 ### [0.4.1] - 2025-11-03
 Docs
 - Refactored `SETUP_GUIDE.md` into concise human-focused Python setup & usage guide (removed legacy Bioconductor / agent content, added validation + survey weight sections, troubleshooting, FAQ).
