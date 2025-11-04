@@ -121,20 +121,24 @@ class PopHealthObservatory:
 
         for url in url_patterns:
             try:
-                print(f"Trying {component} URL: {url}")
                 response = requests.get(url, timeout=30)
 
                 if response.status_code == 200:
-                    print(f"✓ Success loading {component} from: {url}")
+                    # Try to parse as XPT before claiming success
                     df = pd.read_sas(io.BytesIO(response.content), format="xport")
-                    self.data_cache[key] = df
-                    return df
+                    if not df.empty:
+                        print(f"✓ Success loading {component} from: {url}")
+                        self.data_cache[key] = df
+                        return df
+                    else:
+                        errors.append(f"Empty DataFrame from {url}")
                 else:
                     errors.append(f"Status {response.status_code} from {url}")
             except Exception as e:
                 errors.append(f"Error with {url}: {str(e)}")
 
-        print(f"Failed to download {component} for {cycle}. Errors: {errors}")
+        print(f"Failed to download {component} for {cycle}. Tried {len(url_patterns)} URLs.")
+        print(f"Sample errors: {errors[:3]}")  # Show first 3 errors to avoid spam
         return pd.DataFrame()
 
     # Reuse logic from legacy NHANESExplorer below for compatibility
@@ -473,19 +477,23 @@ class NHANESExplorer(PopHealthObservatory):
 
         for url in url_patterns:
             try:
-                print(f"Trying demographics URL: {url}")
                 response = requests.get(url, timeout=30)
                 if response.status_code == 200:
-                    print(f"✓ Success loading demographics from: {url}")
+                    # Try to parse as XPT before claiming success
                     demo_df = pd.read_sas(io.BytesIO(response.content), format="xport")
-                    break
+                    if not demo_df.empty:
+                        print(f"✓ Success loading demographics from: {url}")
+                        break
+                    else:
+                        errors.append(f"Empty DataFrame from {url}")
                 else:
                     errors.append(f"Status {response.status_code} from {url}")
             except Exception as e:
                 errors.append(f"Error with {url}: {str(e)}")
 
         if demo_df.empty:
-            print(f"Failed to download demographics for {cycle}. Errors: {errors}")
+            print(f"Failed to download demographics for {cycle}. Tried {len(url_patterns)} URLs.")
+            print(f"Sample errors: {errors[:3]}")
             return demo_df
         demo_vars = {
             "SEQN": "participant_id",
