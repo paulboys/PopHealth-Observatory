@@ -42,16 +42,17 @@ from pophealth_observatory.observatory import NHANESExplorer
 
 explorer = NHANESExplorer()
 
-# Download & merge selected components
-df = explorer.get_merged_dataset(cycle="2017-2018", components=["demographics", "body_measures", "blood_pressure"])
+# Download & merge demographics, body measures, and blood pressure
+# Note: create_merged_dataset() currently merges all three components by default
+df = explorer.create_merged_dataset(cycle="2017-2018")
 
 # Validate integrity against CDC metadata
-report = explorer.validate(["demographics", "body_measures", "blood_pressure"])
-print(report.summary())
+report = explorer.validate(cycle="2017-2018", components=["demographics", "body_measures", "blood_pressure"])
+print(f"Validation status: {report['status']}")
 
-# Weighted mean (experimental survey helper)
-mean_bmi = explorer.calculate_weighted_mean(df, value_col="body_mass_index", cycle="2017-2018")
-print("Weighted BMI mean:", mean_bmi)
+# Weighted mean (experimental survey helper - auto-detects survey weights)
+result = explorer.calculate_weighted_mean(df, variable="body_mass_index")
+print(f"Weighted BMI mean: {result['weighted_mean']:.2f}")
 ```
 
 ---
@@ -92,8 +93,10 @@ Edge cases handled: missing downloads → empty DataFrame; mismatch in participa
 Functions:
 ```python
 explorer.get_survey_weight(cycle: str, component: str) -> str
-explorer.calculate_weighted_mean(df, value_col: str, cycle: str) -> float
+explorer.calculate_weighted_mean(data: pd.DataFrame, variable: str, weight_var: str = None, min_weight: float = 0) -> dict
 ```
+
+The `calculate_weighted_mean` function auto-detects survey weights (exam_weight, interview_weight, or dietary_day1_weight) if not specified. Returns a dictionary with `weighted_mean`, `unweighted_mean`, `n_obs`, and `sum_weights`.
 
 Currently covers standard 2-year weights. Planned: variance estimation & multi-cycle normalized weighting.
 
@@ -175,4 +178,4 @@ MIT License – see the [LICENSE](https://github.com/paulboys/PopHealth-Observat
 
 ---
 
-Last sync (source mtime): 2025-11-04 01:46 UTC
+Last sync (source mtime): 2025-11-04 10:04 UTC
