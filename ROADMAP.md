@@ -39,3 +39,40 @@ Status legend: (planned) not yet started; (in progress); (done)
 
 ---
 Feedback and contributions welcome—open an issue or discussion to propose adjustments.
+
+## Planned Release: 0.5.0 (Robustness & Longitudinal Foundations)
+
+Target Window: Late Nov / Early Dec 2025
+
+Themes
+1. Coverage & Quality Gate
+	- Introduce coverage threshold (initial 75%) enforced in CI.
+	- Add tests for: failed multi-URL download fallback, participant ID merge uniqueness, validation WARN paths.
+2. Harmonization Registry Bootstrap
+	- Add `registry/variable_harmonization.json` tracking cross-cycle variable name drift (BMI, age, race/ethnicity, education, weight variables).
+	- Public helper: `get_harmonization_map(variable: str)`.
+3. New Component Loader
+	- Implement `get_cholesterol()` with LDL/HDL ratio derivation (if columns available) and tests.
+4. Survey Weight Enhancements
+	- Weighted group stats: `calculate_weighted_group_stats(df, value_col, group_col)`.
+	- Variance estimation scaffold (placeholder class or function with TODO markers).
+5. RAG Pipeline Backend Abstraction
+	- Introduce retrieval backend interface; optional FAISS path; maintain current API compatibility.
+6. Documentation Expansion
+	- Dedicated Validation Layers page consolidating README sections.
+	- Intro page for harmonization registry concept and usage.
+7. Performance & Caching (Stretch)
+	- Prototype parquet caching for merged multi-cycle dataset with toggle flag.
+
+Stretch / Risk Items
+- Hybrid lexical + vector retrieval (BM25 + embeddings) may slip to 0.6.0.
+- CLI manifest tool if registry work exceeds scope.
+
+Acceptance Criteria
+- Coverage gate active and passing.
+- One new loader + tests + docstring.
+- Harmonization registry file + accessor function.
+- Docs reflect registry, coverage gate, and weighted group stats.
+- RAG backend interface introduced without breaking existing usage.
+
+Milestone tracking via issues labeled `0.5.0`.

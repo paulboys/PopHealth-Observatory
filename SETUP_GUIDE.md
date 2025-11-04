@@ -170,6 +170,7 @@ MIT License (see `LICENSE`).
 ---
 *Last updated: 2025-11-03*
 
+<!-- INTERNAL_INSTRUCTIONS_EXCLUDED_FROM_DOCS -->
 
 ## 2. Install VS Code Extensions
 

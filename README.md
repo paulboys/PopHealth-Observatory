@@ -30,6 +30,9 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 
 ## Installation
 
+Full setup instructions (including development workflow & validation layers):
+`SETUP_GUIDE.md` (repository root) | Online: https://paulboys.github.io/PopHealth-Observatory/setup-guide/
+
 ## Repository Structure
 
 ```
