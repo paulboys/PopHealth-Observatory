@@ -57,45 +57,57 @@ jobs:
             echo "Detected PATCH version bump"
           fi
 
-      - name: Bump version in pyproject.toml
+      - name: Bump version
+        id: bump_version
         run: |
-          # Extract current version
-          CURRENT_VERSION=$(grep -oP 'version = "\K[^"]+' pyproject.toml)
-          echo "Current version: $CURRENT_VERSION"
+          python << 'EOF'
+          import re
+          import os
+
+          # Read current version
+          with open('pyproject.toml', 'r') as f:
+              content = f.read()
+
+          match = re.search(r'version = "([^"]+)"', content)
+          if not match:
+              print("Error: Could not find version in pyproject.toml")
+              exit(1)
+
+          current_version = match.group(1)
+          print(f"Current version: {current_version}")
 
           # Calculate new version
-          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+          major, minor, patch = map(int, current_version.split('.'))
+          bump_type = "${{ steps.bump-type.outputs.bump }}"
+          print(f"Bump type: {bump_type}")
 
-          if [[ "${{ steps.bump-type.outputs.bump }}" == "major" ]]; then
-            major=$((major + 1))
-            minor=0
-            patch=0
-          elif [[ "${{ steps.bump-type.outputs.bump }}" == "minor" ]]; then
-            minor=$((minor + 1))
-            patch=0
-          else
-            patch=$((patch + 1))
-          fi
+          if bump_type == "major":
+              major, minor, patch = major + 1, 0, 0
+          elif bump_type == "minor":
+              minor, patch = minor + 1, 0
+          else:
+              patch = patch + 1
 
-          NEW_VERSION="${major}.${minor}.${patch}"
-          echo "New version: $NEW_VERSION"
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          new_version = f"{major}.{minor}.{patch}"
+          print(f"New version: {new_version}")
 
-          # Update pyproject.toml using sed
-          sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
+          # Update file with proper escaping
+          new_content = re.sub(
+              r'version = "' + re.escape(current_version) + r'"',
+              f'version = "{new_version}"',
+              content
+          )
 
-          # Commit and push
-          git add pyproject.toml
-          git commit -m "Bump version to $NEW_VERSION [skip-ci]"
-          git push
+          with open('pyproject.toml', 'w') as f:
+              f.write(new_content)
 
-          # Create version tag
-          git tag "v$NEW_VERSION"
-          git push origin "v$NEW_VERSION"
-        id: version-bump
+          # Output for next steps
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'new_version={new_version}\n')
+          EOF
 
       - name: Summary
         run: |
-          echo "✅ Version bumped: ${{ steps.version-bump.outputs.new_version }}"
-          echo "📦 Tag created: v${{ steps.version-bump.outputs.new_version }}"
+          echo "✅ Version bumped: ${{ steps.bump_version.outputs.new_version }}"
+          echo "📦 Tag created: v${{ steps.bump_version.outputs.new_version }}"
           echo "🚀 PyPI publish will trigger automatically via publish.yml"
