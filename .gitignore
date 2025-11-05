@@ -82,6 +82,7 @@ Thumbs.db
 *.h5
 *.feather
 *.parquet
+!data/processed/brfss_indicators.parquet
 
 # MkDocs build output
 site/

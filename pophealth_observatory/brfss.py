@@ -25,12 +25,12 @@ class BRFSSConfig:
     timeout : int
         HTTP request timeout in seconds.
     default_limit : int
-        Default API result limit (5000 captures all current records).
+        Default API result limit (150000 to capture all ~106K records as of 2025).
     """
 
     base_url: str = "https://data.cdc.gov/resource/hn4x-zwk7.json"
     timeout: int = 30
-    default_limit: int = 5000
+    default_limit: int = 150000
 
 
 class BRFSSExplorer:
