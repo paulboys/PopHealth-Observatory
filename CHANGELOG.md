@@ -10,6 +10,32 @@
 Added
 - (placeholder)
 
+### [0.6.0] - 2025-11-05
+Added
+- Streamlit application UI redesign: tab-specific NHANES demographic filters (age, gender, race, weights) isolated per analytical context (cross-sectional, trends, bivariate).
+- Animated BRFSS choropleth time series (2011–2023) with in-memory playback and year slider/play controls.
+- Local BRFSS Parquet caching (`scripts/fetch_brfss_data.py`) eliminating repeated large remote pulls; single-year view now filters cached multi-year dataset.
+- Performance caching layers (raw, indicator-filtered, aggregated) for BRFSS data access; removal of per-year API loops for animation.
+- Logo integration with dark/transparent variant generation (Pillow) replacing prior microscope emoji branding.
+- `get_asset_path()` helper and automatic dark logo processor.
+
+Changed
+- Tagline clarified to emphasize exploratory analysis rather than finalized scientific visualization.
+- Geographic tab metrics hidden during animation to avoid misleading static summaries.
+- Single-year BRFSS selection now uses cached filtered DataFrame (no API call) for instant response.
+- Removed obsolete `load_brfss_indicator()` function (redundant after unified caching approach).
+- Added Pillow (`pillow>=10.0.0`) to core dependencies for runtime logo image transformation.
+
+Performance
+- Eliminated 13 sequential API calls in animated BRFSS time series; replaced with vectorized in-memory filtering.
+- Reduced latency for year switching (BRFSS) via indicator-level cached normalization.
+
+Documentation
+- Internal UI text updated (tagline) to align with intended business exploratory & assumption‑checking use cases.
+
+Notes
+- Non-breaking feature expansion; minor version bump per convention (`feat` scope, no API removal).
+
 ### [0.5.0] - 2025-11-04
 Added
 - BRFSSExplorer module (`pophealth_observatory/brfss.py`) introducing first multi-dataset adapter (CDC BRFSS state-level indicators).
