@@ -5,9 +5,9 @@
 ![License](https://img.shields.io/github/license/paulboys/PopHealth-Observatory.svg)
 ![Docs](https://img.shields.io/badge/docs-online-blue.svg)
 
-Actionable population health & nutrition analytics: acquisition → harmonization → stratified insights → visualization.
+Exploratory population health & nutrition analytics: acquisition → harmonization → stratified insights → geographic & temporal visualization.
 
-PopHealth Observatory is an open-source toolkit for exploring population health and nutrition metrics using publicly available survey microdata (current focus: NHANES). It streamlines secure data acquisition, cleaning, demographic stratification, trend analysis, and visualization—designed for reproducible epidemiologic and health disparities research.
+PopHealth Observatory is an open-source toolkit for exploring population health and nutrition metrics using publicly available survey microdata (NHANES) and state-level prevalence (BRFSS). It streamlines secure data acquisition, cleaning, demographic stratification, trend / cross‑cycle analysis, exploratory visualization, and geographic prevalence mapping—designed for assumption checking, rapid exploratory real‑world evidence generation, and reproducible epidemiologic or health disparities research.
 
 ## Overview
 
@@ -24,13 +24,17 @@ The project provides a Python-based framework for ingesting, harmonizing, and an
 - **Demographic Stratification**: Rapid group-wise descriptive statistics
 - **Cycle Comparison**: Simple cross-cycle trend scaffolding
 - **Visualization Suite**: Boxplots, distributions, stratified means, interactive widgets
+- **Tabbed Streamlit UI (0.6.0)**: Cross-sectional, Trend Analysis, Bivariate relationships, and Geographic (state‑level BRFSS) views with per‑tab demographic filters
 - **Multi-Dataset Support**:
   - **NHANES**: National-level clinical measurements and demographics
   - **BRFSS**: State-level health indicators via `BRFSSExplorer` class (obesity, physical activity, nutrition metrics)
   - Geographic health analysis combining national trends with state-level prevalence
+- **Animated Time Series (0.6.0)**: Year‑over‑year choropleth playback (2011–2023) for BRFSS indicators
+- **Local BRFSS Parquet Caching (0.6.0)**: One-time multi‑year download script with in‑memory indicator/year filtering (no repeated API calls)
 - **Extensible Architecture**: Plug in additional NHANES components or other survey sources
 - **Reproducible Reporting**: Programmatic summary report generation
 - **Rich Metadata Manifest**: Enumerate all component table rows with standardized schema & filtering
+- **Logo Theming (0.6.0)**: Light + dark transparent logo variant generated automatically (Pillow)
 
 ## Installation
 
@@ -146,19 +150,41 @@ print(indicators.head(10))
 
 An interactive exploration UI is provided via `streamlit_app.py`.
 
-Run locally:
+Run locally (from project root):
 ```bash
-streamlit run streamlit_app.py
+streamlit run apps/streamlit_app.py
 ```
 
-Features:
-- Select NHANES cycle
-- Choose metric & demographic for aggregation (mean / median / count)
-- View summary table & bar chart
-- Inspect laboratory & questionnaire manifest sample (schema-aligned)
-- Optional raw data preview (first 500 rows)
+App Tabs (0.6.0):
+- **Cross-Sectional**: Cycle selection, demographic filters (age, gender, race), metric distribution (box/violin), summary stats
+- **Trend Analysis**: Multi-cycle comparison with confidence bands and optional survey weights
+- **Bivariate Analysis**: Scatter with OLS trendline, Pearson correlation
+- **Geographic (BRFSS)**: Single-year or animated multi-year choropleth; local cached data filtering; state ranking table
 
-Requirements: `streamlit` (installed via `requirements.txt`).
+Performance Improvements (0.6.0):
+- Indicator-level cached normalization for BRFSS (fast year switching)
+- Removal of repeated per-year API calls in animated view
+- Metrics hidden during animation to avoid static misinterpretation
+
+Optional Local BRFSS Cache (recommended for speed):
+```bash
+python scripts/fetch_brfss_data.py  # generates data/processed/brfss_indicators.parquet
+```
+After creation, the app reads the Parquet file first; API fallback occurs only if missing.
+
+Requirements: `streamlit`, `plotly`, `pillow` (auto logo processing), and core package dependencies.
+
+Tagline updated to emphasize *exploratory analysis* rather than definitive scientific visualization.
+
+> If you encounter slow initial BRFSS loads, ensure the Parquet cache is generated and verify network throughput.
+
+### New Dependency (0.6.0)
+`pillow` added for runtime logo dark/transparent variant generation.
+
+### Plan for 0.7.0 (Preview)
+- Expanded survey weight robustness (design effects)
+- Additional NHANES component loaders
+- Optional DuckDB persistent cache layer
 
 
 ## Metadata Manifest (NHANES Component Tables)
@@ -373,7 +399,107 @@ PopHealth Observatory is an independent open-source project and is not affiliate
 
 ---
 
-Tagline: Population health analytics from acquisition to insight.
+Tagline: Exploratory population health analytics from acquisition to insight.
+
+## Try the App ▶️
+
+Quick launch (after editable install):
+```bash
+streamlit run apps/streamlit_app.py
+```
+
+Recommended (faster BRFSS geographic tab):
+```bash
+python scripts/fetch_brfss_data.py  # one-time multi-year BRFSS snapshot -> data/processed/brfss_indicators.parquet
+streamlit run apps/streamlit_app.py
+```
+
+Environment sanity check:
+```bash
+python -c "import pophealth_observatory, streamlit, plotly, pillow; print(pophealth_observatory.__version__)"
+```
+
+If the geographic tab is slow on first load, generate the local Parquet cache and re-run. No additional configuration required; the app auto-detects the file.
+
+## FAQ ❓
+
+<details>
+<summary><strong>Why do some summary numbers differ from published NHANES reports?</strong></summary>
+Published reports often apply full complex survey design adjustments (strata, PSU, weighting). Current helpers apply exam weights only (simplified). For publication-grade estimates, incorporate full survey design or use specialized R survey packages once parquet export arrives.
+</details>
+
+<details>
+<summary><strong>Where are survey weights handled?</strong></summary>
+Experimental weight selection & weighted means are in the validation/weight helpers. In the Streamlit app you can toggle "Apply Survey Weights"; this uses exam weights for rough population-level approximations.
+</details>
+
+<details>
+<summary><strong>How can I speed up BRFSS indicator exploration?</strong></summary>
+Run the `scripts/fetch_brfss_data.py` script to create a local multi-year Parquet cache. The app then performs in-memory filtering per indicator/year (no repeated API calls) and animation playback becomes instant.
+</details>
+
+<details>
+<summary><strong>What does the 0.6.0 release change?</strong></summary>
+Tabbed UI, animated BRFSS choropleth (2011–2023), local Parquet caching, indicator-level performance layer, dark/transparent logo generation, clarified exploratory positioning.
+</details>
+
+<details>
+<summary><strong>How is versioning handled?</strong></summary>
+Semantic versioning with conventional commits. Minor bumps (`feat:`) add features without breaking APIs; patch entries cover fixes/docs. Tags trigger automated publish workflows.
+</details>
+
+<details>
+<summary><strong>Can I add a new NHANES component?</strong></summary>
+Yes. Follow existing loader patterns (see `observatory.py`), implement column mapping + derived metrics, add tests, update manifests if needed, and document in the README + CHANGELOG.
+</details>
+
+<details>
+<summary><strong>How do I contribute R layer functionality?</strong></summary>
+Parquet exchange will be the bridge. Avoid `reticulate`; design stand-alone R code in a future `r/` directory using Arrow (`arrow::read_parquet`). Share a proposal via issue first.
+</details>
+
+<details>
+<summary><strong>Are there plans for a CLI?</strong></summary>
+Yes—roadmap includes scripted manifest generation and batch exports (likely `pophealth-cli`).
+</details>
+
+<details>
+<summary><strong>Is the logo theming automatic?</strong></summary>
+On first app run Pillow generates a dark/transparent variant if possible; falls back gracefully if Pillow missing.
+</details>
+
+<details>
+<summary><strong>Is this production / regulatory grade?</strong></summary>
+No. It is an exploratory toolkit for assumption checking, hypothesis generation, and early analytic prototyping. For regulated / submission contexts perform validated workflows with full survey design and audit trails.
+</details>
+
+## What's New in 0.6.0
+Minor feature release focused on UI, performance, and multi-dataset exploration.
+
+Added:
+- Streamlit UI redesign with per-tab demographic filters and logo integration (dark variant auto-generated)
+- Animated BRFSS choropleth (2011–2023) and year slider
+- Local Parquet caching + indicator-level filtering (no repeated API calls)
+- `scripts/fetch_brfss_data.py` utility for full BRFSS snapshot
+- Pillow dependency for image processing
+
+Changed:
+- Tagline clarified to reflect exploratory / assumption-checking usage
+- Single-year BRFSS view now subsets cached multi-year data
+- Metrics hidden during animation mode to prevent misleading static stats
+
+Removed:
+- Obsolete per-year BRFSS indicator loader function (replaced by unified cached flow)
+
+Performance:
+- Eliminated sequential API loop for animated BRFSS time series
+- Faster indicator selection via cached normalized DataFrame
+
+Documentation:
+- Interactive App section expanded, emphasis on generating local cache
+
+SemVer & Tagging:
+- Version bumped to 0.6.0 (`feat` scope, non-breaking). Semantic versioning automated via commit message conventions and CI.
 
 Suggested GitHub Topics: `population-health`, `epidemiology`, `public-health`, `nutrition`, `analytics`, `data-science`, `health-disparities`, `python`, `nhanes`, `visualization`
 
