@@ -26,6 +26,7 @@ nav:
       - Quick Start: usage/quickstart.md
       - Data Validation: usage/validation.md
       - Manifest: usage/manifest.md
+  - Methodology & Limits: methodology.md
   - Feature Status: features.md
   - API Reference: api.md
   - Contributing:

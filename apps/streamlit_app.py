@@ -436,17 +436,21 @@ with st.sidebar:
 
     st.markdown(
         """
-    **PopHealth Observatory** is a scientific toolkit for exploring population health data.
+    **PopHealth Observatory** delivers exploratory RWE population health insights — directional signal scanning.
 
     📊 **Data Sources:**
-    - NHANES: National Health and Nutrition Examination Survey (CDC)
-    - BRFSS: Behavioral Risk Factor Surveillance System (CDC)
+    - NHANES (CDC): National-level clinical measurements
+    - BRFSS (CDC): State-level health indicators
 
-    🔬 **Features:**
-    - Cross-sectional & trend analysis
-    - Bivariate relationships
-    - Geographic visualizations
-    - Survey weights support
+    🧪 **Scope:**
+    - Directional patterns & early hypothesis generation
+    - Multi-cycle trends & geographic prevalence mapping
+    - Optional survey weight summaries
+
+    🚫 **Not:**
+    - Formal statistical inference
+    - Clinical decision support
+    - Regulatory submission-grade analysis
     """
     )
 
@@ -461,7 +465,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.caption("v0.5.0 | MIT License")
+    st.caption("v0.6.0 | MIT License")
 
 # Tabs for different analysis modes
 tab1, tab2, tab3, tab4 = st.tabs(
