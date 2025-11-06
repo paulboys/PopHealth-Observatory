@@ -2,58 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/api/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/changelog/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/features/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/getting-started/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/license/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
+    </url>
+    <url>
+         <loc>https://paulboys.github.io/PopHealth-Observatory/methodology/</loc>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/pre-commit/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/roadmap/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/setup-guide/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/versioning/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/usage/brfss/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/usage/manifest/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/usage/quickstart/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://paulboys.github.io/PopHealth-Observatory/usage/validation/</loc>
-         <lastmod>2025-11-05</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
 </urlset>
