@@ -2,6 +2,9 @@
 # Pinned versions for reproducible builds and fast install times
 # Dev/test dependencies are in pyproject.toml [project.optional-dependencies]
 
+# Install the package itself (from repo root)
+.
+
 streamlit==1.38.0
 pandas==2.2.2
 numpy==1.26.4
