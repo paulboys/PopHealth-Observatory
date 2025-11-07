@@ -670,7 +670,12 @@ with tab1:
 
 with tab2:
     st.header("Trend Analysis Across Survey Cycles")
-    st.caption("Visualize how health metrics change over time")
+    st.caption(
+        """
+        Visualize how population-level health metrics change over time by comparing different survey cycles.
+        This is a repeated cross-sectional analysis, not a longitudinal study of the same individuals.
+        """
+    )
 
     # Demographic filters (local to this tab)
     with st.expander("⚙️ Demographic Filters", expanded=False):
