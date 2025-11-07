@@ -477,7 +477,7 @@ with logo_col:
         st.write("[logo missing]")
 
 with title_col:
-    st.title("PopHealth Observatory Explorer")
+    st.title("PopHealth Observatory")
     st.caption("Exploratory analysis of U.S. population health data (NHANES & BRFSS)")
 
 st.markdown("---")
