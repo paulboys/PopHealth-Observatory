@@ -470,9 +470,9 @@ _dark_logo_path = ensure_dark_logo(_logo_path)
 logo_col, title_col = st.columns([1, 4])
 with logo_col:
     if _dark_logo_path.exists():
-        st.image(str(_dark_logo_path), use_container_width=True)
+        st.image(str(_dark_logo_path), use_column_width=True)
     elif _logo_path.exists():
-        st.image(str(_logo_path), use_container_width=True)
+        st.image(str(_logo_path), use_column_width=True)
     else:
         st.write("[logo missing]")
 
