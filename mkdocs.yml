@@ -35,6 +35,7 @@ nav:
   - Project:
       - Roadmap: roadmap.md
       - Changelog: changelog.md
+      - Release Notes: release-notes/0.6.0.md
 extra:
   social:
     - icon: fontawesome/brands/github
