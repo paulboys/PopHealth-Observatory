@@ -432,9 +432,9 @@ Tagline: Exploratory population health analytics from acquisition to insight.
 
 ## Try the App ▶️
 
-Quick launch (after editable install):
+Quick launch streamlit.io app:
 ```bash
-streamlit run apps/streamlit_app.py
+https://pophealth-observatory.streamlit.app/
 ```
 
 Recommended (faster BRFSS geographic tab):
