@@ -1,6 +1,6 @@
 """Interactive NHANES & BRFSS exploration app using Streamlit.
 
-Scientific visualization with tiered caching, survey weights, and trend analysis.
+Exploratory visualization with tiered caching, survey weights, and trend analysis.
 
 SPDX-License-Identifier: MIT
 """
@@ -67,7 +67,7 @@ try:  # Dynamic version from installed metadata (fallback to 'unknown')
 except Exception:  # pragma: no cover - very unlikely unless metadata missing
     __version__ = "unknown"
 
-st.set_page_config(page_title="PopHealth Observatory Explorer", layout="wide")
+st.set_page_config(page_title="PopHealth Observatory", layout="wide")
 
 if _IMPORT_MODE == "fallback":
     st.warning(
