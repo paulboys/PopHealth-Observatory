@@ -1064,8 +1064,8 @@ Python compatibility: 3.10–3.13 (tested), <code>requires-python</code> will be
 <li>Cross-sectional tab with demographic filtering (age range, gender, race/ethnicity).</li>
 <li>Multi-cycle trend tab with parallel loading and basic 95% CI approximation (mean ± 1.96 * SD / sqrt(n)).</li>
 <li>Bivariate scatter (optional OLS trendline) for simple associations.</li>
-<li>Geographic BRFSS choropleth (single-year and animated multi-year modes).</li>
-<li>Weighted summary option (exam weights) for descriptive adjustment.</li>
+<li>Geographic tab (BRFSS state-level choropleth, animated or single-year).</li>
+<li>Optional exam weight application in summaries (simplified weighted mean/variance; does not account for strata/PSU or complex survey design—see Experimental section).</li>
 <li>Robust import fallback for application environments where editable install fails (<code>sys.path</code> injection + warning).</li>
 <li>Dynamic package version display in the app sidebar (<code>v{__version__}</code>).</li>
 <li>Cached data layers separated by latency cost:</li>
