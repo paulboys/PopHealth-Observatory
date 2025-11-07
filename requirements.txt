@@ -3,7 +3,7 @@
 # Dev/test dependencies are in pyproject.toml [project.optional-dependencies]
 
 # Install the package itself (from repo root)
--e .
+.
 
 streamlit==1.38.0
 pandas==2.2.2

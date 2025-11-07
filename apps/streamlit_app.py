@@ -5,13 +5,16 @@ Scientific visualization with tiered caching, survey weights, and trend analysis
 SPDX-License-Identifier: MIT
 """
 
+import importlib.metadata as _md
+import os
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 try:
     from PIL import Image  # Pillow for logo processing
-except ImportError:
-    Image = None  # Graceful fallback if Pillow not installed yet
+except ImportError:  # pragma: no cover - optional dependency during build
+    Image = None
 
 import numpy as np
 import pandas as pd
@@ -19,9 +22,58 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from pophealth_observatory import BRFSSExplorer, NHANESExplorer
+
+def _ensure_package_import() -> tuple[object, object, str]:
+    """Robust import for internal package classes.
+
+    Attempts normal import of BRFSSExplorer & NHANESExplorer; if the package
+    isn't installed (e.g. requirements.txt failed to install "."), inject the
+    repository root onto ``sys.path`` and retry.
+
+    Returns
+    -------
+    tuple
+        (BRFSSExplorer, NHANESExplorer, mode) where mode is ``'installed'`` or
+        ``'fallback'`` indicating whether a path injection was needed.
+
+    Raises
+    ------
+    RuntimeError
+        If import still fails after path injection.
+    """
+    try:
+        from pophealth_observatory import BRFSSExplorer, NHANESExplorer  # type: ignore
+
+        return BRFSSExplorer, NHANESExplorer, "installed"
+    except ModuleNotFoundError:
+        repo_root = Path(__file__).resolve().parents[1]
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+        try:
+            from pophealth_observatory import BRFSSExplorer, NHANESExplorer  # type: ignore
+
+            return BRFSSExplorer, NHANESExplorer, "fallback"
+        except ModuleNotFoundError as e:
+            raise RuntimeError(
+                "Failed to import pophealth_observatory even after sys.path injection. "
+                f"Working dir={os.getcwd()} sys.path snapshot length={len(sys.path)}"
+            ) from e
+
+
+BRFSSExplorer, NHANESExplorer, _IMPORT_MODE = _ensure_package_import()
+
+try:  # Dynamic version from installed metadata (fallback to 'unknown')
+    __version__ = _md.version("pophealth-observatory")
+except Exception:  # pragma: no cover - very unlikely unless metadata missing
+    __version__ = "unknown"
 
 st.set_page_config(page_title="PopHealth Observatory Explorer", layout="wide")
+
+if _IMPORT_MODE == "fallback":
+    st.warning(
+        "⚠️ Package wasn't installed normally. Using fallback sys.path injection. "
+        "Ensure requirements.txt contains a single line '.' to install the project root."
+    )
 
 # ============================================================================
 # LAYER 1: Raw Data Cache (Expensive - 20-60s load)
@@ -465,7 +517,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.caption("v0.6.0 | MIT License")
+    st.caption(f"v{__version__} | MIT License")
 
 # Tabs for different analysis modes
 tab1, tab2, tab3, tab4 = st.tabs(
