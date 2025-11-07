@@ -15,6 +15,35 @@ PopHealth Observatory is an open-source toolkit for exploring population health 
 
 The project provides a Python-based framework for ingesting, harmonizing, and analyzing public health survey data (initially NHANES). NHANES (National Health and Nutrition Examination Survey) is a nationally representative program assessing the health and nutritional status of the U.S. population. PopHealth Observatory abstracts common data wrangling and analytic patterns so you can focus on questions, not boilerplate.
 
+## Core Capabilities
+
+Fundamental building blocks beyond the Streamlit UI—each designed for repeatable, auditable exploratory epidemiology workflows:
+
+| Domain | What It Does | Key Objects / Functions | Output Artifacts |
+|--------|--------------|-------------------------|------------------|
+| Resilient Acquisition | Attempts multiple URL patterns for NHANES SAS transport files, applies timeouts, returns empty DataFrame (not exception crash) on failure | `PopHealthObservatory._download_xpt`, `NHANESExplorer.get_<component>()` | In‑memory DataFrames |
+| Schema Harmonization | Column subset + semantic renaming, derived gender/race labels applied uniformly across cycles | `NHANESExplorer._standardize_columns`, `create_merged_dataset()` | Cycle‑merged DataFrames |
+| Derived Health Metrics | BMI, BMI category, averaged BP (systolic/diastolic), BP stage classification | `NHANESExplorer._derive_metrics` | Enriched analytic columns |
+| Component Metadata Manifesting | Parses component listing HTML tables, normalizes spans, attaches file URLs, sizes, publish dates, schema versioning | `NHANESExplorer.get_detailed_component_manifest()` | JSON / JSONL manifests under `manifests/` |
+| Validation Layer | Programmatic dataset integrity (row counts, source availability) + expanding reproducibility notebooks | `NHANESExplorer.validate()`; notebooks in `reproducibility/` | Structured validation dict + notebooks |
+| BRFSS Indicator Exploration | Local Parquet snapshot + indicator/year filtering; animated choropleth playback | `BRFSSExplorer` methods, `scripts/fetch_brfss_data.py` | Parquet cache + interactive plots |
+| Pesticide Text Snippet Extraction | Sentence segmentation, regex analyte matching, windowed snippet construction (context preserved) | `pesticide_ingestion.generate_snippets()` (Dataclass `Snippet`) | JSONL snippet files (`data/processed/pesticides/`) |
+| RAG Embedding & Retrieval (Experimental) | Deterministic or model-based embeddings; ranked snippet retrieval; prompt assembly decoupled from generation | `rag.pipeline.RAGPipeline`, `DummyEmbedder`, `SentenceTransformerEmbedder` | In‑memory embedding cache + retrieval results |
+| Extensible Loader Pattern | New NHANES components follow consistent mapping + derivation contract | `NHANESExplorer.get_body_measures()` (pattern exemplar) | Additional domain-specific DataFrames |
+| Caching Strategy | Lightweight in‑session caches (data files, component pages) to avoid redundant network calls | Internal dictionaries (`_component_page_cache`, `data_cache`) | Faster repeated interactive queries |
+| Planned Cross‑Language Exchange | Parquet format reserved for future R analytics layer (Arrow) | Future `r/` directory (design only) | Parquet snapshots (naming: `YYYY-MM-DD_<descriptor>.parquet`) |
+
+Design Principles:
+- Pure transformation helpers separated from I/O
+- Precomputed indices (regex patterns, embeddings) before iteration loops
+- Dataclasses (e.g. `Snippet`) for structured, schema-stable records
+- Explicit, narrow exception handling (fail gracefully with empty DataFrames)
+- Type hints and predictable return contracts (dict / list / DataFrame)
+- One-object-per-line JSONL for append-friendly text artifact generation
+- Separation of retrieval vs prompt formatting in RAG pipeline
+
+These capabilities permit a workflow where ingestion, harmonization, derived metric expansion, validation, and exploratory retrieval (text + tabular) occur through programmable, test‑covered interfaces—reducing manual wrangling time before hypothesis generation.
+
 ## Features
 
 - **Automated Acquisition**: Pull SAS transport (.XPT) files directly from CDC endpoints
