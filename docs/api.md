@@ -16,6 +16,80 @@ High-level convenience class for NHANES workflows.
 
 Refer to inline docstrings for full parameter details.
 
+## Pesticide Laboratory Module
+
+### `get_pesticide_metabolites(cycle, ref_path=None, timeout=30)`
+Load and harmonize NHANES pesticide laboratory analytes for a given cycle.
+
+**Parameters:**
+- `cycle` (str): NHANES cycle in format YYYY-YYYY (e.g., '2017-2018')
+- `ref_path` (Path, optional): Path to pesticide_reference.csv (defaults to data/reference/pesticide_reference.csv)
+- `timeout` (int): Download timeout in seconds (default: 30)
+
+**Returns:** DataFrame with schema:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| participant_id | int | NHANES SEQN identifier |
+| cycle | str | Survey cycle |
+| analyte_name | str | Normalized metabolite name (e.g., '3-PBA') |
+| parent_pesticide | str | Parent active ingredient or chemical class |
+| metabolite_class | str | Category (pyrethroid, OP, organochlorine, herbicide) |
+| matrix | str | Biological matrix ('urine' or 'serum') |
+| concentration_raw | float | Reported concentration (original units) |
+| unit | str | Measurement unit (e.g., 'µg/L', 'ng/g lipid') |
+| log_concentration | float | Natural log of concentration (NaN for ≤0) |
+| detected_flag | bool | True if concentration_raw > 0 |
+| source_file | str | Originating XPT filename |
+
+Returns empty DataFrame if cycle has no pesticide data or download fails.
+
+**Raises:**
+- `ValueError`: If cycle format invalid or not in known mapping
+
+**Example:**
+```python
+from pophealth_observatory import get_pesticide_metabolites
+
+pest_df = get_pesticide_metabolites('2017-2018')
+print(pest_df[['participant_id', 'analyte_name', 'concentration_raw']].head())
+```
+
+**Data Sources:**
+Attempts to download from multiple NHANES pesticide file series:
+- UPHOPM: Pyrethroids, Herbicides, & Organophosphorus Metabolites
+- OPD: Organophosphate Dialkyl Phosphate Metabolites
+- PP: Priority Pesticides - Current Use
+
+**Supported Cycles:** 1999-2000 through 2021-2022 (availability varies by analyte)
+
+**Schema Notes (0.7.0):**
+- `log_concentration` uses natural log; values <= 0 yield NaN to avoid math domain errors.
+- `detected_flag` is a simple > 0 heuristic; future versions may incorporate LOD/LOQ thresholds when published reference limits are integrated.
+- `parent_pesticide` enables grouping analytes by active ingredient lineage for aggregate exposure metrics.
+- Output remains wide-format per participant per analyte; long-format convenience helper planned.
+
+**Test Coverage (0.7.0):** Ingestion paths validated via unit tests for empty cycles, synthetic datasets, and edge-case metabolite naming (commas, hyphenation, mixed case).
+
+### `load_pesticide_reference(ref_path=None)`
+Load curated pesticide analyte reference metadata.
+
+**Parameters:**
+- `ref_path` (Path, optional): Path to reference CSV
+
+**Returns:** DataFrame with columns:
+- `analyte_name`, `parent_pesticide`, `metabolite_class`, `cas_rn`, `typical_matrix`, `unit`, `first_cycle_measured`, `last_cycle_measured`, etc.
+
+Returns empty DataFrame if file not found.
+
+**Example:**
+```python
+from pophealth_observatory import load_pesticide_reference
+
+ref_df = load_pesticide_reference()
+pyrethroids = ref_df[ref_df['metabolite_class'] == 'Pyrethroid']
+```
+
 ## BRFSSExplorer
 State-level health indicator access from CDC BRFSS dataset.
 

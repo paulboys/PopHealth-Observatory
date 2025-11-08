@@ -502,6 +502,24 @@ On first app run Pillow generates a dark/transparent variant if possible; falls 
 No. It is an exploratory toolkit for assumption checking, hypothesis generation, and early analytic prototyping. For regulated / submission contexts perform validated workflows with full survey design and audit trails.
 </details>
 
+## What's New in 0.7.0
+Minor feature release focused on laboratory pesticide ingestion and test coverage expansion.
+
+Added:
+- Laboratory pesticide ingestion module `get_pesticide_metabolites()` (UPHOPM, OPD, PP series) with harmonized schema (analyte, parent pesticide, metabolite class, matrix, units, log transform, detection flag).
+- Pesticide reference loader `load_pesticide_reference()` exposing CAS RN, matrix hints, cycle availability.
+- Expanded observatory test suite (coverage 30% → 81%) across HTML table parsing, manifest filtering, weighted mean calculations, merged dataset integrity.
+
+Changed:
+- Feature status & API docs updated to include pesticide laboratory domain.
+- README references updated to reflect new coverage level and ingestion capabilities.
+
+Quality:
+- Strengthened confidence in core manifest and data derivation paths via targeted tests.
+
+Notes:
+- Non-breaking additive release; prepares for cross-cycle pesticide analytics and RAG contextual enrichment.
+
 ## What's New in 0.6.0
 Minor feature release focused on UI, performance, and multi-dataset exploration.
 
