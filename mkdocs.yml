@@ -26,16 +26,20 @@ nav:
       - Quick Start: usage/quickstart.md
       - Data Validation: usage/validation.md
       - Manifest: usage/manifest.md
+      - BRFSS Explorer: usage/brfss.md
   - Methodology & Limits: methodology.md
   - Feature Status: features.md
   - API Reference: api.md
+  - Pesticide Biomonitoring Plan: pesticide_biomonitoring_plan.md
   - Contributing:
       - Versioning & Releases: versioning.md
       - Pre-commit Hooks: pre-commit.md
   - Project:
       - Roadmap: roadmap.md
       - Changelog: changelog.md
-      - Release Notes: release-notes/0.6.0.md
+      - Release Notes:
+          - v0.7.0: release-notes/0.7.0.md
+          - v0.6.0: release-notes/0.6.0.md
 extra:
   social:
     - icon: fontawesome/brands/github

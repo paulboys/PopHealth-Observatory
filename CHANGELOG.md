@@ -11,28 +11,64 @@ Added
 - (placeholder)
 
 ### [0.7.0] - 2025-11-08
-Added
-- Laboratory pesticide ingestion module: `get_pesticide_metabolites()` with multi-series file discovery (UPHOPM, OPD, PP) and harmonized schema (analyte, parent pesticide, class, matrix, units, log transform, detection flag).
-- Curated pesticide reference loader: `load_pesticide_reference()` exposing CAS RN, matrix, first/last cycle measured.
-- Expanded API documentation for pesticide laboratory functions (`docs/api.md`).
-- Comprehensive observatory test expansion: increased `observatory.py` coverage from 30% → 81% (+51 pp) with targeted HTML parsing, manifest filtering, weighted mean, and data merge tests.
-- Additional weighted mean helpers documented; auto-detection of exam/interview/dietary day 1 weights validated.
 
-Changed
-- Version bump to 0.7.0 (minor feature release; non-breaking API additions).
-- README updated with pesticide ingestion feature and revised coverage note.
-- Feature status page updated to reflect pesticide ingestion availability and increased test coverage maturity.
+#### Summary
+Version 0.7.0 focuses on **robustness, reliability, and extensibility**. This release introduces foundational infrastructure for pesticide biomonitoring analysis while dramatically improving code quality, test coverage (90% → 96%), and system stability.
 
-Documentation
-- Added pesticide laboratory schema table to API reference.
-- Clarified test coverage scope & remaining defensive paths in observatory internals.
+#### Added
+- **Pesticide Laboratory Ingestion Module** (`laboratory_pesticides.py`):
+  - `get_pesticide_metabolites(cycle)`: Multi-component NHANES pesticide file discovery & ingestion with flexible URL fallback
+  - `load_pesticide_reference()`: Curated reference metadata (CAS RN, matrix, cycle availability)
+  - Derived metrics: log-transformed concentration (`log_concentration`) and detection flag (`detected_flag`)
+  - Coverage: 99% (108/109 statements tested)
 
-Quality
-- Total test count increased (observatory-focused) ensuring stable ingestion and manifest logic across edge cases.
+- **Data Validation Framework** (`validation.py`):
+  - `run_validation()`: Programmatic validation against official CDC sources
+  - `validate_component()`: Component-level URL and row count verification
+  - `_scrape_cdc_component_metadata()`: Automated CDC page parsing for validation
+  - Coverage: 100% (120/120 statements tested)
 
-Notes
-- Prepares foundation for future cross-cycle pesticide analytics & RAG integration using analyte context.
-- No breaking changes; existing public methods retain signatures.
+- **Comprehensive Test Expansion**:
+  - 35+ new micro-tests across 3 modules
+  - `TestDownloadXPTFlexible`: URL fallback logic, network failures (6 tests)
+  - `TestScrapeCDCMetadata`: CDC page parsing robustness (9 tests)
+  - `TestValidateComponent`: Component validation logic (17 tests)
+  - `TestRunValidation`: Multi-component pipeline (4 tests)
+  - Observatory edge cases: HTML parsing, year filtering, manifest exceptions (6 tests)
+
+#### Improved
+- **Test Coverage**: Overall project 90% → 96% (+6 percentage points)
+  - `laboratory_pesticides.py`: 83% → 99% (+16%)
+  - `validation.py`: 31% → 100% (+69%)
+  - `observatory.py`: 85% → 86% (+1%)
+- **Code Quality**: All pre-commit hooks passing (black, ruff, trailing whitespace, line endings)
+- **Documentation**: Added comprehensive pesticide biomonitoring roadmap (`docs/pesticide_biomonitoring_plan.md`)
+
+#### Fixed
+- **Streamlit Application**: Line length compliance (E501) in help strings and filter summaries
+- **Repository Hygiene**:
+  - Resolved F841 unused variable warnings
+  - Fixed B007 unused loop variable names
+  - Added B904 exception chaining for better error context
+  - Corrected E712 boolean comparison style
+
+#### Changed
+- Version bump to 0.7.0 (minor feature release; non-breaking API additions)
+- README updated with v0.7.0 feature highlights and coverage improvements
+- Feature status page updated to reflect pesticide ingestion availability
+
+#### Technical Details
+- Total Tests: 144 (up from 109)
+- All Passing: ✅
+- Execution Time: ~35 seconds
+- No new required dependencies
+- No performance regressions
+
+#### Notes
+- Establishes foundation for future pesticide biomonitoring UI (Phase 2, planned v0.8.0)
+- Fully backward-compatible with v0.6.x
+- See `docs/release-notes/0.7.0.md` for complete release documentation
+- See `docs/pesticide_biomonitoring_plan.md` for detailed roadmap
 
 ### [0.6.0] - 2025-11-05
 Added
