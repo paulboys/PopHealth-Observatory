@@ -16,6 +16,7 @@ Comprehensive breakdown of implemented vs planned capabilities.
 - **Body Measures (BMX)**: Weight, height, BMI with categorical bins (Underweight/Normal/Overweight/Obese)
 - **Blood Pressure (BPX)**: Multi-reading averages + hypertension staging (Normal/Elevated/Stage 1/Stage 2)
 - **Merged Datasets**: Participant-level merge across DEMO, BMX, BPX via `participant_id`
+- **Pesticide Laboratory (UPHOPM / OPD / PP)**: Multi-series file discovery, analyte harmonization (parent pesticide, metabolite class, matrix, unit), derived `log_concentration` + `detected_flag`.
 
 ### Metadata & Manifesting
 - **Component Table Parsing**: Extract file listings (XPT/ZIP/FTP) from Demographics, Examination, Laboratory, Dietary, Questionnaire pages
@@ -34,7 +35,7 @@ Comprehensive breakdown of implemented vs planned capabilities.
 ### Testing & Quality
 - **Programmatic Validation**: `validate()` method to verify data integrity against official CDC metadata (URL correctness, row counts)
 - **Analytical Validation Framework**: Reproducibility notebooks to validate tool output against published research (`reproducibility/`)
-- **Pytest Suite**: 18 tests covering basic ingestion, context lookup, RAG retrieval, and validation module structure
+- **Pytest Suite**: Expanded tests (observatory coverage 30% → 81%) covering HTML parsing, manifest filtering, weighted means, merged dataset assembly, pesticide ingestion.
 - **NumPy-Style Docstrings**: Comprehensive Parameter/Returns/Raises documentation across all modules
 - **Lint/Format Config**: Ruff + Black with notebook exclusion, 120-char line length
 - **Pre-commit Hooks**: Automated code formatting and linting with Black, Ruff, and file hygiene checks
@@ -194,8 +195,8 @@ Comprehensive breakdown of implemented vs planned capabilities.
 
 ---
 
-**Last Updated:** 2025-11-03
-**Version Coverage:** 0.4.0
+**Last Updated:** 2025-11-08
+**Version Coverage:** 0.7.0
 
 For implementation timelines, see [ROADMAP.md](roadmap.md).
 For change history, see [CHANGELOG.md](changelog.md).

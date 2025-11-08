@@ -10,6 +10,30 @@
 Added
 - (placeholder)
 
+### [0.7.0] - 2025-11-08
+Added
+- Laboratory pesticide ingestion module: `get_pesticide_metabolites()` with multi-series file discovery (UPHOPM, OPD, PP) and harmonized schema (analyte, parent pesticide, class, matrix, units, log transform, detection flag).
+- Curated pesticide reference loader: `load_pesticide_reference()` exposing CAS RN, matrix, first/last cycle measured.
+- Expanded API documentation for pesticide laboratory functions (`docs/api.md`).
+- Comprehensive observatory test expansion: increased `observatory.py` coverage from 30% → 81% (+51 pp) with targeted HTML parsing, manifest filtering, weighted mean, and data merge tests.
+- Additional weighted mean helpers documented; auto-detection of exam/interview/dietary day 1 weights validated.
+
+Changed
+- Version bump to 0.7.0 (minor feature release; non-breaking API additions).
+- README updated with pesticide ingestion feature and revised coverage note.
+- Feature status page updated to reflect pesticide ingestion availability and increased test coverage maturity.
+
+Documentation
+- Added pesticide laboratory schema table to API reference.
+- Clarified test coverage scope & remaining defensive paths in observatory internals.
+
+Quality
+- Total test count increased (observatory-focused) ensuring stable ingestion and manifest logic across edge cases.
+
+Notes
+- Prepares foundation for future cross-cycle pesticide analytics & RAG integration using analyte context.
+- No breaking changes; existing public methods retain signatures.
+
 ### [0.6.0] - 2025-11-05
 Added
 - Streamlit application UI redesign: tab-specific NHANES demographic filters (age, gender, race, weights) isolated per analytical context (cross-sectional, trends, bivariate).
