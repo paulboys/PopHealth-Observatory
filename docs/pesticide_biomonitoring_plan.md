@@ -1,0 +1,215 @@
+# Pesticide Biomonitoring & External Exposure Context Expansion Plan
+
+Version: 0.1 (Draft)
+Generated: 2025-11-08
+Related Instructions: `.github/copilot-instructions.md`
+
+---
+## 1. Purpose
+Introduce a structured, testable ingestion + exploration layer for NHANES pesticide biomonitoring analytes and high-value external exposure context datasets (USGS agricultural use, PDP residue monitoring, TRI releases, etc.). Provide an integrated Streamlit tab enabling temporal trends, disparity views, and exploratory health linkage while preserving the project’s *exploratory, non-inferential* positioning.
+
+## 2. High-Level Objectives
+1. Internal ingestion of NHANES pesticide laboratory analytes (urine & serum) with harmonized schema.
+2. Streamlit “Pesticide Biomonitoring” tab: multi-analyte trends, distribution heatmap, demographic disparities, and preliminary health correlations.
+3. External context scaffolding for agricultural use and residue prevalence without premature geospatial microdata linkage claims.
+4. Reusable data contracts + registry for each external source with schema versioning.
+5. Transparent UI & docs disclaimers about simplified weighting, exploratory correlations, and absent complex survey design adjustments.
+
+## 3. Scope (In / Out)
+IN:
+- NHANES pesticide analyte ingestion (DAP metabolites, pyrethroids, glyphosate/AMPA, organochlorines).
+- Per-cycle concentration extraction + log transform + detection flag.
+- Basic summary metrics: geometric mean, median, percent detected, 95th percentile.
+- Demographic stratification: age range, gender, race/ethnicity, income (INDFMPIR quartiles).
+- External dataset ingestion (USGS use; PDP residues) with stable schemas.
+- Minimal exploratory correlation panels (e.g., analyte vs BMI / systolic BP).
+- Test coverage for ingestion helpers & external source normalization.
+
+OUT (Future Phases):
+- Full survey design variance estimation (strata/PSU).
+- Restricted-use geographic linkage (county/ZIP) – requires separate data access.
+- Causal inference / regression modeling.
+- Mixture exposure modeling (weighted quantile sum, Bayesian kernels).
+- Occupation-level risk dashboards until occupational code mapping stabilized.
+
+## 4. Phased Milestones
+| Phase | Milestone | Deliverables | Success Criteria |
+|-------|-----------|--------------|------------------|
+| 1 | Internal analyte ingestion | `laboratory_pesticides.py`, schema docs | Load ≥8 key analytes across ≥5 cycles; no ingestion crashes |
+| 2 | Biomonitoring tab (core) | New Streamlit tab with trends, heatmap, disparity chart | Tab loads <3s cached; user can select ≥4 analytes & cycles |
+| 3 | External source scaffolding | `external/usgs_use.py`, `external/pdp_residues.py`, registry | USGS + PDP functions return non-empty normalized DataFrames |
+| 4 | Context integration | Tab section: agricultural use overlay + commodity residue table | Overlay chart renders; detection table downloadable |
+| 5 | Exploratory health linkage | BMI/BP correlation panel + disclaimers | Correlation updates on filter; clearly marked exploratory |
+| 6 | Mixture / co-exposure matrix | Analyte correlation heatmap + network graph | Graph renders for ≥6 analytes; performance acceptable |
+
+## 5. Architecture Overview
+```
+pophealth_observatory/
+  laboratory_pesticides.py        # NHANES pesticide lab ingestion
+  external/
+    usgs_use.py                   # Agricultural use data
+    pdp_residues.py               # Commodity residue monitoring
+    tri_releases.py               # (Stub) facility release context
+    state_sales.py                # (Stub) CA DPR sales scaffolding
+    bls_incidents.py              # (Stub) occupational incidents
+    registry.py                   # Source registry & schema metadata
+    exposure_context.py           # Composite context builder
+apps/
+  streamlit_app.py                # New 'Pesticide Biomonitoring' tab
+tests/
+  test_laboratory_pesticides.py
+  test_external_usgs.py
+  test_external_pdp.py
+  test_exposure_context.py
+```
+
+## 6. Internal Data Model (Pesticide Lab Schema)
+| Field | Type | Description |
+|-------|------|-------------|
+| participant_id | int | NHANES SEQN identifier |
+| cycle | str | Survey cycle (e.g. `2017-2018`) |
+| analyte_name | str | Normalized metabolite name (e.g. `3-PBA`) |
+| parent_pesticide | str | Parent active ingredient or chemical class |
+| metabolite_class | str | Category (pyrethroid, OP, organochlorine, herbicide) |
+| matrix | str | `urine` or `serum` |
+| concentration_raw | float | Reported concentration (original units) |
+| unit | str | Measurement unit (e.g. `µg/L`, `ng/g lipid`) |
+| log_concentration | float | ln(concentration_raw) for positive values |
+| detected_flag | bool | concentration_raw > 0 or > LOD (if available) |
+| lod | float | Limit of detection (if parseable) |
+| source_file | str | Originating XPT filename |
+
+## 7. External Data Contracts
+### USGS Use
+```
+{ year:int, state_fips:str, state_name:str, pesticide_active_ingredient:str, lbs_ai:float }
+```
+### PDP Residues
+```
+{ year:int, commodity:str, analyte:str, detect_freq_pct:float, mean_detect_level:float|None, max_detect_level:float|None }
+```
+### TRI Releases (Future)
+```
+{ year:int, cas_rn:str, state:str, release_lbs:float }
+```
+### Sales (CA DPR - Future)
+```
+{ year:int, county:str, ai_name:str, lbs_sold:float }
+```
+
+## 8. Functions & Contracts (Initial)
+```python
+# laboratory_pesticides.py
+def get_pesticide_metabolites(cycle: str) -> pd.DataFrame:
+    """Return harmonized pesticide analyte DataFrame for a cycle.
+    Raises ValueError for malformed cycle; returns empty DataFrame if files missing."""
+
+# external/usgs_use.py
+def fetch_usgs_state_use(year: int) -> pd.DataFrame:
+    """Download or load cached agricultural pesticide use estimates (state-level)."""
+
+def normalize_usgs(df: pd.DataFrame) -> pd.DataFrame:
+    """Ensure canonical columns & types; drop rows with missing active ingredient or lbs."""
+
+# external/pdp_residues.py
+def fetch_pdp_summary(year: int) -> pd.DataFrame:
+    """Retrieve commodity-level residue frequency and concentrations."""
+
+# external/exposure_context.py
+def build_exposure_context(year_range: tuple[int,int], analytes: list[str]) -> dict[str, pd.DataFrame]:
+    """Aggregate external context slices keyed by source name."""
+```
+
+## 9. Streamlit Tab Responsibilities
+- Inputs: analyte list, cycle range, demographics, metric type, weights toggle.
+- Data pipeline: multi-cycle stack → filter → summarize → visualize.
+- Visual components:
+  - Line Trends: geometric mean or detection frequency over cycles.
+  - Heatmap: analytes × cycles (metric).
+  - Demographic Bars: exposure by race/income quartile.
+  - Correlation Panel (experimental): analyte concentration vs BMI / BP.
+  - Context Overlay: USGS use trend vs population biomonitoring trend.
+- Export: CSV (long format: cycle, analyte, mean, n, detected_flag_rate).
+
+## 10. Edge Cases & Handling
+| Scenario | Handling |
+|----------|----------|
+| Missing cycle file | Return empty DataFrame; log info message |
+| Zero or negative concentrations | Exclude from log transform; keep raw |
+| No analytes selected | Disable plots; show instruction message |
+| Single cycle selected for trends | Show warning (need ≥2 cycles) |
+| External source fetch timeout | Return empty DataFrame with schema; display caution banner |
+| Weight application without weight column | Graceful fallback to unweighted aggregation |
+
+## 11. Testing Strategy
+- Unit:
+  - Synthetic XPT fixture ingestion (column rename, log transform correct).
+  - External fetch mocked responses (schema check, normalization).
+- Integration:
+  - `build_exposure_context` returns dict with expected keys.
+  - Streamlit tab caching (simulate first vs second call).
+- Edge-case asserts: empty cycle, analyte not present in early cycles, zero-only concentration vector.
+
+## 12. Performance Considerations
+- Cache per-cycle pesticide ingestion (`@st.cache_data ttl=3600`).
+- Avoid full multi-year reprocessing: incremental stacking on selection changes.
+- Limit default analyte set (3–5) to keep initial render fast (<1.5s).
+- Defer correlation heatmap rendering until user toggles advanced section.
+
+## 13. Disclaimers (UI + Docs)
+- “Survey weights simplified (exam weights only); no strata/PSU variance estimation.”
+- “Correlations exploratory; no causal inference.”
+- “External agricultural and residue data are context indicators, not direct exposure determinants.”
+- “Detection frequency may shift due to analytical method changes; interpret longitudinal changes cautiously.”
+
+## 14. PR Breakdown & Labels
+| PR | Title | Label Suggestions | Summary |
+|----|-------|------------------|---------|
+| 1 | feat: ingest pesticide lab analytes | feat, labs | Add `get_pesticide_metabolites` + schema docs |
+| 2 | feat: pesticide biomonitoring tab | feat, ui | Add new Streamlit tab (trends + heatmap) |
+| 3 | feat: external USGS ingestion | feat, external-data | Add USGS module + registry entry |
+| 4 | feat: PDP residue ingestion | feat, external-data | Commodity residue loader + tests |
+| 5 | feat: exposure context builder | feat, orchestration | `build_exposure_context` aggregator |
+| 6 | feat: disparity & correlation views | feat, analysis | Add demographic bar + simple correlations |
+| 7 | feat: mixture correlation matrix | feat, analysis | Add analyte correlation heatmap + network |
+| 8 | chore: docs & disclaimers update | docs | README + release notes + tab disclaimers |
+
+## 15. Acceptance Criteria (Phase 1–2)
+- Running `get_pesticide_metabolites("2017-2018")` returns DataFrame with ≥5 analytes and required columns.
+- Biomonitoring tab displays multi-line trend for ≥3 analytes across ≥4 cycles.
+- Heatmap renders without error; missing analyte-cycle pairs show NA.
+- External USGS function returns non-empty DataFrame for a known recent year (mocked in CI).
+- All new tests pass; coverage for new modules ≥80%.
+
+## 16. Risks & Mitigations
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Inconsistent file naming across cycles | Missing ingestion | Build a small mapping table; fallback empty frame |
+| Detection limits unavailable in raw XPT | Incomplete detection frequency | Introduce placeholder flag; future enhancement to parse doc pages |
+| Large memory usage stacking many cycles | Slow UI | Limit default cycle selection; offer advanced multi-cycle toggle |
+| External API schema drift | Break ingestion | Add schema validation & version pin in registry |
+| Misinterpretation of exploratory correlations | Reputational risk | Prominent disclaimers + UI badge + docs alignment |
+
+## 17. Future Enhancements (Beyond Current Plan)
+- Creatinine adjustment helper for urinary analytes.
+- Automated analytic method change flag (LOD tracking per cycle).
+- Occupational linkage (when occupation code ingestion stabilized).
+- RAG integration: embedding pesticide trend narrative with snippet retrieval.
+- Export Parquet snapshots for R survey design analysis.
+
+## 18. Implementation Order Rationale
+Start with internal analyte ingestion (foundation). Progress to UI integration for immediate visible value. External data ingestion next to enrich context. Analytic overlays (disparities, correlations) deferred until baseline ingestion stable to avoid compounding debugging scopes.
+
+## 19. Open Questions
+- Should glyphosate/AMPA cycles with partial missing data be excluded or flagged? (Decision: flag rows with `partial_cycle=True`).
+- Do we harmonize lipid-adjusted vs. raw serum concentrations into a single field? (Decision: keep `unit` explicit; no conversion yet.)
+- Is creatinine normalization required for all urinary analytes up-front? (Decision: optional later; display raw only initially.)
+
+## 20. Next Immediate Steps (Actionable)
+1. Create `laboratory_pesticides.py` with stub `get_pesticide_metabolites` returning empty DataFrame.
+2. Add tests scaffolding (expect empty for unsupported cycle).
+3. Incrementally implement XPT pattern matching & column mapping using reference CSV.
+4. Draft Biomonitoring tab skeleton (no charts yet) → commit.
+
+---
+_This plan is a living document. Update `Version` & add a changelog section here when refinements occur._
