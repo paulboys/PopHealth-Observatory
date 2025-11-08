@@ -13,6 +13,10 @@
         <link rel="canonical" href="https://paulboys.github.io/PopHealth-Observatory/pesticide_biomonitoring_plan/">
       
       
+        <link rel="prev" href="../api/">
+      
+      
+        <link rel="next" href="../versioning/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -20,7 +24,7 @@
     
     
       
-        <title>Pesticide Biomonitoring & External Exposure Context Expansion Plan - PopHealth Observatory</title>
+        <title>Pesticide Biomonitoring Plan - PopHealth Observatory</title>
       
     
     
@@ -98,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Pesticide Biomonitoring &amp; External Exposure Context Expansion Plan
+              Pesticide Biomonitoring Plan
             
           </span>
         </div>
@@ -413,6 +417,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/brfss/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    BRFSS Explorer
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -490,6 +517,292 @@
       
   
   
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Pesticide Biomonitoring Plan
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pesticide Biomonitoring Plan
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-high-level-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. High-Level Objectives
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-scope-in-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Scope (In / Out)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-phased-milestones" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Phased Milestones
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Architecture Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-internal-data-model-pesticide-lab-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Internal Data Model (Pesticide Lab Schema)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-external-data-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. External Data Contracts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. External Data Contracts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usgs-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      USGS Use
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pdp-residues" class="md-nav__link">
+    <span class="md-ellipsis">
+      PDP Residues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tri-releases-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      TRI Releases (Future)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sales-ca-dpr-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sales (CA DPR - Future)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-functions-contracts-initial" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Functions &amp; Contracts (Initial)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-streamlit-tab-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Streamlit Tab Responsibilities
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-edge-cases-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. Edge Cases &amp; Handling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      11. Testing Strategy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      12. Performance Considerations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-disclaimers-ui-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      13. Disclaimers (UI + Docs)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-pr-breakdown-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      14. PR Breakdown &amp; Labels
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-acceptance-criteria-phase-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      15. Acceptance Criteria (Phase 1–2)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-risks-mitigations" class="md-nav__link">
+    <span class="md-ellipsis">
+      16. Risks &amp; Mitigations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-future-enhancements-beyond-current-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      17. Future Enhancements (Beyond Current Plan)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-implementation-order-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      18. Implementation Order Rationale
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      19. Open Questions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-next-immediate-steps-actionable" class="md-nav__link">
+    <span class="md-ellipsis">
+      20. Next Immediate Steps (Actionable)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
   
   
     
@@ -506,10 +819,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -522,8 +835,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Contributing
           </label>
@@ -602,10 +915,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
             
   
   
@@ -618,8 +931,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             Project
           </label>
@@ -677,9 +990,22 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../release-notes/0.6.0/" class="md-nav__link">
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_11_3" id="__nav_11_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -688,7 +1014,65 @@
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_11_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11_3">
+            <span class="md-nav__icon md-icon"></span>
+            Release Notes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/0.7.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    v0.7.0
+    
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/0.6.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    v0.6.0
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
