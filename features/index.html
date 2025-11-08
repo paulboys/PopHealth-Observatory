@@ -1192,6 +1192,7 @@
 <li><strong>Body Measures (BMX)</strong>: Weight, height, BMI with categorical bins (Underweight/Normal/Overweight/Obese)</li>
 <li><strong>Blood Pressure (BPX)</strong>: Multi-reading averages + hypertension staging (Normal/Elevated/Stage 1/Stage 2)</li>
 <li><strong>Merged Datasets</strong>: Participant-level merge across DEMO, BMX, BPX via <code>participant_id</code></li>
+<li><strong>Pesticide Laboratory (UPHOPM / OPD / PP)</strong>: Multi-series file discovery, analyte harmonization (parent pesticide, metabolite class, matrix, unit), derived <code>log_concentration</code> + <code>detected_flag</code>.</li>
 </ul>
 <h3 id="metadata-manifesting">Metadata &amp; Manifesting<a class="headerlink" href="#metadata-manifesting" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1213,7 +1214,7 @@
 <ul>
 <li><strong>Programmatic Validation</strong>: <code>validate()</code> method to verify data integrity against official CDC metadata (URL correctness, row counts)</li>
 <li><strong>Analytical Validation Framework</strong>: Reproducibility notebooks to validate tool output against published research (<code>reproducibility/</code>)</li>
-<li><strong>Pytest Suite</strong>: 18 tests covering basic ingestion, context lookup, RAG retrieval, and validation module structure</li>
+<li><strong>Pytest Suite</strong>: Expanded tests (observatory coverage 30% → 81%) covering HTML parsing, manifest filtering, weighted means, merged dataset assembly, pesticide ingestion.</li>
 <li><strong>NumPy-Style Docstrings</strong>: Comprehensive Parameter/Returns/Raises documentation across all modules</li>
 <li><strong>Lint/Format Config</strong>: Ruff + Black with notebook exclusion, 120-char line length</li>
 <li><strong>Pre-commit Hooks</strong>: Automated code formatting and linting with Black, Ruff, and file hygiene checks</li>
@@ -1638,8 +1639,8 @@
 - 🔧 Partially ready: Infrastructure exists, full workflow incomplete
 - ❌ Not ready: Planned but not implemented</p>
 <hr />
-<p><strong>Last Updated:</strong> 2025-11-03
-<strong>Version Coverage:</strong> 0.4.0</p>
+<p><strong>Last Updated:</strong> 2025-11-08
+<strong>Version Coverage:</strong> 0.7.0</p>
 <p>For implementation timelines, see <a href="../roadmap/">ROADMAP.md</a>.
 For change history, see <a href="../changelog/">CHANGELOG.md</a>.</p>
 
