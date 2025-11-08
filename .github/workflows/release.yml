@@ -1,17 +1,12 @@
-name: Deploy Documentation
+name: Release to PyPI & Deploy Docs
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
-      - 'SETUP_GUIDE.md'
-      - '.github/workflows/docs.yml'
-  workflow_dispatch:  # Allow manual trigger
+    tags:
+      - 'v*'
 
 concurrency:
-  group: docs-deploy-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -20,7 +15,7 @@ permissions:
   id-token: write
 
 jobs:
-  build-docs:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,6 +26,24 @@ jobs:
         with:
           python-version: '3.11'
           install-extras: 'docs'
+
+      - name: Install build backend
+        run: pip install build twine
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Verify install from wheel
+        run: |
+          pip install --no-cache-dir dist/*.whl
+          python -c "import pophealth_observatory as p; print('Imported version', p.__version__)"
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          twine upload dist/*
 
       - name: Generate site (MkDocs)
         run: |
@@ -48,7 +61,7 @@ jobs:
           path: site
 
   deploy-pages:
-    needs: build-docs
+    needs: build-and-publish
     runs-on: ubuntu-latest
     environment:
       name: github-pages
