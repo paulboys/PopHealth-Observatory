@@ -1,0 +1,23 @@
+analyte_name,check_type,status,expected,actual,message
+ALL,format,PASS,5,5,All required columns present
+DMP,pubchem,WARNING,814-24-8,no CAS in PubChem,CID 11640 exists but CAS not found in synonyms
+DMTP,pubchem,FAIL,756-80-9,211-056-2,"CAS mismatch for CID 12357: expected 756-80-9, found 211-056-2"
+DMDTP,pubchem,FAIL,756-81-0,628-81-9,"CAS mismatch for CID 12355: expected 756-81-0, found 628-81-9"
+DEP,pubchem,FAIL,598-02-7,626-01-7,"CAS mismatch for CID 12271: expected 598-02-7, found 626-01-7"
+DETP,pubchem,FAIL,2465-65-8,211-054-1,"CAS mismatch for CID 12354: expected 2465-65-8, found 211-054-1"
+DEDTP,pubchem,FAIL,298-06-6,722-01-0,"CAS mismatch for CID 164721: expected 298-06-6, found 722-01-0"
+TCPy,pubchem,FAIL,6515-38-4,2921-88-2,"CAS mismatch for CID 2730: expected 6515-38-4, found 2921-88-2"
+3-PBA,pubchem,FAIL,3739-38-6,146-14-5,"CAS mismatch for CID 643975: expected 3739-38-6, found 146-14-5"
+cis-DCCA,pubchem,FAIL,53179-07-0,227-919-1,"CAS mismatch for CID 23668749: expected 53179-07-0, found 227-919-1"
+trans-DCCA,pubchem,FAIL,55719-85-2,147-85-3,"CAS mismatch for CID 145742: expected 55719-85-2, found 147-85-3"
+4-F-3-PBA,pubchem,FAIL,96282-05-0,14391-76-5,"CAS mismatch for CID 104828: expected 96282-05-0, found 14391-76-5"
+"2,4-D",pubchem,PASS,94-75-7,94-75-7,CID 1486 → CAS 94-75-7 verified
+Glyphosate,pubchem,PASS,1071-83-6,1071-83-6,CID 3496 → CAS 1071-83-6 verified
+AMPA,pubchem,WARNING,API response,error,PubChem API error: 404 Client Error: PUGREST.NotFound for url: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/14700/synonyms/JSON
+"p,p'-DDE",pubchem,FAIL,72-55-9,50-29-3,"CAS mismatch for CID 3036: expected 72-55-9, found 50-29-3"
+HCB,pubchem,FAIL,118-74-1,65595-90-6,"CAS mismatch for CID 5681: expected 118-74-1, found 65595-90-6"
+β-HCH,pubchem,FAIL,319-85-7,115-40-2,"CAS mismatch for CID 8273: expected 319-85-7, found 115-40-2"
+ETU,pubchem,FAIL,96-45-7,1841-19-6,"CAS mismatch for CID 3396: expected 96-45-7, found 1841-19-6"
+THPI,pubchem,FAIL,1861-32-1,51022-71-0,"CAS mismatch for CID 5284592: expected 1861-32-1, found 51022-71-0"
+DMP,nhanes_cycles,SKIP,1999-2000: URXDMP,not implemented,NHANES cycle validation requires integration with observatory.py download logic (TODO)
+3-PBA,nhanes_cycles,SKIP,2001-2002: URX3PBA,not implemented,NHANES cycle validation requires integration with observatory.py download logic (TODO)
