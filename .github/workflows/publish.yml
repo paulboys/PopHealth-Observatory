@@ -1,10 +1,13 @@
-name: Build, Publish & Docs
+name: Build, Publish & Docs (Legacy - Use release.yml)
+
+# This workflow is deprecated and kept for reference only.
+# New releases should use release.yml which triggers on tags only.
+# Documentation updates on main branch use docs.yml.
 
 on:
   push:
-    branches: [ main ]
     tags:
-      - 'v*'
+      - 'v*-legacy'  # Changed to prevent accidental triggers
 
 concurrency:
   group: pages-build-${{ github.ref }}
