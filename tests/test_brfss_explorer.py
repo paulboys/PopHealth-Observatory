@@ -396,3 +396,32 @@ def test_network_exception_handling(monkeypatch, capsys):
 
     captured = capsys.readouterr()
     assert "BRFSS request error" in captured.out
+
+
+def test_latest_year_with_empty_dataframe():
+    """Test _latest_year() returns 0 for empty DataFrame (line 319)."""
+    explorer = BRFSSExplorer()
+    assert explorer._latest_year(pd.DataFrame()) == 0
+
+
+def test_latest_year_with_missing_yearstart_column():
+    """Test _latest_year() returns 0 when yearstart column missing (line 319)."""
+    explorer = BRFSSExplorer()
+    df_no_yearstart = pd.DataFrame({"other_column": [1, 2, 3]})
+    assert explorer._latest_year(df_no_yearstart) == 0
+
+
+def test_list_available_indicators_empty_response(monkeypatch):
+    """Test list_available_indicators() with empty API response (line 228)."""
+
+    def fake_get(url, timeout):
+        return _MockResponse(payload=[])
+
+    explorer = BRFSSExplorer()
+    monkeypatch.setattr(explorer.session, "get", fake_get)
+
+    indicators = explorer.list_available_indicators()
+
+    # Should return empty DataFrame with correct schema
+    assert indicators.empty
+    assert list(indicators.columns) == ["class", "question"]

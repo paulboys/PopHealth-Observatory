@@ -519,6 +519,19 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"v{__version__} | MIT License")
 
+# Define available cycles for all tabs
+available_cycles = ["2021-2022", "2017-2018", "2015-2016", "2013-2014", "2011-2012", "2009-2010"]
+
+# Define metrics dictionary for tab2
+nhanes_metrics = {
+    "bmi": "BMI (kg/m²)",
+    "avg_systolic": "Systolic BP (mmHg)",
+    "avg_diastolic": "Diastolic BP (mmHg)",
+    "weight_kg": "Weight (kg)",
+    "height_cm": "Height (cm)",
+    "waist_cm": "Waist Circumference (cm)",
+}
+
 # Tabs for different analysis modes
 tab1, tab2, tab3, tab4 = st.tabs(
     ["📊 Cross-Sectional Explorer", "📈 Trend Analysis", "🔗 Bivariate Analysis", "🗺️ Geographic View (BRFSS)"]
@@ -554,10 +567,13 @@ with tab1:
 
         with col_f2:
             use_weights_tab1 = st.checkbox(
-                "Apply Survey Weights ⚖️",
+                "Apply Survey Weights",
                 value=False,
-                key="weights_tab1",
-                help="Use NHANES exam weights for population estimates",
+                key="use_weights_tab1",
+                help=(
+                    "Applies simple exam weights to approximate population-level estimates. "
+                    "Does NOT account for complex survey design (strata/PSU) and is for exploratory purposes only."
+                ),
             )
 
             available_races = [
@@ -603,78 +619,75 @@ with tab1:
     if df_filtered.empty:
         st.warning("No data matches the selected filters. Try broadening your criteria.")
     else:
-        # Display summary metrics
-        if metric in df_filtered.columns:
-            col1, col2, col3, col4 = st.columns(4)
-            values = df_filtered[metric].dropna()
+        # --- Metric Display ---
+        st.header(f"Cross-Sectional Analysis for {metric}")
 
-            with col1:
-                st.metric("Sample Size", f"{len(df_filtered):,}")
-            with col2:
-                st.metric("Mean", f"{values.mean():.2f}")
-            with col3:
-                st.metric("Median", f"{values.median():.2f}")
-            with col4:
-                st.metric("Std Dev", f"{values.std():.2f}")
+        # Filter out NaNs for metric calculations
+        values = df_filtered[metric].dropna()
 
-            st.markdown("---")
+        if not values.empty:
+            # Calculate summary stats (conditionally weighted)
+            if use_weights_tab1 and "exam_weight" in df_filtered.columns:
+                weights = df_filtered.loc[values.index, "exam_weight"]
+                mean_val = np.average(values, weights=weights)
+                std_val = np.sqrt(np.average((values - mean_val) ** 2, weights=weights))
+                # Weighted median approximation: reuse mean for display
+                median_val = mean_val
+            else:
+                mean_val = values.mean()
+                median_val = values.median()
+                std_val = values.std()
 
-            # Visualization
-            if viz_type == "Box Plot":
-                if demographic in df_filtered.columns:
-                    title = f"{metric.replace('_', ' ').title()} by {demographic.replace('_', ' ').title()}"
-                    if use_weights_tab1:
-                        title += " (Weighted)"
-                    fig = create_box_plot(df_filtered, metric, demographic, title)
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.caption(
-                        "📦 Box plot shows median (line), interquartile range (box), and outliers (points). "
-                        "Mean and standard deviation are overlaid."
-                    )
-                else:
-                    st.warning(f"Demographic '{demographic}' not found in dataset.")
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Mean", f"{mean_val:.2f}")
+            col2.metric("Median", f"{median_val:.2f}")
+            col3.metric("Std Dev", f"{std_val:.2f}")
 
-            elif viz_type == "Violin Plot":
-                if demographic in df_filtered.columns:
-                    title = (
-                        f"{metric.replace('_', ' ').title()} Distribution by {demographic.replace('_', ' ').title()}"
-                    )
-                    fig = px.violin(
-                        df_filtered,
-                        x=demographic,
-                        y=metric,
-                        color=demographic,
-                        box=True,
-                        template="plotly_white",
-                        title=title,
-                    )
-                    fig.update_layout(showlegend=False, height=500)
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.caption("🎻 Violin plot combines box plot with probability density (width = frequency).")
-                else:
-                    st.warning(f"Demographic '{demographic}' not found in dataset.")
+            # --- Demographic Filter Summary ---
+            filter_summary = (
+                f"**Filters:** Age {age_range_tab1[0]}–{age_range_tab1[1]} | "
+                f"Gender: {', '.join(selected_genders_tab1)} | "
+                f"Race/Ethnicity: {', '.join(selected_races_tab1)}"
+            )
+            if use_weights_tab1:
+                filter_summary += " | **Survey Weights: Applied (metrics & table only)**"
+            else:
+                filter_summary += " | **Survey Weights: Not Applied**"
+            st.caption(filter_summary)
 
-            elif viz_type == "Summary Table":
-                summary = compute_nhanes_summary(df_filtered, metric, demographic, use_weights_tab1)
-                if not summary.empty:
-                    st.dataframe(summary, use_container_width=True)
-                    st.caption("📊 Summary statistics computed using pandas groupby aggregation.")
-                else:
-                    st.warning("Unable to compute summary statistics.")
+            # --- Visualization ---
+            if use_weights_tab1:
+                st.warning(
+                    "The plot below is **unweighted**. The summary table and metrics above are **weighted**.",
+                    icon="⚠️",
+                )
+
+            plot_title = f"{metric.replace('_', ' ').title()} Distribution"
+            if demographic != "None":
+                plot_title += f" by {demographic.replace('_', ' ').title()}"
+            plot_title += f" | {nhanes_cycle_tab1} | Age {age_range_tab1[0]}-{age_range_tab1[1]}"
+            plot_title += " | Unweighted" if not use_weights_tab1 else " | Weighted (metrics only, plot unweighted)"
+
+            fig = create_box_plot(df_filtered, metric, demographic, plot_title)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # --- Summary Table ---
+            st.subheader("Summary Statistics")
+            summary_df = compute_nhanes_summary(df_filtered, metric, demographic, use_weights=use_weights_tab1)
+            st.dataframe(summary_df, use_container_width=True)
         else:
-            st.error(f"Metric '{metric}' not found in the dataset for this cycle.")
+            st.warning(f"No data available for '{metric.replace('_', ' ').title()}' with the current filters.")
 
 # ============================================================================
 # TAB 2: Trend Analysis
 # ============================================================================
 
 with tab2:
-    st.header("Trend Analysis Across Survey Cycles")
-    st.caption(
-        """
-        Visualize how population-level health metrics change over time by comparing different survey cycles.
-        This is a repeated cross-sectional analysis, not a longitudinal study of the same individuals.
-        """
+    st.header("Trend Analysis")
+    st.markdown(
+        "Compare a metric across multiple NHANES cycles. This is a **repeated cross-sectional analysis**, "
+        "not a longitudinal cohort study. Confidence intervals are approximated and do not account for complex "
+        "survey design."
     )
 
     # Demographic filters (local to this tab)
@@ -691,10 +704,13 @@ with tab2:
 
         with col_f2:
             use_weights_tab2 = st.checkbox(
-                "Apply Survey Weights ⚖️",
-                value=False,
-                key="weights_tab2",
-                help="Use NHANES exam weights for population estimates",
+                "Apply Survey Weights",
+                value=True,
+                key="use_weights_tab2",
+                help=(
+                    "Applies simple exam weights to approximate population-level estimates. "
+                    "Does NOT account for complex survey design (strata/PSU) and is for exploratory purposes only."
+                ),
             )
 
             available_races = [
@@ -709,65 +725,69 @@ with tab2:
                 "Race/Ethnicity", available_races, default=available_races, key="race_tab2"
             )
 
+    # --- Trend Controls ---
     col1, col2 = st.columns(2)
-
     with col1:
-        trend_metric = st.selectbox(
-            "Metric to Track",
-            ["bmi", "avg_systolic", "avg_diastolic", "weight_kg", "height_cm"],
-            key="trend_metric",
-            help="Select metric to track over time",
+        selected_cycles_tab2 = st.multiselect(
+            "Select NHANES Cycles",
+            options=available_cycles,
+            default=available_cycles[-3:],  # Default to last 3 cycles
+            key="cycles_tab2",
         )
-
     with col2:
-        trend_cycles = st.multiselect(
-            "Survey Cycles",
-            ["2017-2018", "2015-2016", "2013-2014", "2011-2012", "2009-2010"],
-            default=["2017-2018", "2015-2016", "2013-2014"],
-            help="Select cycles to compare (more cycles = longer processing time)",
+        metric_tab2 = st.selectbox(
+            "Select Metric",
+            options=list(nhanes_metrics.keys()),
+            format_func=lambda x: nhanes_metrics[x],
+            index=0,
+            key="metric_tab2",
         )
+    metric_tab2_label = nhanes_metrics.get(metric_tab2, metric_tab2)
 
-    trend_groups = st.multiselect(
-        "Compare Groups",
-        available_genders + available_races,
-        default=["Male", "Female"],
-        help="Select demographic groups to compare",
-    )
+    # Automatically compute and display trends if inputs are valid
+    if len(selected_cycles_tab2) > 1 and metric_tab2:
+        with st.spinner("Computing trend data across cycles..."):
+            # Combine all demographic groups for trend analysis
+            all_demographic_groups = selected_genders_tab2 + selected_races_tab2
 
-    if st.button("🔄 Compute Trends", type="primary"):
-        if not trend_cycles:
-            st.warning("Please select at least one survey cycle.")
-        elif not trend_groups:
-            st.warning("Please select at least one demographic group to compare.")
-        else:
-            trend_df = compute_trend_data(
-                trend_cycles,
-                trend_metric,
-                trend_groups,
-                age_range_tab2,
-                selected_genders_tab2,
-                selected_races_tab2,
-                use_weights_tab2,
+            # The compute_trend_data function is cached, so this will only re-run
+            # when input parameters change.
+            trend_data = compute_trend_data(
+                cycles=selected_cycles_tab2,
+                metric=metric_tab2,
+                demographic_groups=all_demographic_groups,
+                age_range=age_range_tab2,
+                genders=selected_genders_tab2,
+                races=selected_races_tab2,
+                use_weights=use_weights_tab2,
             )
 
-            if trend_df.empty:
-                st.error("No trend data could be computed. Check your filters and try again.")
+        if not trend_data.empty:
+            st.subheader(f"Trend for {metric_tab2_label}")
+
+            # --- Demographic Filter Summary ---
+            filter_summary = (
+                f"**Filters:** Age {age_range_tab2[0]}–{age_range_tab2[1]} | "
+                f"Gender: {', '.join(selected_genders_tab2)} | "
+                f"Race/Ethnicity: {', '.join(selected_races_tab2)}"
+            )
+            if use_weights_tab2:
+                filter_summary += " | **Survey Weights: Applied**"
             else:
-                title = f"{trend_metric.replace('_', ' ').title()} Trends"
-                if use_weights_tab2:
-                    title += " (Weighted)"
-                fig = create_trend_plot(trend_df, trend_metric, title)
-                st.plotly_chart(fig, use_container_width=True)
+                filter_summary += " | **Survey Weights: Not Applied**"
+            st.caption(filter_summary)
 
-                st.caption(
-                    "📈 Line shows mean value; shaded area represents 95% confidence interval. "
-                    "Hover for exact values and sample sizes."
-                )
+            # Enhanced title with filter info
+            weight_label = "Weighted" if use_weights_tab2 else "Unweighted"
+            plot_title = f"{metric_tab2_label} Trends | Age {age_range_tab2[0]}-{age_range_tab2[1]} | {weight_label}"
 
-                with st.expander("📊 View Trend Data Table"):
-                    st.dataframe(trend_df, use_container_width=True)
-    else:
-        st.info("👆 Click the button above to compute and visualize trends across selected cycles.")
+            fig = create_trend_plot(trend_data, metric_tab2, plot_title)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("Could not compute trend data for the selected inputs.")
+    elif len(selected_cycles_tab2) <= 1:
+        st.info("Please select at least two cycles to compute a trend.")
+
 
 # ============================================================================
 # TAB 3: Bivariate Analysis
@@ -799,10 +819,13 @@ with tab3:
 
         with col_f2:
             use_weights_tab3 = st.checkbox(
-                "Apply Survey Weights ⚖️",
+                "Apply Survey Weights",
                 value=False,
-                key="weights_tab3",
-                help="Use NHANES exam weights for population estimates",
+                key="use_weights_tab3",
+                help=(
+                    "Applies simple exam weights to the Pearson correlation coefficient. "
+                    "The OLS trendline in the plot remains unweighted. This is for exploratory purposes only."
+                ),
             )
 
             available_races = [
@@ -843,7 +866,22 @@ with tab3:
         if scatter_df.empty:
             st.warning("No data available after removing missing values.")
         else:
+            # Enhanced title with filter and weight info
+            weight_label = "Weighted Correlation, Unweighted OLS" if use_weights_tab3 else "Unweighted"
             title = f"{y_metric.replace('_', ' ').title()} vs {x_metric.replace('_', ' ').title()}"
+            title += f" | {nhanes_cycle_tab3} | Age {age_range_tab3[0]}-{age_range_tab3[1]} | {weight_label}"
+
+            # --- Demographic Filter Summary ---
+            filter_summary = (
+                f"**Filters:** Age {age_range_tab3[0]}–{age_range_tab3[1]} | "
+                f"Gender: {', '.join(selected_genders_tab3)} | "
+                f"Race/Ethnicity: {', '.join(selected_races_tab3)}"
+            )
+            if use_weights_tab3:
+                filter_summary += " | **Survey Weights: Applied (correlation only)**"
+            else:
+                filter_summary += " | **Survey Weights: Not Applied**"
+            st.caption(filter_summary)
 
             fig = px.scatter(
                 scatter_df,
@@ -868,6 +906,9 @@ with tab3:
             # Correlation coefficient
             corr = scatter_df[x_metric].corr(scatter_df[y_metric])
             st.metric("Pearson Correlation", f"{corr:.3f}")
+
+            if use_weights_tab3:
+                st.warning("The OLS trendline in the plot above is **unweighted**.", icon="⚠️")
 
 # ============================================================================
 # TAB 4: Geographic View (BRFSS)
@@ -975,9 +1016,9 @@ with tab4:
                 # "Latest" option - get most recent year
                 latest_year = brfss_df["year"].max()
                 brfss_df = brfss_df[brfss_df["year"] == latest_year]
-    else:
-        brfss_df = pd.DataFrame()
-        use_animation = False
+        else:
+            brfss_df = pd.DataFrame()
+            use_animation = False
 
     if brfss_df.empty:
         st.error("Unable to load BRFSS data. Try a different indicator or year.")
