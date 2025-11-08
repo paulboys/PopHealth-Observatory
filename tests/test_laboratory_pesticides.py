@@ -12,7 +12,7 @@ Test coverage:
 SPDX-License-Identifier: MIT
 """
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
@@ -20,8 +20,10 @@ import pytest
 
 from pophealth_observatory.laboratory_pesticides import (
     _derive_metrics,
+    _download_xpt_flexible,
     _extract_analyte_columns,
     _get_cycle_letter_suffix,
+    _map_to_reference,
     _normalize_column_names,
     _parse_cycle_years,
     get_pesticide_metabolites,
@@ -324,3 +326,118 @@ class TestEdgeCases:
 
         assert pd.isna(df_derived["log_concentration"].iloc[1])
         assert not df_derived["detected_flag"].iloc[1]
+
+
+class TestDownloadXPTFlexible:
+    """Test URL fallback logic in _download_xpt_flexible."""
+
+    @patch("pophealth_observatory.laboratory_pesticides.requests.get")
+    @patch("pophealth_observatory.laboratory_pesticides.pd.read_sas")
+    def test_tries_multiple_url_patterns_until_success(self, mock_read_sas, mock_get):
+        """Test that multiple URL patterns are attempted on failure."""
+        # First 5 URLs fail (404), 6th succeeds (200)
+        mock_responses = []
+        for _ in range(5):
+            resp = Mock()
+            resp.status_code = 404
+            mock_responses.append(resp)
+
+        success_resp = Mock()
+        success_resp.status_code = 200
+        success_resp.content = b"fake_xpt_content"
+        mock_responses.append(success_resp)
+
+        mock_get.side_effect = mock_responses
+        mock_read_sas.return_value = pd.DataFrame({"col": [1, 2]})
+
+        result = _download_xpt_flexible("2017-2018", "SSNH")
+
+        assert not result.empty
+        assert len(result) == 2
+        assert mock_get.call_count == 6  # Tried all patterns until success
+
+    @patch("pophealth_observatory.laboratory_pesticides.requests.get")
+    def test_all_url_patterns_fail_returns_empty(self, mock_get):
+        """Test empty DataFrame when all URL patterns fail."""
+        mock_get.side_effect = Exception("Network error")
+
+        result = _download_xpt_flexible("2017-2018", "SSNH")
+
+        assert result.empty
+        assert isinstance(result, pd.DataFrame)
+
+    @patch("pophealth_observatory.laboratory_pesticides.requests.get")
+    @patch("pophealth_observatory.laboratory_pesticides.pd.read_sas")
+    def test_empty_dataframe_returned_skips_to_next_pattern(self, mock_read_sas, mock_get):
+        """Test that empty DataFrames from read_sas trigger next URL attempt."""
+        # All responses succeed with 200, but first returns empty
+        mock_responses = []
+        for _ in range(2):
+            resp = Mock()
+            resp.status_code = 200
+            resp.content = b"content"
+            mock_responses.append(resp)
+
+        mock_get.side_effect = mock_responses
+        # First read returns empty, second returns data
+        mock_read_sas.side_effect = [pd.DataFrame(), pd.DataFrame({"data": [1]})]
+
+        result = _download_xpt_flexible("2017-2018", "SSNH")
+
+        assert not result.empty
+        assert mock_get.call_count == 2
+
+
+class TestMapToReference:
+    """Test metadata enrichment edge cases."""
+
+    def test_empty_reference_dataframe_returns_input_unchanged(self):
+        """Empty reference DataFrame returns input as-is."""
+        df_long = pd.DataFrame({"analyte_code": ["A"], "value": [1.0]})
+        ref_empty = pd.DataFrame()
+
+        result = _map_to_reference(df_long, ref_empty)
+
+        assert result.equals(df_long)
+
+    def test_empty_input_dataframe_short_circuits(self):
+        """Empty input DataFrame short-circuits and returns empty."""
+        df_empty = pd.DataFrame()
+        ref_df = pd.DataFrame({"analyte_name": ["test"]})
+
+        result = _map_to_reference(df_empty, ref_df)
+
+        assert result.empty
+
+
+class TestGetPesticideMetabolitesEdgeCases:
+    """Test edge cases in main ingestion function."""
+
+    @patch("pophealth_observatory.laboratory_pesticides._download_xpt_flexible")
+    @patch("pophealth_observatory.laboratory_pesticides.load_pesticide_reference")
+    def test_warns_on_missing_reference(self, mock_load_ref, mock_download, capsys):
+        """Test warning printed when reference CSV missing or empty."""
+        mock_load_ref.return_value = pd.DataFrame()  # Empty reference
+        mock_download.return_value = pd.DataFrame()  # Empty to short-circuit
+
+        get_pesticide_metabolites("2017-2018", ref_path="nonexistent.csv")
+
+        captured = capsys.readouterr()
+        assert "Warning: pesticide_reference.csv not found or empty" in captured.out
+
+    @patch("pophealth_observatory.laboratory_pesticides._download_xpt_flexible")
+    @patch("pophealth_observatory.laboratory_pesticides.load_pesticide_reference")
+    def test_skips_empty_component_downloads(self, mock_load_ref, mock_download):
+        """Test that components with empty downloads are skipped."""
+        mock_load_ref.return_value = pd.DataFrame({"analyte_code": ["URXAAZ"]})
+
+        # Return empty DataFrames for all component attempts
+        mock_download.return_value = pd.DataFrame()
+
+        result = get_pesticide_metabolites("2017-2018")
+
+        # Should have tried multiple components but all empty
+        assert mock_download.call_count >= 1
+        # Result should be empty since all components were empty
+        assert isinstance(result, pd.DataFrame)
+        assert result.empty  # All were empty
