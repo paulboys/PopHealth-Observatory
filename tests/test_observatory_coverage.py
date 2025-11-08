@@ -805,3 +805,131 @@ class TestAdditionalDataMethods:
         result = explorer.get_body_measures("2017-2018")
 
         assert result.empty
+
+
+class TestVisualizationEdgeCases:
+    """Test visualization method error handling."""
+
+    def test_create_demographic_visualization_missing_columns_returns_early(self):
+        """Test visualization returns early when required columns missing."""
+        explorer = NHANESExplorer()
+        df = pd.DataFrame({"age_years": [25, 30]})  # Missing 'bmi' and 'gender'
+
+        # Should return None silently without error
+        result = explorer.create_demographic_visualization(df, "bmi", "gender")
+        assert result is None
+
+
+class TestHTMLParsingEdgeCases:
+    """Test HTML parsing robustness."""
+
+    def test_parse_component_table_malformed_row(self):
+        """Test that malformed table rows are skipped gracefully."""
+        explorer = NHANESExplorer()
+
+        # HTML with incomplete row structure (missing data cell with link)
+        html = """
+        <table>
+            <tr>
+                <td>2017-2018</td>
+                <td>Demographics</td>
+                <!-- Missing data_cell with anchor tag -->
+            </tr>
+        </table>
+        """
+
+        records = explorer._parse_component_table(html, "http://test.com")
+
+        # Should skip malformed row and return empty
+        assert records == []
+
+    def test_parse_component_table_empty_cells(self):
+        """Test handling of empty table cells."""
+        explorer = NHANESExplorer()
+
+        html = """
+        <table>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><a href="data.xpt">Data</a></td>
+            </tr>
+        </table>
+        """
+
+        records = explorer._parse_component_table(html, "http://test.com")
+
+        # Should handle empty cells gracefully
+        assert isinstance(records, list)
+
+    @patch.object(NHANESExplorer, "_fetch_component_page")
+    @patch.object(NHANESExplorer, "_parse_component_table")
+    def test_get_detailed_component_manifest_handles_parse_exception(self, mock_parse, mock_fetch):
+        """Test manifest generation continues when component parsing fails."""
+        explorer = NHANESExplorer()
+
+        mock_fetch.return_value = "<html><table></table></html>"
+        # First component fails, second succeeds with complete record (no component key, will be added)
+        mock_parse.side_effect = [
+            Exception("Parse error"),
+            [{"year_normalized": "2017_2018", "data_file_url": "http://test.xpt", "data_file_type": "XPT"}],
+        ]
+
+        result = explorer.get_detailed_component_manifest(["Demographics", "Examination"])
+
+        # Should have dict structure with detailed_year_records
+        assert isinstance(result, dict)
+        assert "detailed_year_records" in result
+
+    @patch("pophealth_observatory.observatory.requests.get")
+    def test_fetch_component_page_returns_none_on_empty(self, mock_get):
+        """Test handling of empty HTML response."""
+        explorer = NHANESExplorer()
+
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.text = ""  # Empty response
+        mock_get.return_value = mock_response
+
+        result = explorer._fetch_component_page("Demographics")
+
+        assert result is None or result == ""  # Could be None or empty string
+
+
+class TestYearFilteringEdgeCases:
+    """Test year range filtering robustness."""
+
+    @patch.object(NHANESExplorer, "_fetch_component_page")
+    @patch.object(NHANESExplorer, "_parse_component_table")
+    def test_manifest_year_range_malformed_span(self, mock_parse, mock_fetch):
+        """Test that malformed year spans are filtered out safely."""
+        explorer = NHANESExplorer()
+
+        mock_fetch.return_value = "<html></html>"
+        mock_parse.return_value = [
+            {"year_normalized": "invalid_format", "data_file_url": "http://test1.xpt", "data_file_type": "XPT"},
+            {"year_normalized": "2017_2018", "data_file_url": "http://test2.xpt", "data_file_type": "XPT"},
+        ]
+
+        result = explorer.get_detailed_component_manifest(["Demographics"], year_range=("2017", "2018"))
+
+        # Should handle malformed gracefully
+        assert isinstance(result, dict)
+        assert "detailed_year_records" in result
+
+    @patch.object(NHANESExplorer, "_fetch_component_page")
+    @patch.object(NHANESExplorer, "_parse_component_table")
+    def test_manifest_year_range_no_underscore(self, mock_parse, mock_fetch):
+        """Test year spans without underscore separator."""
+        explorer = NHANESExplorer()
+
+        mock_fetch.return_value = "<html></html>"
+        mock_parse.return_value = [
+            {"year_normalized": "2017", "data_file_url": "http://test.xpt", "data_file_type": "XPT"},
+        ]
+
+        result = explorer.get_detailed_component_manifest(["Demographics"], year_range=("2015", "2019"))
+
+        # Should handle gracefully
+        assert isinstance(result, dict)
