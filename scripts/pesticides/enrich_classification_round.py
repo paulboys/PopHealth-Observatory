@@ -27,38 +27,96 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-# CDC Fourth Report classification data (subset; expand as needed)
+# ============================================================================
+# CDC Fourth Report Classification Reference Data
+# ============================================================================
+# PROVENANCE:
+#   - chemical_class: Extracted from CDC Fourth National Report on Human Exposure
+#     to Environmental Chemicals (2021+), Table 1 and supplemental data tables.
+#     Source: https://www.cdc.gov/exposurereport/
+#
+#   - chemical_subclass: PROVISIONAL (currently stripped; requires verification)
+#     Previously contained structural chemistry inferences (e.g., "Chlorinated benzene",
+#     "DDT-related", "Cyclodiene") but these are NOT direct CDC Fourth Report labels.
+#     Subclass refinement requires cross-reference with:
+#       * PubChem chemical taxonomy
+#       * ATSDR Toxicological Profiles
+#       * Peer-reviewed pesticide classification literature
+#
+# VERIFICATION CHECKLIST:
+#   See inline comments below each entry for PubChem verification links.
+#   Subclass values should remain empty ("") until authoritative source confirmed.
+#
 # Format: (normalized_cdc_name, chemical_class, chemical_subclass)
+# ============================================================================
+
 CDC_CLASSIFICATIONS = [
-    ("hexachlorobenzene", "Organochlorine", "Chlorinated benzene"),
-    ("mirex", "Organochlorine", "Chlordane-related"),
-    ("ddt", "Organochlorine", "DDT-related"),
-    ("dde", "Organochlorine", "DDT metabolite"),
-    ("oxychlordane", "Organochlorine", "Chlordane-related"),
-    ("trans-nonachlor", "Organochlorine", "Chlordane-related"),
-    ("aldrin", "Organochlorine", "Cyclodiene"),
-    ("dieldrin", "Organochlorine", "Cyclodiene"),
-    ("endrin", "Organochlorine", "Cyclodiene"),
-    ("heptachlor", "Organochlorine", "Cyclodiene"),
-    ("beta-hexachlorocyclohexane", "Organochlorine", "HCH"),
-    ("gamma-hexachlorocyclohexane", "Organochlorine", "HCH (Lindane)"),
-    ("3-phenoxybenzoic acid", "Pyrethroid metabolite", "Common metabolite"),
-    ("3-pba", "Pyrethroid metabolite", "Common metabolite"),
-    ("4-fluoro-3-phenoxybenzoic acid", "Pyrethroid metabolite", "Cyfluthrin-specific"),
-    ("dimethylphosphate", "Organophosphate metabolite", "DAP"),
-    ("diethylphosphate", "Organophosphate metabolite", "DAP"),
-    ("dimethylthiophosphate", "Organophosphate metabolite", "DAP"),
-    ("diethylthiophosphate", "Organophosphate metabolite", "DAP"),
-    ("dimethyldithiophosphate", "Organophosphate metabolite", "DAP"),
-    ("diethyldithiophosphate", "Organophosphate metabolite", "DAP"),
-    ("malathion", "Organophosphate", "Current-use OP"),
-    ("chlorpyrifos", "Organophosphate", "Current-use OP"),
-    ("2,4-d", "Phenoxy herbicide", "Chlorophenoxy"),
-    ("2,4,5-t", "Phenoxy herbicide", "Chlorophenoxy"),
-    ("atrazine", "Triazine herbicide", "Current-use herbicide"),
-    ("glyphosate", "Organophosphonate herbicide", "Current-use herbicide"),
-    ("2,5-dichlorophenol", "Chlorophenol", "Environmental contaminant"),
-    ("2,4-dichlorophenol", "Chlorophenol", "Environmental contaminant"),
+    # Organochlorine Pesticides
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/hexachlorobenzene
+    ("hexachlorobenzene", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/mirex
+    ("mirex", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/ddt
+    ("ddt", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/dde
+    ("dde", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/oxychlordane
+    ("oxychlordane", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/trans-nonachlor
+    ("trans-nonachlor", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/aldrin
+    ("aldrin", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/dieldrin
+    ("dieldrin", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/endrin
+    ("endrin", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/heptachlor
+    ("heptachlor", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/beta-hexachlorocyclohexane
+    ("beta-hexachlorocyclohexane", "Organochlorine", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/gamma-hexachlorocyclohexane
+    ("gamma-hexachlorocyclohexane", "Organochlorine", ""),
+    # Pyrethroid Metabolites
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/3-phenoxybenzoic-acid
+    ("3-phenoxybenzoic acid", "Pyrethroid metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/3-phenoxybenzoic-acid
+    ("3-pba", "Pyrethroid metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/4-fluoro-3-phenoxybenzoic-acid
+    ("4-fluoro-3-phenoxybenzoic acid", "Pyrethroid metabolite", ""),
+    # Organophosphate Metabolites (Dialkyl Phosphates - DAPs)
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/dimethyl-phosphate
+    ("dimethylphosphate", "Organophosphate metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/diethyl-phosphate
+    ("diethylphosphate", "Organophosphate metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/dimethylthiophosphate
+    ("dimethylthiophosphate", "Organophosphate metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/diethylthiophosphate
+    ("diethylthiophosphate", "Organophosphate metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/dimethyldithiophosphate
+    ("dimethyldithiophosphate", "Organophosphate metabolite", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/diethyldithiophosphate
+    ("diethyldithiophosphate", "Organophosphate metabolite", ""),
+    # Current-Use Organophosphate Pesticides
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/malathion
+    ("malathion", "Organophosphate", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/chlorpyrifos
+    ("chlorpyrifos", "Organophosphate", ""),
+    # Phenoxy Herbicides
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/2,4-dichlorophenoxyacetic-acid
+    ("2,4-d", "Phenoxy herbicide", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/2,4,5-trichlorophenoxyacetic-acid
+    ("2,4,5-t", "Phenoxy herbicide", ""),
+    # Triazine Herbicides
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/atrazine
+    ("atrazine", "Triazine herbicide", ""),
+    # Organophosphonate Herbicides
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/glyphosate
+    ("glyphosate", "Organophosphonate herbicide", ""),
+    # Chlorophenols (Environmental Contaminants)
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/2,5-dichlorophenol
+    ("2,5-dichlorophenol", "Chlorophenol", ""),
+    # Verify: https://pubchem.ncbi.nlm.nih.gov/compound/2,4-dichlorophenol
+    ("2,4-dichlorophenol", "Chlorophenol", ""),
 ]
 
 
