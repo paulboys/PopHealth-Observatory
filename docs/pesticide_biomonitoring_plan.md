@@ -1,6 +1,6 @@
 # Pesticide Biomonitoring & External Exposure Context Expansion Plan
 
-Version: 0.2 (Draft)
+Version: 0.2 (Draft) – Updated schema alignment & loader cascade clarification
 Generated: 2025-11-09
 Related Instructions: `.github/copilot-instructions.md`
 
@@ -86,29 +86,50 @@ tests/
   test_laboratory_pesticides.py       # (placeholder / future expansion)
 ```
 
+### 5.1 Reference Loader Cascade (New)
+The analyte reference is resolved via an ordered cascade to maximize robustness when distribution artifacts omit nested files:
+
+1. `data/reference/classified/pesticide_reference_classified.csv` (enriched classification)
+2. `data/reference/minimal/pesticide_reference_minimal.csv` (canonical minimal)
+3. `data/reference/pesticide_reference.csv` (flat shim for backward compatibility)
+4. Legacy flat minimal / classified files if accidentally retained
+5. Any glob-discovered `pesticide_reference_*.csv` (last resort)
+
+If key analytes (e.g., `3-PBA`, `DMP`) are absent due to packaging omission, temporary placeholder rows are injected at runtime (CI safeguard). SUCCESS CRITERIA includes removing this injection once packaging reliably includes nested reference CSVs.
+
 ## 6. Internal Data Model (Updated)
 We now distinguish between:
 
 1. Analyte Reference Schema (static descriptive metadata)
 2. Laboratory Measurement Schema (per-participant concentration records – forthcoming)
 
-### 6.1 Analyte Reference Schema
+### 6.1 Analyte Reference Schema (Aligned With `PesticideAnalyte.to_dict()`)
 | Field | Type | Description |
 |-------|------|-------------|
+| variable_name | str | Original NHANES variable code (e.g. `URX3PBA`) |
 | analyte_name | str | Canonical short name (e.g. `3-PBA`) |
 | cas_rn | str | CAS Registry Number if verified |
-| cas_verified_source | str | Source of CAS verification (e.g. `pubchem_api`, blank if unverified) |
-| chemical_class | str | High-level chemical class (from CDC classification) |
-| chemical_subclass | str | Subclass / group (if provided) |
-| classification_source | str | Source of classification (e.g. `cdc_fourth_report`) |
-| legacy_parent_pesticide | str | (Deprecated) formerly `parent_pesticide` – kept blank for backward compatibility |
-| legacy_metabolite_class | str | (Deprecated) formerly `metabolite_class` – retained only for compatibility |
-| current_measurement_flag | bool | Always True placeholder (legacy compatibility stub) |
+| cas_verified_source | str | Verification source (`pubchem_api` or blank) |
+| matrix | str | Biological matrix (`urine`, `serum`, `unknown`) |
+| unit | str | Reporting unit (e.g. `ug/L`) |
+| cycle_first | int | Earliest cycle year the analyte appears |
+| cycle_last | int | Latest cycle year observed |
+| cycle_count | int | Number of distinct cycles observed (0 if placeholder) |
+| data_file_description | str | Short narrative describing the data file / analyte context |
+| chemical_class | str | High-level class (CDC Fourth Report) |
+| chemical_subclass | str | Subclass/group (CDC Fourth Report) |
+| classification_source | str | Classification provenance (`cdc_fourth_report`) |
+| metabolite_class | str | (Deprecated – kept blank) legacy compatibility field |
+| parent_pesticide | str | (Deprecated – kept blank) legacy compatibility field |
+| current_measurement_flag | bool | Legacy flag (always `True` placeholder) |
 
-Notes:
-- Legacy fields remain as empty strings or True (for boolean) to avoid breaking existing tests/scripts.
-- Classification coverage currently 35 / 108 analytes (32.4%).
-- CAS verification coverage 78 / 108 analytes (72.2%).
+Deprecation Notes:
+- `metabolite_class`, `parent_pesticide`, and `current_measurement_flag` are retained only to avoid breaking downstream legacy scripts/tests; they will be scheduled for removal once classification coverage ≥90%.
+- Placeholder analytes (`3-PBA`, `DMP`) are runtime-injected only when absent from packaged references; removal of injection is a stability milestone.
+
+Coverage Metrics (2025-11-09):
+- Classification coverage: 35 / 108 analytes (32.4%).
+- CAS verification coverage: 78 / 108 analytes (72.2%).
 
 ### 6.2 Laboratory Measurement Schema (Planned)
 | Field | Type | Description |
@@ -239,6 +260,7 @@ def build_exposure_context(year_range: tuple[int,int], analytes: list[str]) -> d
 | Large memory usage stacking many cycles | Slow UI | Limit default cycle selection; offer advanced multi-cycle toggle |
 | External API schema drift | Break ingestion | Add schema validation & version pin in registry |
 | Misinterpretation of exploratory correlations | Reputational risk | Prominent disclaimers + UI badge + docs alignment |
+| Packaged distribution omits nested reference CSVs | Placeholder injection persists; risk of silent schema drift | Add explicit package data include; CI test asserts presence; remove runtime injection |
 
 ## 17. Future Enhancements (Beyond Current Plan)
 - Creatinine adjustment helper for urinary analytes.
@@ -265,6 +287,30 @@ Start with internal analyte ingestion (foundation). Progress to UI integration f
 5. Begin Streamlit tab scaffolding (load + simple table) behind feature flag.
 6. Extend CDC classification enrichment to attempt additional matching heuristics (e.g., case-insensitive substring, hyphen normalization) – log unresolved analytes.
 7. Draft external source registry skeleton (USGS & PDP placeholders returning empty typed DataFrames).
+ 8. Add packaging test ensuring classified & minimal CSV presence; assert no placeholder injection occurred.
+ 9. Draft deprecation timeline for legacy fields (announce in CHANGELOG once coverage threshold set).
+
+## 21. Classification Expansion Strategy (New)
+Goal: Raise classification coverage from 32% → ≥90% while minimizing manual curation.
+
+Heuristic Layers:
+1. Case-insensitive exact name match against CDC list.
+2. Hyphen/apostrophe normalization (`p,p'-DDE` → `ppDDE`) for resilient matching.
+3. Synonym expansion using minimal curated synonym map (avoid uncontrolled third-party scraping initially).
+4. Length + token similarity scoring for ambiguous abbreviations (retain low-confidence matches separately).
+
+Workflow:
+1. Generate unresolved analyte list after each enrichment pass.
+2. Persist evidence in `data/reference/evidence/` with columns: analyte_name, attempted_tokens, candidate_matches, confidence_score.
+3. Manual review only for low-confidence group (< threshold, e.g. 0.6 similarity score).
+
+Success Metrics:
+- Classification coverage ≥90% with zero false positive assignments in spot-check sample.
+- Evidence artifacts versioned; reproducible enrichment script documented.
+
+Exit Criteria:
+- Placeholder legacy classification fields removable.
+- CHANGELOG entry outlines migration path for downstream consumers.
 
 ---
-_This plan is a living document. Version bumped to 0.2 for reference layer restructuring & classification/CAS progress recording._
+_This plan is a living document. Version 0.2 now reflects aligned schema, loader cascade transparency, packaging risk addition, and classification expansion strategy._
