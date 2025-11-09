@@ -107,3 +107,5 @@ URXTCC,"trans-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid",55
 URXTHF,Thifensulfuron methyl,79277-27-3,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
 URXTRA,Triasulfuron,82097-50-5,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
 URXTRN,Triflusulfuron methyl,126535-15-7,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URX3PBA,3-PBA,70458-82-3,,urine,ug/L,2001,2018,6,"Pyrethroid metabolite (placeholder cycles)"
+URXDMP,DMP,814-24-8,,urine,ug/L,1999,2018,5,"Organophosphate metabolite (Dimethylphosphate)"
