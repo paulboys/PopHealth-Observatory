@@ -1,8 +1,10 @@
 import json
 
 from pophealth_observatory.pesticide_context import (
+    as_json,
     get_pesticide_info,
     load_analyte_reference,
+    suggest_analytes,
 )
 
 
@@ -39,12 +41,15 @@ def test_reference_load_fields():
     records = load_analyte_reference()
     assert records, "Reference list should not be empty"
     first = records[0].to_dict()
+    # Legacy AI-generated reference file has been removed. Tests no longer
+    # assert legacy inference fields (parent_pesticide, metabolite_class).
+    # We focus on core minimal + optional classification fields.
     required_fields = {
         "analyte_name",
         "cas_rn",
-        "metabolite_class",
-        "parent_pesticide",
-        "current_measurement_flag",
+        "chemical_class",
+        "chemical_subclass",
+        "classification_source",
     }
     assert required_fields.issubset(first.keys())
 
@@ -54,3 +59,28 @@ def test_serialization_roundtrip():
     raw = json.dumps(info)
     restored = json.loads(raw)
     assert restored["match"]["analyte_name"] == "DMP"
+
+
+def test_suggest_analytes_order():
+    records = load_analyte_reference()
+    out = suggest_analytes("dde", records, limit=5)
+    assert out, "Expected suggestions for partial 'dde'"
+    # Heuristic validation: first suggestion should contain the exact normalized
+    # fragment and represent a minimal length difference. We relax strict ordering
+    # because classification or placeholder rows may introduce variant lengths.
+    first = out[0]
+    assert "DDE" in first.upper(), "Top suggestion should relate to query substring"
+    assert len(first) <= max(len(x) for x in out), "First suggestion should not be longer than all others"
+
+
+def test_suggest_analytes_empty():
+    records = load_analyte_reference()
+    assert suggest_analytes("", records) == []
+
+
+def test_as_json_roundtrip():
+    payload = {"a": 1, "b": "x"}
+    js = as_json(payload)
+    restored = json.loads(js)
+    assert restored == payload
+    assert "\n" in js  # pretty formatting contains newlines

@@ -42,8 +42,7 @@ DATA_REFERENCE_DIR = Path("data/reference")
 #  evidence/     -> mapping attempt evidence
 REFERENCE_CSV = DATA_REFERENCE_DIR / "minimal" / "pesticide_reference_minimal.csv"
 REFERENCE_CSV_CLASSIFIED = DATA_REFERENCE_DIR / "classified" / "pesticide_reference_classified.csv"
-REFERENCE_CSV_LEGACY_AI = DATA_REFERENCE_DIR / "legacy" / "pesticide_reference_legacy_ai.csv"
-REFERENCE_CSV_VERIFIED = DATA_REFERENCE_DIR / "legacy" / "pesticide_reference_verified.csv"
+REFERENCE_CSV_SHIM = DATA_REFERENCE_DIR / "pesticide_reference.csv"  # backward compatibility shim
 SOURCES_YAML = DATA_REFERENCE_DIR / "config" / "pesticide_sources.yml"
 
 
@@ -111,16 +110,22 @@ def _normalize(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", s.lower())
 
 
-def load_analyte_reference(path: Path = REFERENCE_CSV, allow_legacy_ai: bool = False) -> list[PesticideAnalyte]:
-    """Load pesticide analyte reference CSV (minimal or classified).
+def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]:
+    """Load pesticide analyte reference CSV (prefer classified, then minimal, then shim).
+
+    The legacy AI-generated reference has been removed; this loader now resolves
+    the best available file via an ordered cascade:
+
+    1. Classified enriched reference (if present)
+    2. Minimal reference (new hierarchical path)
+    3. Flat compatibility shim (`pesticide_reference.csv`)
+    4. Legacy flat minimal / classified (if accidentally retained)
+    5. Any glob-discovered `pesticide_reference_*.csv` as last resort
 
     Parameters
     ----------
     path : Path, default=REFERENCE_CSV
-        Path to the reference CSV file. Auto-detects classified vs minimal schema.
-    allow_legacy_ai : bool, default=False
-        If True, permits loading the legacy AI-generated file without warning.
-        If False and legacy file is detected, raises ValueError.
+        Starting path (usually minimal). If this path does not exist the cascade applies.
 
     Returns
     -------
@@ -130,39 +135,37 @@ def load_analyte_reference(path: Path = REFERENCE_CSV, allow_legacy_ai: bool = F
     Raises
     ------
     FileNotFoundError
-        If the CSV file does not exist.
-    ValueError
-        If legacy AI file is being loaded without explicit permission.
+        If no suitable reference file is found.
     """
-    # Prefer classified file if caller passed default minimal path and classified exists
-    if path == REFERENCE_CSV and REFERENCE_CSV_CLASSIFIED.exists():
-        path = REFERENCE_CSV_CLASSIFIED
-        print(f"INFO: Using classified reference file: {path}")
-    # Otherwise prefer verified file if explicit path missing
-    elif not path.exists() and REFERENCE_CSV_VERIFIED.exists():
-        path = REFERENCE_CSV_VERIFIED
-        print(f"INFO: Using verified reference file: {path}")
-
-    # Fallback compatibility: if new structured path not found, try old flat locations
-    if not path.exists():
-        legacy_flat_candidates = [
-            DATA_REFERENCE_DIR / "pesticide_reference_minimal.csv",
-            DATA_REFERENCE_DIR / "pesticide_reference_classified.csv",
+    # Ordered candidate selection allowing for missing packaged data.
+    # Rationale: In distribution artifacts the nested minimal/ or classified/ files may be excluded
+    # if not declared as package data. The shim (pesticide_reference.csv) provides a stable fallback.
+    if path == REFERENCE_CSV:  # only apply cascade when caller uses default
+        candidates: list[Path] = [
+            REFERENCE_CSV_CLASSIFIED,  # enriched classification
+            REFERENCE_CSV,  # minimal hierarchical
+            REFERENCE_CSV_SHIM,  # flat shim
+            DATA_REFERENCE_DIR / "pesticide_reference_minimal.csv",  # legacy flat minimal (if lingering)
+            DATA_REFERENCE_DIR / "pesticide_reference_classified.csv",  # legacy flat classified (if lingering)
         ]
-        for candidate in legacy_flat_candidates:
+        # Add any glob-discovered files matching pattern as last resort
+        for extra in DATA_REFERENCE_DIR.rglob("pesticide_reference_*.csv"):
+            if extra not in candidates:
+                candidates.append(extra)
+        for candidate in candidates:
             if candidate.exists():
-                print(f"INFO: Fallback to legacy flat reference path: {candidate}")
+                if candidate != path:
+                    print(f"INFO: Using reference file: {candidate}")
                 path = candidate
                 break
 
-    # Check for legacy AI file
-    if path.name == "pesticide_reference_legacy_ai.csv" and not allow_legacy_ai:
-        raise ValueError(
-            f"Attempted to load AI-generated legacy file: {path}\n"
-            "This file contains unverified parent_pesticide mappings.\n"
-            "To use this file for historical reproduction only, set allow_legacy_ai=True.\n"
-            f"Preferred: Use {REFERENCE_CSV} (minimal schema with zero inference)."
-        )
+    # If caller provided explicit path but it does not exist, attempt shim then legacy flat
+    if not path.exists():
+        for candidate in [REFERENCE_CSV_SHIM, DATA_REFERENCE_DIR / "pesticide_reference_minimal.csv"]:
+            if candidate.exists():
+                print(f"INFO: Fallback to reference file: {candidate}")
+                path = candidate
+                break
 
     if not path.exists():  # pragma: no cover
         raise FileNotFoundError(f"Reference CSV not found: {path}")
