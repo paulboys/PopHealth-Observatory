@@ -10,6 +10,15 @@ Strategy:
 3. Store all synonyms (common names, abbreviations, IUPAC, trade names).
 4. Generate structured synonym map CSV for downstream classification matching.
 
+Coverage:
+- PubChem success: 57/59 CAS RNs (96.6%)
+- Total synonyms: 5,451 entries
+- Known gaps:
+  * CAS 70458-82-3 (3-PBA): Not in PubChem (may be invalid/outdated CAS)
+  * CAS 814-24-8 (DMP): Not in PubChem (may be invalid/outdated CAS)
+
+Manual curation needed for gap cases using NHANES codebooks or CDC Fourth Report.
+
 Usage:
     python scripts/pesticides/expand_synonyms_via_pubchem.py
 
@@ -50,6 +59,13 @@ def fetch_pubchem_synonyms(cas_rn: str, retries: int = 2) -> list[str]:
     -------
     list[str]
         List of all registered synonyms, or empty list on failure
+
+    Notes
+    -----
+    Known limitations:
+    - CAS 70458-82-3 (3-PBA): Not found in PubChem (may be invalid/outdated CAS)
+    - CAS 814-24-8 (DMP): Not found in PubChem (may be invalid/outdated CAS)
+    These cases require manual curation from NHANES codebooks or CDC Fourth Report.
     """
     url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{cas_rn}/synonyms/JSON"
 
