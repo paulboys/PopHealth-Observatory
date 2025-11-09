@@ -25,6 +25,32 @@ import pandas as pd
 import requests
 
 
+def load_analyte_code_map(map_path: Path | None = None) -> dict[str, str]:
+    """Load analyte code → name mapping for URX*/LBX* variable translation.
+
+    Parameters
+    ----------
+    map_path : Path | None
+        Path to analyte_code_map.csv; defaults to data/reference/config/analyte_code_map.csv
+
+    Returns
+    -------
+    dict[str, str]
+        Mapping from variable_name (e.g., 'URX3PBA') to analyte_name (e.g., '3-PBA')
+    """
+    if map_path is None:
+        map_path = Path(__file__).parent.parent / "data" / "reference" / "config" / "analyte_code_map.csv"
+
+    if not map_path.exists():
+        return {}
+
+    df = pd.read_csv(map_path)
+    if df.empty or "variable_name" not in df.columns or "analyte_name" not in df.columns:
+        return {}
+
+    return dict(zip(df["variable_name"], df["analyte_name"], strict=True))
+
+
 def load_pesticide_reference(ref_path: Path | None = None) -> pd.DataFrame:
     """Load curated pesticide analyte reference CSV.
 
@@ -259,7 +285,9 @@ def _extract_analyte_columns(df: pd.DataFrame, ref_df: pd.DataFrame) -> pd.DataF
     return df_long
 
 
-def _map_to_reference(df_long: pd.DataFrame, ref_df: pd.DataFrame) -> pd.DataFrame:
+def _map_to_reference(
+    df_long: pd.DataFrame, ref_df: pd.DataFrame, code_map: dict[str, str] | None = None
+) -> pd.DataFrame:
     """Map raw analyte codes to normalized reference names and metadata.
 
     Parameters
@@ -268,20 +296,28 @@ def _map_to_reference(df_long: pd.DataFrame, ref_df: pd.DataFrame) -> pd.DataFra
         Long-format data with analyte_code column
     ref_df : pd.DataFrame
         Reference table
+    code_map : dict[str, str] | None
+        Variable name to analyte name mapping (optional)
 
     Returns
     -------
     pd.DataFrame
-        Enriched DataFrame with analyte_name, parent_pesticide, metabolite_class, etc.
+        Enriched DataFrame with canonical analyte_name instead of raw code
     """
-    if df_long.empty or ref_df.empty:
+    if df_long.empty:
         return df_long
 
-    # For now, simple join on analyte_name (assuming codes can be mapped)
-    # Future: build explicit code->name mapping from NHANES variable labels
-
-    # Placeholder: return as-is; full mapping requires variable label parsing
-    # which is beyond Phase 1 scope. Will refine in Phase 2.
+    # Apply code mapping if available (URX*/LBX* → canonical names)
+    if code_map:
+        # Convert analyte_code to uppercase for case-insensitive matching
+        df_long["analyte_code_upper"] = df_long["analyte_code"].str.upper()
+        df_long["analyte_name"] = df_long["analyte_code_upper"].map(code_map)
+        # Fallback to raw code if unmapped
+        df_long["analyte_name"] = df_long["analyte_name"].fillna(df_long["analyte_code"])
+        df_long.drop(columns=["analyte_code_upper"], inplace=True)
+    else:
+        # No map available; use raw code as analyte_name
+        df_long["analyte_name"] = df_long["analyte_code"]
 
     return df_long
 
@@ -369,6 +405,9 @@ def get_pesticide_metabolites(cycle: str, ref_path: Path | None = None, timeout:
     if ref_df.empty:
         print("Warning: pesticide_reference.csv not found or empty. Proceeding without metadata.")
 
+    # Load analyte code mapping for URX*/LBX* → canonical name translation
+    code_map = load_analyte_code_map()
+
     # Try each candidate file pattern
     candidates = _build_pesticide_file_candidates(cycle)
 
@@ -391,8 +430,8 @@ def get_pesticide_metabolites(cycle: str, ref_path: Path | None = None, timeout:
         df_long["cycle"] = cycle
         df_long["source_file"] = f"{component}_{_get_cycle_letter_suffix(cycle)}"
 
-        # Map to reference
-        df_mapped = _map_to_reference(df_long, ref_df)
+        # Map to reference (apply code→name translation)
+        df_mapped = _map_to_reference(df_long, ref_df, code_map)
 
         # Derive metrics
         df_final = _derive_metrics(df_mapped)
@@ -437,3 +476,61 @@ def get_pesticide_metabolites(cycle: str, ref_path: Path | None = None, timeout:
     final_cols = [c for c in schema_cols if c in result.columns]
 
     return result[final_cols]
+
+
+def get_pesticide_panel(cycles: list[str], ref_path: Path | None = None, timeout: int = 30) -> pd.DataFrame:
+    """Load and stack pesticide laboratory analytes for multiple NHANES cycles.
+
+    Convenience wrapper around `get_pesticide_metabolites` for multi-cycle longitudinal analysis.
+    Automatically skips missing cycles (returns empty for that cycle) and concatenates results.
+
+    Parameters
+    ----------
+    cycles : list[str]
+        List of NHANES cycles (e.g., ['2015-2016', '2017-2018'])
+    ref_path : Path | None
+        Optional path to pesticide_reference.csv
+    timeout : int
+        Download timeout in seconds
+
+    Returns
+    -------
+    pd.DataFrame
+        Stacked DataFrame with all available analytes across specified cycles.
+        Returns empty DataFrame if no cycles yield data.
+
+    Raises
+    ------
+    ValueError
+        If any cycle format is invalid (even if data unavailable, format must be valid)
+
+    Examples
+    --------
+    >>> panel = get_pesticide_panel(['2015-2016', '2017-2018'])
+    >>> panel.groupby('cycle')['participant_id'].nunique()
+    cycle
+    2015-2016    8000
+    2017-2018    7500
+    Name: participant_id, dtype: int64
+
+    Notes
+    -----
+    - Missing cycle files do NOT raise exceptions; empty frames are skipped.
+    - Cycles with partial data (some components missing) are included if at least one component succeeds.
+    - Use for temporal trend analysis, demographic comparisons, or correlation studies.
+    """
+    frames = []
+
+    for cycle in cycles:
+        df = get_pesticide_metabolites(cycle, ref_path=ref_path, timeout=timeout)
+        if not df.empty:
+            frames.append(df)
+        # Silently skip empty cycles (already logged by get_pesticide_metabolites)
+
+    if not frames:
+        print(f"⚠ No valid data retrieved for any of the {len(cycles)} requested cycles.")
+        return pd.DataFrame()
+
+    # Concatenate all cycles
+    stacked = pd.concat(frames, ignore_index=True)
+    return stacked

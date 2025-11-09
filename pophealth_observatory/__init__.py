@@ -5,7 +5,7 @@ Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 """
 
 from .brfss import BRFSSExplorer
-from .laboratory_pesticides import get_pesticide_metabolites, load_pesticide_reference
+from .laboratory_pesticides import get_pesticide_metabolites, get_pesticide_panel, load_pesticide_reference
 from .observatory import NHANESExplorer, PopHealthObservatory
 
 # Dynamic version reading from package metadata
@@ -22,6 +22,7 @@ __all__ = [
     "NHANESExplorer",
     "BRFSSExplorer",
     "get_pesticide_metabolites",
+    "get_pesticide_panel",
     "load_pesticide_reference",
     "__version__",
 ]
