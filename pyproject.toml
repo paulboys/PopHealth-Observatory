@@ -90,4 +90,21 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pophealth_observatory*"]
-exclude = ["tests*", "notebooks*", "docs*", "apps*", "data*", "manifests*", "r*"]
+exclude = ["tests*", "notebooks*", "docs*", "apps*", "manifests*", "r*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+# Explicit allowlist of small, versioned reference artifacts needed for runtime integrity tests.
+# These paths are intentionally narrow to avoid packaging large or generated data.
+"pophealth_observatory" = [
+    # Pesticide reference minimal & classified CSVs (required by packaging integrity tests)
+    "../data/reference/minimal/pesticide_reference_minimal.csv",
+    "../data/reference/classified/pesticide_reference_classified.csv",
+    # Config mapping (analyte code map)
+    "../data/reference/config/analyte_code_map.csv",
+    # Placeholder README files to ensure directory structure expectations
+    "../data/reference/legacy/README.md",
+    "../data/reference/discovery/README.md"
+]
