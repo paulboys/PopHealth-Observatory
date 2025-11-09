@@ -1,111 +1,111 @@
-variable_name,analyte_name,normalized_name,candidate_cdc_name,candidate_class,candidate_subclass,similarity_score
-LBCBHC,Beta-hexachlorocyclohexane,beta-hexachlorocyclohexane,beta-hexachlorocyclohexane,Organochlorine,HCH,1.000
-LBCBHCLA,B-hexachlorocyclohexane,b-hexachlorocyclohexane,,,,0.000
-LBCGHC,Gamma-hexachlorocyclohexane,gamma-hexachlorocyclohexane,gamma-hexachlorocyclohexane,Organochlorine,HCH (Lindane),1.000
-LBCGHCLA,G-hexachlorocyclohexane,g-hexachlorocyclohexane,,,,0.000
-LBCHCB,Hexachlorobenzene,hexachlorobenzene,hexachlorobenzene,Organochlorine,Chlorinated benzene,1.000
-LBCHCBLA,Hexachlorobenzene,hexachlorobenzene,hexachlorobenzene,Organochlorine,Chlorinated benzene,1.000
-LBCMIR,Mirex,mirex,mirex,Organochlorine,Chlordane-related,1.000
-LBCMIRLA,Mirex,mirex,mirex,Organochlorine,Chlordane-related,1.000
-LBCODT,"o,p'-DDT","o,p-ddt",ddt,Organochlorine,DDT-related,0.429
-LBCODTLA,"o,p'-DDT","o,p-ddt",ddt,Organochlorine,DDT-related,0.429
-LBCOXY,Oxychlordane,oxychlordane,oxychlordane,Organochlorine,Chlordane-related,1.000
-LBCOXYLA,Oxychlordane,oxychlordane,oxychlordane,Organochlorine,Chlordane-related,1.000
-LBCPDE,"p,p'-DDE","p,p-dde",dde,Organochlorine,DDT metabolite,0.429
-LBCPDELA,"p,p'-DDE","p,p-dde",dde,Organochlorine,DDT metabolite,0.429
-LBCPDT,"p,p'-DDT","p,p-ddt",ddt,Organochlorine,DDT-related,0.429
-LBCPDTLA,"p,p'-DDT","p,p-ddt",ddt,Organochlorine,DDT-related,0.429
-LBCTNA,trans-Nonachlor,trans-nonachlor,trans-nonachlor,Organochlorine,Chlordane-related,1.000
-LBCTNALA,trans-Nonachlor,trans-nonachlor,trans-nonachlor,Organochlorine,Chlordane-related,1.000
-LBXALD,Aldrin,aldrin,aldrin,Organochlorine,Cyclodiene,1.000
-LBXALDLA,Aldrinusted,aldrinusted,aldrin,Organochlorine,Cyclodiene,0.545
-LBXBHC,Beta-hexachloro-cyclohexane,beta-hexachloro-cyclohexane,,,,0.000
-LBXBHCLA,Beta-hexachlorocyclohexaneusted,beta-hexachlorocyclohexaneusted,beta-hexachlorocyclohexane,Organochlorine,HCH,0.839
-LBXDIE,Dieldrin,dieldrin,dieldrin,Organochlorine,Cyclodiene,1.000
-LBXDIELA,Dieldrinusted,dieldrinusted,dieldrin,Organochlorine,Cyclodiene,0.615
-LBXEND,Endrin,endrin,endrin,Organochlorine,Cyclodiene,1.000
-LBXENDLA,Endrinusted,endrinusted,endrin,Organochlorine,Cyclodiene,0.545
-LBXGHC,Gamma-hexachloro-cyclohexane,gamma-hexachloro-cyclohexane,,,,0.000
-LBXGHCLA,Gamma-hexachlorocyclohexaneusted,gamma-hexachlorocyclohexaneusted,gamma-hexachlorocyclohexane,Organochlorine,HCH (Lindane),0.844
-LBXHCB,Hexachlorobenzene,hexachlorobenzene,hexachlorobenzene,Organochlorine,Chlorinated benzene,1.000
-LBXHCBLA,Hexachlorobenzeneusted,hexachlorobenzeneusted,hexachlorobenzene,Organochlorine,Chlorinated benzene,0.773
-LBXHPE,Heptachlor Epoxide,heptachlor epoxide,heptachlor,Organochlorine,Cyclodiene,0.556
-LBXHPELA,Heptachlor Epoxideusted,heptachlor epoxideusted,heptachlor,Organochlorine,Cyclodiene,0.435
-LBXMIR,Mirex,mirex,mirex,Organochlorine,Chlordane-related,1.000
-LBXMIRLA,Mirexusted,mirexusted,mirex,Organochlorine,Chlordane-related,0.500
-LBXODT,opDDT,opddt,ddt,Organochlorine,DDT-related,0.600
-LBXODTLA,opDDTusted,opddtusted,ddt,Organochlorine,DDT-related,0.300
-LBXOXY,Oxychlordane,oxychlordane,oxychlordane,Organochlorine,Chlordane-related,1.000
-LBXOXYLA,Oxychlordaneusted,oxychlordaneusted,oxychlordane,Organochlorine,Chlordane-related,0.706
-LBXPDE,ppDDE,ppdde,dde,Organochlorine,DDT metabolite,0.600
-LBXPDELA,ppDDEusted,ppddeusted,dde,Organochlorine,DDT metabolite,0.300
-LBXPDT,ppDDT,ppddt,ddt,Organochlorine,DDT-related,0.600
-LBXPDTLA,ppDDTusted,ppddtusted,ddt,Organochlorine,DDT-related,0.300
-LBXTNA,Trans-nonachlor,trans-nonachlor,trans-nonachlor,Organochlorine,Chlordane-related,1.000
-LBXTNALA,Trans-nonachlorusted,trans-nonachlorusted,trans-nonachlor,Organochlorine,Chlordane-related,0.750
-SSBHC,B-HCCH,b-hcch,,,,0.000
-SSGHC,G-HCCH,g-hcch,,,,0.000
-SSHCB,HCB,hcb,,,,0.000
-SSMIR,MIREX,mirex,mirex,Organochlorine,Chlordane-related,1.000
-SSODT,OP-DDT,op-ddt,ddt,Organochlorine,DDT-related,0.500
-SSOXY,OXYCHLOR,oxychlor,oxychlordane,Organochlorine,Chlordane-related,0.667
-SSPDE,PP-DDE7,pp-dde7,dde,Organochlorine,DDT metabolite,0.429
-SSPDT,PP-DDT,pp-ddt,ddt,Organochlorine,DDT-related,0.500
-SSTNA,T-NONA,t-nona,,,,0.000
-URX14D,"2,5-dichlorophenol","2,5-dichlorophenol","2,5-dichlorophenol",Chlorophenol,Environmental contaminant,1.000
-URX1TB,"2,4,5-trichlorophenol","2,4,5-trichlorophenol","2,4,5-t",Phenoxy herbicide,Chlorophenoxy,0.333
-URX24D,"2,4-D","2,4-d","2,4-d",Phenoxy herbicide,Chlorophenoxy,1.000
-URX25T,"2,4,5-T","2,4,5-t","2,4,5-t",Phenoxy herbicide,Chlorophenoxy,1.000
-URX3TB,"2,4,6-trichlorophenol","2,4,6-trichlorophenol",,,,0.000
-URX4FP,4-fluoro-3-phenoxybenzoic acid,4-fluoro-3-phenoxybenzoic acid,4-fluoro-3-phenoxybenzoic acid,Pyrethroid metabolite,Cyfluthrin-specific,1.000
-URXACE,Acetochlor mercapturate,acetochlor mercapturate,,,,0.000
-URXALA,Alachlor mercapturate,alachlor mercapturate,,,,0.000
-URXAPE,Acephate,acephate,,,,0.000
-URXATZ,Atrazine mercapturate,atrazine mercapturate,atrazine,Triazine herbicide,Current-use herbicide,0.381
-URXBSM,Bensulfuron methyl,bensulfuron methyl,,,,0.000
-URXCB3,"cis-3-(2,2-dibromovinyl)-2,2-dimethylcyclopropane carboxylic acid","cis-3-2,2-dibromovinyl-2,2-dimethylcyclopropane carboxylic acid",3-phenoxybenzoic acid,Pyrethroid metabolite,Common metabolite,0.250
-URXCBF,Carbofuranphenol,carbofuranphenol,,,,0.000
-URXCCC,"cis-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid","cis-3-2,2-dichlorovinyl-2,2-dimethylcyclopropane carboxylic acid",3-phenoxybenzoic acid,Pyrethroid metabolite,Common metabolite,0.250
-URXCHS,Chlorsulfuron,chlorsulfuron,,,,0.000
-URXCMH,3-chloro-7-hydroxy-4-methyl-2H-chromen-2-one/ol,3-chloro-7-hydroxy-4-methyl-2h-chromen-2-oneol,,,,0.000
-URXCPM,"3,5,6-trichloropyridinol","3,5,6-trichloropyridinol",,,,0.000
-URXDCB,"2,4-dichlorophenol","2,4-dichlorophenol","2,4-dichlorophenol",Chlorophenol,Environmental contaminant,1.000
-URXDEE,DEET,deet,,,,0.000
-URXDIZ,Oxypyrimidine,oxypyrimidine,,,,0.000
-URXDPY,2-(diethylamino)-6-methylpyrimidin-4-ol/one,2-diethylamino-6-methylpyrimidin-4-olone,,,,0.000
-URXEMM,Ethametsulfuron methyl,ethametsulfuron methyl,,,,0.000
-URXETU,Ethylenethio urea,ethylenethio urea,,,,0.000
-URXFRM,Foramsulfuron,foramsulfuron,,,,0.000
-URXHLS,Halosulfuron,halosulfuron,,,,0.000
-URXMAL,Malathion diacid,malathion diacid,malathion,Organophosphate,Current-use OP,0.562
-URXMET,Metolachlor mercapturate,metolachlor mercapturate,,,,0.000
-URXMMI,Methamidaphos,methamidaphos,,,,0.000
-URXMSM,Mesosulfuron methyl,mesosulfuron methyl,,,,0.000
-URXMTM,Metsulfuron methyl,metsulfuron methyl,,,,0.000
-URXMTO,Dimethoate,dimethoate,,,,0.000
-URXNOS,Nicosulfuron,nicosulfuron,,,,0.000
-URXOMO,O-methoate,o-methoate,,,,0.000
-URXOP1,Dimethylphosphate,dimethylphosphate,dimethylphosphate,Organophosphate metabolite,DAP,1.000
-URX3PBA,3-PBA,3-pba,3-pba,Pyrethroid metabolite,Common metabolite,1.000
-URXDMP,DMP,dmp,,,,0.000
-URXOP2,Diethylphosphate,diethylphosphate,diethylphosphate,Organophosphate metabolite,DAP,1.000
-URXOP3,Dimethylthiophosphate,dimethylthiophosphate,dimethylthiophosphate,Organophosphate metabolite,DAP,1.000
-URXOP4,Diethylthiophosphate,diethylthiophosphate,diethylthiophosphate,Organophosphate metabolite,DAP,1.000
-URXOP5,Dimethyldithiophosphate,dimethyldithiophosphate,dimethyldithiophosphate,Organophosphate metabolite,DAP,1.000
-URXOP6,Diethyldithiophosphate,diethyldithiophosphate,diethyldithiophosphate,Organophosphate metabolite,DAP,1.000
-URXOPM,3-phenoxybenzoic acid,3-phenoxybenzoic acid,3-phenoxybenzoic acid,Pyrethroid metabolite,Common metabolite,1.000
-URXOPP,O-Phenyl phenol,o-phenyl phenol,,,,0.000
-URXOXS,Oxasulfuron,oxasulfuron,,,,0.000
-URXPAR,Paranitrophenol,paranitrophenol,,,,0.000
-URXPCP,Pentachlorophenol,pentachlorophenol,,,,0.000
-URXPIM,Primisulfuron methyl,primisulfuron methyl,,,,0.000
-URXPPX,2-isopropoxyphenol,2-isopropoxyphenol,,,,0.000
-URXPRO,Prosulfuron,prosulfuron,,,,0.000
-URXPTU,Propylenethio urea,propylenethio urea,,,,0.000
-URXRIM,Rimsulfuron,rimsulfuron,,,,0.000
-URXSMM,Sulfometuron methyl,sulfometuron methyl,,,,0.000
-URXSSF,Sulfosulfuron,sulfosulfuron,,,,0.000
-URXTCC,"trans-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid","trans-3-2,2-dichlorovinyl-2,2-dimethylcyclopropane carboxylic acid",3-phenoxybenzoic acid,Pyrethroid metabolite,Common metabolite,0.250
-URXTHF,Thifensulfuron methyl,thifensulfuron methyl,,,,0.000
-URXTRA,Triasulfuron,triasulfuron,,,,0.000
-URXTRN,Triflusulfuron methyl,triflusulfuron methyl,,,,0.000
+variable_name,analyte_name,normalized_name,candidate_cdc_name,candidate_class,candidate_subclass,similarity_score,match_method
+LBCBHC,Beta-hexachlorocyclohexane,beta-hexachlorocyclohexane,beta-hexachlorocyclohexane,Organochlorine,,1.000,pubchem_synonym
+LBCBHCLA,B-hexachlorocyclohexane,b-hexachlorocyclohexane,beta-hexachlorocyclohexane,Organochlorine,,1.000,pubchem_synonym
+LBCGHC,Gamma-hexachlorocyclohexane,gamma-hexachlorocyclohexane,beta-hexachlorocyclohexane,Organochlorine,,1.000,pubchem_synonym
+LBCGHCLA,G-hexachlorocyclohexane,g-hexachlorocyclohexane,beta-hexachlorocyclohexane,Organochlorine,,1.000,pubchem_synonym
+LBCHCB,Hexachlorobenzene,hexachlorobenzene,hexachlorobenzene,Organochlorine,,1.000,pubchem_synonym
+LBCHCBLA,Hexachlorobenzene,hexachlorobenzene,hexachlorobenzene,Organochlorine,,1.000,pubchem_synonym
+LBCMIR,Mirex,mirex,mirex,Organochlorine,,1.000,pubchem_synonym
+LBCMIRLA,Mirex,mirex,mirex,Organochlorine,,1.000,pubchem_synonym
+LBCODT,"o,p'-DDT","o,p-ddt",ddt,Organochlorine,,0.429,fuzzy
+LBCODTLA,"o,p'-DDT","o,p-ddt",ddt,Organochlorine,,0.429,fuzzy
+LBCOXY,Oxychlordane,oxychlordane,oxychlordane,Organochlorine,,1.000,pubchem_synonym
+LBCOXYLA,Oxychlordane,oxychlordane,oxychlordane,Organochlorine,,1.000,pubchem_synonym
+LBCPDE,"p,p'-DDE","p,p-dde",dde,Organochlorine,,0.429,fuzzy
+LBCPDELA,"p,p'-DDE","p,p-dde",dde,Organochlorine,,0.429,fuzzy
+LBCPDT,"p,p'-DDT","p,p-ddt",ddt,Organochlorine,,0.429,fuzzy
+LBCPDTLA,"p,p'-DDT","p,p-ddt",ddt,Organochlorine,,0.429,fuzzy
+LBCTNA,trans-Nonachlor,trans-nonachlor,trans-nonachlor,Organochlorine,,1.000,pubchem_synonym
+LBCTNALA,trans-Nonachlor,trans-nonachlor,trans-nonachlor,Organochlorine,,1.000,pubchem_synonym
+LBXALD,Aldrin,aldrin,aldrin,Organochlorine,,1.000,pubchem_synonym
+LBXALDLA,Aldrinusted,aldrinusted,aldrin,Organochlorine,,0.545,fuzzy
+LBXBHC,Beta-hexachloro-cyclohexane,beta-hexachloro-cyclohexane,,,,0.000,none
+LBXBHCLA,Beta-hexachlorocyclohexaneusted,beta-hexachlorocyclohexaneusted,beta-hexachlorocyclohexane,Organochlorine,,0.839,fuzzy
+LBXDIE,Dieldrin,dieldrin,dieldrin,Organochlorine,,1.000,pubchem_synonym
+LBXDIELA,Dieldrinusted,dieldrinusted,dieldrin,Organochlorine,,0.615,fuzzy
+LBXEND,Endrin,endrin,endrin,Organochlorine,,1.000,pubchem_synonym
+LBXENDLA,Endrinusted,endrinusted,endrin,Organochlorine,,0.545,fuzzy
+LBXGHC,Gamma-hexachloro-cyclohexane,gamma-hexachloro-cyclohexane,beta-hexachlorocyclohexane,Organochlorine,,1.000,pubchem_synonym
+LBXGHCLA,Gamma-hexachlorocyclohexaneusted,gamma-hexachlorocyclohexaneusted,gamma-hexachlorocyclohexane,Organochlorine,,0.844,fuzzy
+LBXHCB,Hexachlorobenzene,hexachlorobenzene,hexachlorobenzene,Organochlorine,,1.000,pubchem_synonym
+LBXHCBLA,Hexachlorobenzeneusted,hexachlorobenzeneusted,hexachlorobenzene,Organochlorine,,0.773,fuzzy
+LBXHPE,Heptachlor Epoxide,heptachlor epoxide,heptachlor,Organochlorine,,0.556,fuzzy
+LBXHPELA,Heptachlor Epoxideusted,heptachlor epoxideusted,heptachlor,Organochlorine,,0.435,fuzzy
+LBXMIR,Mirex,mirex,mirex,Organochlorine,,1.000,pubchem_synonym
+LBXMIRLA,Mirexusted,mirexusted,mirex,Organochlorine,,0.500,fuzzy
+LBXODT,opDDT,opddt,ddt,Organochlorine,,0.600,fuzzy
+LBXODTLA,opDDTusted,opddtusted,ddt,Organochlorine,,0.300,fuzzy
+LBXOXY,Oxychlordane,oxychlordane,oxychlordane,Organochlorine,,1.000,pubchem_synonym
+LBXOXYLA,Oxychlordaneusted,oxychlordaneusted,oxychlordane,Organochlorine,,0.706,fuzzy
+LBXPDE,ppDDE,ppdde,dde,Organochlorine,,0.600,fuzzy
+LBXPDELA,ppDDEusted,ppddeusted,dde,Organochlorine,,0.300,fuzzy
+LBXPDT,ppDDT,ppddt,ddt,Organochlorine,,0.600,fuzzy
+LBXPDTLA,ppDDTusted,ppddtusted,ddt,Organochlorine,,0.300,fuzzy
+LBXTNA,Trans-nonachlor,trans-nonachlor,trans-nonachlor,Organochlorine,,1.000,pubchem_synonym
+LBXTNALA,Trans-nonachlorusted,trans-nonachlorusted,trans-nonachlor,Organochlorine,,0.750,fuzzy
+SSBHC,B-HCCH,b-hcch,,,,0.000,none
+SSGHC,G-HCCH,g-hcch,,,,0.000,none
+SSHCB,HCB,hcb,hexachlorobenzene,Organochlorine,,1.000,pubchem_synonym
+SSMIR,MIREX,mirex,mirex,Organochlorine,,1.000,pubchem_synonym
+SSODT,OP-DDT,op-ddt,ddt,Organochlorine,,0.500,fuzzy
+SSOXY,OXYCHLOR,oxychlor,oxychlordane,Organochlorine,,0.667,fuzzy
+SSPDE,PP-DDE7,pp-dde7,ddt,Organochlorine,,1.000,pubchem_synonym
+SSPDT,PP-DDT,pp-ddt,ddt,Organochlorine,,0.500,fuzzy
+SSTNA,T-NONA,t-nona,,,,0.000,none
+URX14D,"2,5-dichlorophenol","2,5-dichlorophenol","2,5-dichlorophenol",Chlorophenol,,1.000,pubchem_synonym
+URX1TB,"2,4,5-trichlorophenol","2,4,5-trichlorophenol","2,4,5-t",Phenoxy herbicide,,0.333,fuzzy
+URX24D,"2,4-D","2,4-d","2,4-d",Phenoxy herbicide,,1.000,pubchem_synonym
+URX25T,"2,4,5-T","2,4,5-t","2,4,5-t",Phenoxy herbicide,,1.000,pubchem_synonym
+URX3TB,"2,4,6-trichlorophenol","2,4,6-trichlorophenol",,,,0.000,none
+URX4FP,4-fluoro-3-phenoxybenzoic acid,4-fluoro-3-phenoxybenzoic acid,4-fluoro-3-phenoxybenzoic acid,Pyrethroid metabolite,,1.000,pubchem_synonym
+URXACE,Acetochlor mercapturate,acetochlor mercapturate,,,,0.000,none
+URXALA,Alachlor mercapturate,alachlor mercapturate,,,,0.000,none
+URXAPE,Acephate,acephate,,,,0.000,none
+URXATZ,Atrazine mercapturate,atrazine mercapturate,atrazine,Triazine herbicide,,0.381,fuzzy
+URXBSM,Bensulfuron methyl,bensulfuron methyl,,,,0.000,none
+URXCB3,"cis-3-(2,2-dibromovinyl)-2,2-dimethylcyclopropane carboxylic acid","cis-3-2,2-dibromovinyl-2,2-dimethylcyclopropane carboxylic acid",3-phenoxybenzoic acid,Pyrethroid metabolite,,0.250,fuzzy
+URXCBF,Carbofuranphenol,carbofuranphenol,,,,0.000,none
+URXCCC,"cis-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid","cis-3-2,2-dichlorovinyl-2,2-dimethylcyclopropane carboxylic acid",3-phenoxybenzoic acid,Pyrethroid metabolite,,0.250,fuzzy
+URXCHS,Chlorsulfuron,chlorsulfuron,,,,0.000,none
+URXCMH,3-chloro-7-hydroxy-4-methyl-2H-chromen-2-one/ol,3-chloro-7-hydroxy-4-methyl-2h-chromen-2-oneol,,,,0.000,none
+URXCPM,"3,5,6-trichloropyridinol","3,5,6-trichloropyridinol",,,,0.000,none
+URXDCB,"2,4-dichlorophenol","2,4-dichlorophenol","2,4-d",Phenoxy herbicide,,1.000,pubchem_synonym
+URXDEE,DEET,deet,,,,0.000,none
+URXDIZ,Oxypyrimidine,oxypyrimidine,,,,0.000,none
+URXDPY,2-(diethylamino)-6-methylpyrimidin-4-ol/one,2-diethylamino-6-methylpyrimidin-4-olone,,,,0.000,none
+URXEMM,Ethametsulfuron methyl,ethametsulfuron methyl,,,,0.000,none
+URXETU,Ethylenethio urea,ethylenethio urea,,,,0.000,none
+URXFRM,Foramsulfuron,foramsulfuron,,,,0.000,none
+URXHLS,Halosulfuron,halosulfuron,,,,0.000,none
+URXMAL,Malathion diacid,malathion diacid,malathion,Organophosphate,,0.562,fuzzy
+URXMET,Metolachlor mercapturate,metolachlor mercapturate,,,,0.000,none
+URXMMI,Methamidaphos,methamidaphos,,,,0.000,none
+URXMSM,Mesosulfuron methyl,mesosulfuron methyl,,,,0.000,none
+URXMTM,Metsulfuron methyl,metsulfuron methyl,,,,0.000,none
+URXMTO,Dimethoate,dimethoate,,,,0.000,none
+URXNOS,Nicosulfuron,nicosulfuron,,,,0.000,none
+URXOMO,O-methoate,o-methoate,,,,0.000,none
+URXOP1,Dimethylphosphate,dimethylphosphate,dimethylphosphate,Organophosphate metabolite,,1.000,pubchem_synonym
+URX3PBA,3-PBA,3-pba,3-phenoxybenzoic acid,Pyrethroid metabolite,,1.000,pubchem_synonym
+URXDMP,DMP,dmp,,,,0.000,none
+URXOP2,Diethylphosphate,diethylphosphate,diethylphosphate,Organophosphate metabolite,,1.000,pubchem_synonym
+URXOP3,Dimethylthiophosphate,dimethylthiophosphate,dimethylthiophosphate,Organophosphate metabolite,,1.000,exact_match
+URXOP4,Diethylthiophosphate,diethylthiophosphate,diethylthiophosphate,Organophosphate metabolite,,1.000,exact_match
+URXOP5,Dimethyldithiophosphate,dimethyldithiophosphate,dimethyldithiophosphate,Organophosphate metabolite,,1.000,pubchem_synonym
+URXOP6,Diethyldithiophosphate,diethyldithiophosphate,diethyldithiophosphate,Organophosphate metabolite,,1.000,exact_match
+URXOPM,3-phenoxybenzoic acid,3-phenoxybenzoic acid,3-phenoxybenzoic acid,Pyrethroid metabolite,,1.000,pubchem_synonym
+URXOPP,O-Phenyl phenol,o-phenyl phenol,,,,0.000,none
+URXOXS,Oxasulfuron,oxasulfuron,,,,0.000,none
+URXPAR,Paranitrophenol,paranitrophenol,,,,0.000,none
+URXPCP,Pentachlorophenol,pentachlorophenol,,,,0.000,none
+URXPIM,Primisulfuron methyl,primisulfuron methyl,,,,0.000,none
+URXPPX,2-isopropoxyphenol,2-isopropoxyphenol,,,,0.000,none
+URXPRO,Prosulfuron,prosulfuron,,,,0.000,none
+URXPTU,Propylenethio urea,propylenethio urea,,,,0.000,none
+URXRIM,Rimsulfuron,rimsulfuron,,,,0.000,none
+URXSMM,Sulfometuron methyl,sulfometuron methyl,,,,0.000,none
+URXSSF,Sulfosulfuron,sulfosulfuron,,,,0.000,none
+URXTCC,"trans-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid","trans-3-2,2-dichlorovinyl-2,2-dimethylcyclopropane carboxylic acid",3-phenoxybenzoic acid,Pyrethroid metabolite,,0.250,fuzzy
+URXTHF,Thifensulfuron methyl,thifensulfuron methyl,,,,0.000,none
+URXTRA,Triasulfuron,triasulfuron,,,,0.000,none
+URXTRN,Triflusulfuron methyl,triflusulfuron methyl,,,,0.000,none
