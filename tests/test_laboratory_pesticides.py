@@ -27,6 +27,7 @@ from pophealth_observatory.laboratory_pesticides import (
     _normalize_column_names,
     _parse_cycle_years,
     get_pesticide_metabolites,
+    get_pesticide_panel,
     load_pesticide_reference,
 )
 
@@ -392,22 +393,33 @@ class TestMapToReference:
     """Test metadata enrichment edge cases."""
 
     def test_empty_reference_dataframe_returns_input_unchanged(self):
-        """Empty reference DataFrame returns input as-is."""
-        df_long = pd.DataFrame({"analyte_code": ["A"], "value": [1.0]})
+        """Empty reference DataFrame returns input with analyte_name from code."""
+        df_long = pd.DataFrame({"analyte_code": ["urxabc"], "value": [1.0]})
         ref_empty = pd.DataFrame()
 
-        result = _map_to_reference(df_long, ref_empty)
+        result = _map_to_reference(df_long, ref_empty, code_map=None)
 
-        assert result.equals(df_long)
+        assert "analyte_name" in result.columns
+        assert result["analyte_name"].iloc[0] == "urxabc"  # Fallback to code
 
     def test_empty_input_dataframe_short_circuits(self):
         """Empty input DataFrame short-circuits and returns empty."""
         df_empty = pd.DataFrame()
         ref_df = pd.DataFrame({"analyte_name": ["test"]})
 
-        result = _map_to_reference(df_empty, ref_df)
+        result = _map_to_reference(df_empty, ref_df, code_map=None)
 
         assert result.empty
+
+    def test_code_map_translates_variable_names(self):
+        """Code map translates URX* codes to canonical analyte names."""
+        df_long = pd.DataFrame({"analyte_code": ["urx3pba", "urxdmp", "urxunk"], "value": [1.0, 2.0, 3.0]})
+        ref_df = pd.DataFrame()
+        code_map = {"URX3PBA": "3-PBA", "URXDMP": "DMP"}  # Uppercase keys
+
+        result = _map_to_reference(df_long, ref_df, code_map=code_map)
+
+        assert result["analyte_name"].tolist() == ["3-PBA", "DMP", "urxunk"]  # unmapped fallback
 
 
 class TestGetPesticideMetabolitesEdgeCases:
@@ -441,3 +453,65 @@ class TestGetPesticideMetabolitesEdgeCases:
         # Result should be empty since all components were empty
         assert isinstance(result, pd.DataFrame)
         assert result.empty  # All were empty
+
+
+class TestGetPesticidePanel:
+    """Test multi-cycle convenience wrapper."""
+
+    @patch("pophealth_observatory.laboratory_pesticides.get_pesticide_metabolites")
+    def test_stacks_multiple_cycles(self, mock_get):
+        """Panel stacks data from multiple cycles."""
+        # Mock different data for each cycle
+        df_2015 = pd.DataFrame(
+            {"participant_id": [1, 2], "cycle": ["2015-2016", "2015-2016"], "analyte_name": ["A", "A"]}
+        )
+        df_2017 = pd.DataFrame(
+            {"participant_id": [3, 4], "cycle": ["2017-2018", "2017-2018"], "analyte_name": ["B", "B"]}
+        )
+
+        mock_get.side_effect = [df_2015, df_2017]
+
+        result = get_pesticide_panel(["2015-2016", "2017-2018"])
+
+        assert not result.empty
+        assert len(result) == 4  # 2 from each cycle
+        assert set(result["cycle"]) == {"2015-2016", "2017-2018"}
+
+    @patch("pophealth_observatory.laboratory_pesticides.get_pesticide_metabolites")
+    def test_skips_empty_cycles_silently(self, mock_get):
+        """Panel skips cycles that return empty DataFrames."""
+        df_valid = pd.DataFrame({"participant_id": [1], "cycle": ["2017-2018"], "analyte_name": ["A"]})
+        df_empty = pd.DataFrame()
+
+        mock_get.side_effect = [df_empty, df_valid, df_empty]
+
+        result = get_pesticide_panel(["2015-2016", "2017-2018", "2019-2020"])
+
+        assert not result.empty
+        assert len(result) == 1
+        assert result["cycle"].iloc[0] == "2017-2018"
+
+    @patch("pophealth_observatory.laboratory_pesticides.get_pesticide_metabolites")
+    def test_returns_empty_when_all_cycles_empty(self, mock_get):
+        """Panel returns empty DataFrame when all cycles are empty."""
+        mock_get.return_value = pd.DataFrame()
+
+        result = get_pesticide_panel(["2015-2016", "2017-2018"])
+
+        assert result.empty
+
+    def test_invalid_cycle_format_raises(self):
+        """Invalid cycle format raises ValueError even if skipping empty."""
+        with pytest.raises(ValueError, match="Invalid cycle format"):
+            get_pesticide_panel(["2015-2016", "invalid"])
+
+    @patch("pophealth_observatory.laboratory_pesticides.get_pesticide_metabolites")
+    def test_single_cycle_returns_non_empty(self, mock_get):
+        """Panel with single cycle works as expected."""
+        df = pd.DataFrame({"participant_id": [1, 2], "cycle": ["2017-2018", "2017-2018"]})
+        mock_get.return_value = df
+
+        result = get_pesticide_panel(["2017-2018"])
+
+        assert not result.empty
+        assert len(result) == 2

@@ -533,8 +533,14 @@ nhanes_metrics = {
 }
 
 # Tabs for different analysis modes
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["📊 Cross-Sectional Explorer", "📈 Trend Analysis", "🔗 Bivariate Analysis", "🗺️ Geographic View (BRFSS)"]
+tab1, tab2, tab3, tab4, tab_pest = st.tabs(
+    [
+        "📊 Cross-Sectional Explorer",
+        "📈 Trend Analysis",
+        "🔗 Bivariate Analysis",
+        "🗺️ Geographic View (BRFSS)",
+        "🦠 Pesticide Biomonitoring",
+    ]
 )
 
 # ============================================================================
@@ -1074,6 +1080,116 @@ with tab4:
                 st.warning("Location data not available for choropleth map.")
         else:
             st.error("Data format unexpected. Unable to visualize.")
+
+# ============================================================================
+# TAB 5: Pesticide Biomonitoring (Phase 1 Scaffold)
+# ============================================================================
+
+with tab_pest:
+    st.header("🦠 Pesticide Biomonitoring")
+    st.caption("Explore NHANES pesticide laboratory analyte concentrations (urine & serum)")
+
+    st.info(
+        "**Phase 1 Scaffold**: Basic analyte selection and summary table. "
+        "Future enhancements: trends, heatmaps, demographic stratification, health correlations."
+    )
+
+    # Import pesticide functions (conditional to avoid overhead if tab not clicked)
+    try:
+        from pophealth_observatory import get_pesticide_panel
+    except ImportError:
+        st.error(
+            "Pesticide ingestion module not available. "
+            "Ensure `pophealth_observatory.laboratory_pesticides` is installed."
+        )
+        st.stop()
+
+    # Cycle selection
+    pest_cycles = st.multiselect(
+        "Select NHANES Cycles",
+        options=["2017-2018", "2015-2016", "2013-2014", "2011-2012"],
+        default=["2017-2018"],
+        help="Choose one or more cycles to retrieve pesticide analyte data (multi-cycle stacking)",
+    )
+
+    if not pest_cycles:
+        st.warning("Please select at least one cycle.")
+        st.stop()
+
+    # Load data (cached)
+    @st.cache_data(ttl=3600, show_spinner="Loading pesticide analyte data...")
+    def load_pesticide_data(cycles: list[str]) -> pd.DataFrame:
+        """Cache pesticide panel data for selected cycles."""
+        return get_pesticide_panel(cycles)
+
+    with st.spinner("Retrieving pesticide data (may take 30-60s for first load)..."):
+        pest_df = load_pesticide_data(pest_cycles)
+
+    if pest_df.empty:
+        st.warning("No pesticide data retrieved for selected cycles. Files may be unavailable or network issue.")
+        st.stop()
+
+    # Data summary
+    n_measurements = len(pest_df)
+    n_participants = pest_df["participant_id"].nunique()
+    st.success(f"✓ Loaded {n_measurements:,} analyte measurements across " f"{n_participants:,} participants")
+
+    # Analyte filter
+    available_analytes = sorted(pest_df["analyte_name"].dropna().unique())
+    selected_analytes = st.multiselect(
+        "Filter by Analyte (optional)",
+        options=available_analytes,
+        default=available_analytes[:5] if len(available_analytes) > 5 else available_analytes,
+        help="Select specific analytes to display. Leave empty to show all.",
+    )
+
+    if selected_analytes:
+        pest_df_filtered = pest_df[pest_df["analyte_name"].isin(selected_analytes)]
+    else:
+        pest_df_filtered = pest_df
+
+    # Summary table
+    st.subheader("📋 Analyte Summary")
+
+    summary_stats = (
+        pest_df_filtered.groupby(["cycle", "analyte_name"])
+        .agg(
+            n=("participant_id", "count"),
+            detected=("detected_flag", lambda x: x.sum()),
+            mean_conc=("concentration_raw", "mean"),
+            median_conc=("concentration_raw", "median"),
+        )
+        .reset_index()
+    )
+
+    summary_stats["detection_rate_pct"] = (summary_stats["detected"] / summary_stats["n"] * 100).round(1)
+    summary_stats = summary_stats.rename(
+        columns={
+            "cycle": "Cycle",
+            "analyte_name": "Analyte",
+            "n": "N",
+            "detected": "Detected",
+            "mean_conc": "Mean Conc",
+            "median_conc": "Median Conc",
+            "detection_rate_pct": "Detection %",
+        }
+    )
+
+    st.dataframe(summary_stats, use_container_width=True)
+
+    # Download option
+    csv = summary_stats.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download Summary CSV",
+        data=csv,
+        file_name=f"pesticide_summary_{'_'.join(pest_cycles)}.csv",
+        mime="text/csv",
+    )
+
+    st.caption(
+        "**Note**: Mean/median concentrations include zeros (below detection limit). "
+        "Future enhancements will add log-scale visualizations and trend analysis."
+    )
 
 # Footer
 st.markdown("---")
