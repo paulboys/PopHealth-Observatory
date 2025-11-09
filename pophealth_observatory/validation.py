@@ -141,7 +141,8 @@ def _scrape_cdc_component_metadata(component_url: str, timeout: int = 10) -> dic
     response = requests.get(component_url, timeout=timeout)
     response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, "lxml")
+    # Use built-in html.parser to avoid external lxml dependency
+    soup = BeautifulSoup(response.text, "html.parser")
 
     # Find the data file link (typically ends with .XPT)
     data_link = None

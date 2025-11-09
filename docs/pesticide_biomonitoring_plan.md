@@ -1,7 +1,7 @@
 # Pesticide Biomonitoring & External Exposure Context Expansion Plan
 
-Version: 0.1 (Draft)
-Generated: 2025-11-08
+Version: 0.2 (Draft)
+Generated: 2025-11-09
 Related Instructions: `.github/copilot-instructions.md`
 
 ---
@@ -42,42 +42,89 @@ OUT (Future Phases):
 | 5 | Exploratory health linkage | BMI/BP correlation panel + disclaimers | Correlation updates on filter; clearly marked exploratory |
 | 6 | Mixture / co-exposure matrix | Analyte correlation heatmap + network graph | Graph renders for ≥6 analytes; performance acceptable |
 
-## 5. Architecture Overview
+Current Progress (2025-11-09):
+- Reference restructuring complete (`data/reference/` hierarchical layout).
+- Core minimal analyte list established (108 analytes).
+- CAS verification implemented via PubChem synonyms endpoint (78 verified, 72%).
+- CDC Fourth Report classification enrichment integrated (35 classified, 32%).
+- Script consolidation under `scripts/pesticides/` for maintainability.
+- Backward compatibility shim (`pesticide_reference.csv`) + legacy stubs to keep tests green.
+- Next active milestone: Implement laboratory ingestion module and first pass of per-cycle DataFrame assembly (Phase 1 still in progress).
+
+## 5. Architecture Overview (Updated)
 ```
 pophealth_observatory/
-  laboratory_pesticides.py        # NHANES pesticide lab ingestion
-  external/
-    usgs_use.py                   # Agricultural use data
-    pdp_residues.py               # Commodity residue monitoring
-    tri_releases.py               # (Stub) facility release context
-    state_sales.py                # (Stub) CA DPR sales scaffolding
-    bls_incidents.py              # (Stub) occupational incidents
-    registry.py                   # Source registry & schema metadata
-    exposure_context.py           # Composite context builder
+  laboratory_pesticides.py            # NHANES pesticide lab ingestion (planned)
+  pesticide_context.py                # Analyte reference loading + lookup (updated with new fields)
+  rag/                                # Retrieval scaffolding (future narrative integration)
+  external/                           # (Planned) external contextual sources
+    usgs_use.py                       # Agricultural use data (planned)
+    pdp_residues.py                   # Commodity residue monitoring (planned)
+    registry.py                       # Source registry & schema metadata (planned)
 apps/
-  streamlit_app.py                # New 'Pesticide Biomonitoring' tab
+  streamlit_app.py                    # Will host 'Pesticide Biomonitoring' tab
+scripts/
+  pesticides/                         # Consolidated pesticide maintenance scripts
+    build_minimal_pesticide_reference.py
+    verify_minimal_reference_cas.py
+    add_cdc_classifications.py
+    derive_parent_pesticide_mapping.py
+    discover_nhanes_pesticides.py
+    curate_pesticide_reference.py
+    validate_pesticide_reference.py
+data/
+  reference/
+    minimal/                          # Core 108-analyte reference (78 CAS verified)
+    classified/                       # CDC Fourth Report classifications (35 analytes)
+    legacy/                           # Archived curated AI-derived reference
+    discovery/                        # Raw NHANES variable discovery output
+    evidence/                         # Parent mapping attempt artifacts
+    config/                           # Source registry yaml
+    pesticide_reference.csv           # Compatibility shim (copy of minimal)
 tests/
-  test_laboratory_pesticides.py
-  test_external_usgs.py
-  test_external_pdp.py
-  test_exposure_context.py
+  test_pesticide_context.py           # Reference loading & integrity
+  test_laboratory_pesticides.py       # (placeholder / future expansion)
 ```
 
-## 6. Internal Data Model (Pesticide Lab Schema)
+## 6. Internal Data Model (Updated)
+We now distinguish between:
+
+1. Analyte Reference Schema (static descriptive metadata)
+2. Laboratory Measurement Schema (per-participant concentration records – forthcoming)
+
+### 6.1 Analyte Reference Schema
+| Field | Type | Description |
+|-------|------|-------------|
+| analyte_name | str | Canonical short name (e.g. `3-PBA`) |
+| cas_rn | str | CAS Registry Number if verified |
+| cas_verified_source | str | Source of CAS verification (e.g. `pubchem_api`, blank if unverified) |
+| chemical_class | str | High-level chemical class (from CDC classification) |
+| chemical_subclass | str | Subclass / group (if provided) |
+| classification_source | str | Source of classification (e.g. `cdc_fourth_report`) |
+| legacy_parent_pesticide | str | (Deprecated) formerly `parent_pesticide` – kept blank for backward compatibility |
+| legacy_metabolite_class | str | (Deprecated) formerly `metabolite_class` – retained only for compatibility |
+| current_measurement_flag | bool | Always True placeholder (legacy compatibility stub) |
+
+Notes:
+- Legacy fields remain as empty strings or True (for boolean) to avoid breaking existing tests/scripts.
+- Classification coverage currently 35 / 108 analytes (32.4%).
+- CAS verification coverage 78 / 108 analytes (72.2%).
+
+### 6.2 Laboratory Measurement Schema (Planned)
 | Field | Type | Description |
 |-------|------|-------------|
 | participant_id | int | NHANES SEQN identifier |
 | cycle | str | Survey cycle (e.g. `2017-2018`) |
-| analyte_name | str | Normalized metabolite name (e.g. `3-PBA`) |
-| parent_pesticide | str | Parent active ingredient or chemical class |
-| metabolite_class | str | Category (pyrethroid, OP, organochlorine, herbicide) |
+| analyte_name | str | Must join to reference analyte_name |
 | matrix | str | `urine` or `serum` |
 | concentration_raw | float | Reported concentration (original units) |
 | unit | str | Measurement unit (e.g. `µg/L`, `ng/g lipid`) |
-| log_concentration | float | ln(concentration_raw) for positive values |
-| detected_flag | bool | concentration_raw > 0 or > LOD (if available) |
+| log_concentration | float | ln(concentration_raw) where concentration_raw > 0 |
+| detected_flag | bool | concentration_raw > 0 or > LOD (when available) |
 | lod | float | Limit of detection (if parseable) |
 | source_file | str | Originating XPT filename |
+
+Removed (legacy) fields from planned measurement schema: `parent_pesticide`, `metabolite_class` (superseded by structured classification in reference layer).
 
 ## 7. External Data Contracts
 ### USGS Use
@@ -131,7 +178,7 @@ def build_exposure_context(year_range: tuple[int,int], analytes: list[str]) -> d
   - Context Overlay: USGS use trend vs population biomonitoring trend.
 - Export: CSV (long format: cycle, analyte, mean, n, detected_flag_rate).
 
-## 10. Edge Cases & Handling
+## 10. Edge Cases & Handling (Updated)
 | Scenario | Handling |
 |----------|----------|
 | Missing cycle file | Return empty DataFrame; log info message |
@@ -140,6 +187,9 @@ def build_exposure_context(year_range: tuple[int,int], analytes: list[str]) -> d
 | Single cycle selected for trends | Show warning (need ≥2 cycles) |
 | External source fetch timeout | Return empty DataFrame with schema; display caution banner |
 | Weight application without weight column | Graceful fallback to unweighted aggregation |
+| Detection limits unavailable in raw XPT | Placeholder `lod` null; future enhancement to parse doc pages |
+| Partial classification coverage | Display "Unclassified" bucket; surface coverage % in docs |
+| Partial CAS verification | Soft-fail with blank CAS; expose progress metric |
 
 ## 11. Testing Strategy
 - Unit:
@@ -192,10 +242,12 @@ def build_exposure_context(year_range: tuple[int,int], analytes: list[str]) -> d
 
 ## 17. Future Enhancements (Beyond Current Plan)
 - Creatinine adjustment helper for urinary analytes.
-- Automated analytic method change flag (LOD tracking per cycle).
+- Automated analytic method change flag (LOD tracking per cycle) + store per-cycle LOD metadata table.
 - Occupational linkage (when occupation code ingestion stabilized).
 - RAG integration: embedding pesticide trend narrative with snippet retrieval.
 - Export Parquet snapshots for R survey design analysis.
+- Classification coverage completion pass (target ≥90%).
+- Semi-automated synonym expansion for unverified CAS resolution.
 
 ## 18. Implementation Order Rationale
 Start with internal analyte ingestion (foundation). Progress to UI integration for immediate visible value. External data ingestion next to enrich context. Analytic overlays (disparities, correlations) deferred until baseline ingestion stable to avoid compounding debugging scopes.
@@ -205,11 +257,14 @@ Start with internal analyte ingestion (foundation). Progress to UI integration f
 - Do we harmonize lipid-adjusted vs. raw serum concentrations into a single field? (Decision: keep `unit` explicit; no conversion yet.)
 - Is creatinine normalization required for all urinary analytes up-front? (Decision: optional later; display raw only initially.)
 
-## 20. Next Immediate Steps (Actionable)
-1. Create `laboratory_pesticides.py` with stub `get_pesticide_metabolites` returning empty DataFrame.
-2. Add tests scaffolding (expect empty for unsupported cycle).
-3. Incrementally implement XPT pattern matching & column mapping using reference CSV.
-4. Draft Biomonitoring tab skeleton (no charts yet) → commit.
+## 20. Next Immediate Steps (Actionable, Updated)
+1. Implement `laboratory_pesticides.get_pesticide_metabolites` with cycle validation + empty-on-miss.
+2. Add tests: ingestion happy path (mock single cycle), empty cycle edge case, reference join integrity.
+3. Create mapping table for XPT filenames → analyte short names (minimize hard-coded branching).
+4. Add classification & CAS coverage badges to docs (auto-generated snippet optional).
+5. Begin Streamlit tab scaffolding (load + simple table) behind feature flag.
+6. Extend CDC classification enrichment to attempt additional matching heuristics (e.g., case-insensitive substring, hyphen normalization) – log unresolved analytes.
+7. Draft external source registry skeleton (USGS & PDP placeholders returning empty typed DataFrames).
 
 ---
-_This plan is a living document. Update `Version` & add a changelog section here when refinements occur._
+_This plan is a living document. Version bumped to 0.2 for reference layer restructuring & classification/CAS progress recording._

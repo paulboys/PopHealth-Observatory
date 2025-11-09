@@ -1,20 +1,111 @@
-analyte_name,parent_pesticide,metabolite_class,cas_rn,parent_cas_rn,epa_pc_code,pubchem_cid,typical_matrix,unit,nhanes_lod,first_cycle_measured,last_cycle_measured,current_measurement_flag,notes
-DMP,Multiple OPs,DAP,814-24-8,,NA,11640,urine,ug/L,,1999,2022,true,Dimethylphosphate; non-specific OP metabolite
-DMTP,Multiple OPs,DAP,756-80-9,,NA,12357,urine,ug/L,,1999,2022,true,Dimethylthiophosphate
-DMDTP,Multiple OPs,DAP,756-81-0,,NA,12355,urine,ug/L,,1999,2022,true,Dimethyldithiophosphate
-DEP,Multiple OPs,DAP,598-02-7,,NA,12271,urine,ug/L,,1999,2022,true,Diethylphosphate
-DETP,Multiple OPs,DAP,2465-65-8,,NA,12354,urine,ug/L,,1999,2022,true,Diethylthiophosphate
-DEDTP,Multiple OPs,DAP,298-06-6,,NA,164721,urine,ug/L,,1999,2022,true,Diethyldithiophosphate
-TCPy,Chlorpyrifos,Specific,6515-38-4,2921-88-2,059101,2730,urine,ug/L,,1999,2022,true,"3,5,6-Trichloro-2-pyridinol"
-3-PBA,Multiple Pyrethroids,Pyrethroid,3739-38-6,,NA,643975,urine,ug/L,,2001,2022,true,Common pyrethroid metabolite
-cis-DCCA,Permethrin/Cypermethrin,Pyrethroid,53179-07-0,,NA,23668749,urine,ug/L,,2001,2022,true,Cis isomer
-trans-DCCA,Permethrin/Cypermethrin,Pyrethroid,55719-85-2,,NA,145742,urine,ug/L,,2001,2022,true,Trans isomer
-4-F-3-PBA,Deltamethrin,Pyrethroid,96282-05-0,52918-63-5,097805,104828,urine,ug/L,,2009,2022,true,Fluorophenoxy metabolite
-"2,4-D","2,4-D",Parent,94-75-7,94-75-7,030501,1486,urine,ug/L,,2001,2022,true,Herbicide acid
-Glyphosate,Glyphosate,Parent,1071-83-6,1071-83-6,103601,3496,urine,ug/L,,2013,2022,false,Limited cycles or special studies
-AMPA,Glyphosate,Metabolite,1066-51-9,1071-83-6,NA,14700,urine,ug/L,,2013,2022,false,Glyphosate metabolite
-"p,p'-DDE",DDT,Organochlorine,72-55-9,50-29-3,059201,3036,serum,ng/g lipid,,1999,2022,true,Persistent metabolite
-HCB,HCB,Organochlorine,118-74-1,118-74-1,063601,5681,serum,ng/g lipid,,1999,2022,true,Hexachlorobenzene
-β-HCH,Lindane,Organochlorine,319-85-7,58-89-9,052901,8273,serum,ng/g lipid,,1999,2022,true,Beta isomer
-ETU,Mancozeb,Fungicide,96-45-7,8018-01-7,014504,3396,urine,ug/L,,2001,2022,false,Ethylene thiourea
-THPI,Captan,Fungicide,1861-32-1,133-06-2,012901,5284592,urine,ug/L,,2005,2022,false,Captan metabolite
+variable_name,analyte_name,cas_rn,cas_verified_source,matrix,unit,cycle_first,cycle_last,cycle_count,data_file_description
+LBCBHC,Beta-hexachlorocyclohexane,27154-44-5,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCBHCLA,B-hexachlorocyclohexane,27154-44-5,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCGHC,Gamma-hexachlorocyclohexane,27154-44-5,pubchem_api,serum,ng/g,2005,2011,4,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCGHCLA,G-hexachlorocyclohexane,27154-44-5,pubchem_api,serum,ng/g,2005,2011,4,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCHCB,Hexachlorobenzene,118-74-1,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCHCBLA,Hexachlorobenzene,118-74-1,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCMIR,Mirex,2385-85-5,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCMIRLA,Mirex,2385-85-5,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCODT,"o,p'-DDT",789-02-6,pubchem_api,serum,ng/g,2005,2007,2,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCODTLA,"o,p'-DDT",789-02-6,pubchem_api,serum,ng/g,2005,2007,2,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCOXY,Oxychlordane,27304-13-8,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCOXYLA,Oxychlordane,27304-13-8,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCPDE,"p,p'-DDE",50-29-3,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCPDELA,"p,p'-DDE",50-29-3,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCPDT,"p,p'-DDT",50-29-3,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCPDTLA,"p,p'-DDT",50-29-3,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCTNA,trans-Nonachlor,39765-80-5,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBCTNALA,trans-Nonachlor,39765-80-5,pubchem_api,serum,ng/g,2005,2015,6,Pesticides - Organochlorine Pesticides - Pooled Samples
+LBXALD,Aldrin,309-00-2,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXALDLA,Aldrinusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXBHC,Beta-hexachloro-cyclohexane,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXBHCLA,Beta-hexachlorocyclohexaneusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXDIE,Dieldrin,60-57-1,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXDIELA,Dieldrinusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXEND,Endrin,72-20-8,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXENDLA,Endrinusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXGHC,Gamma-hexachloro-cyclohexane,27154-44-5,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXGHCLA,Gamma-hexachlorocyclohexaneusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXHCB,Hexachlorobenzene,118-74-1,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXHCBLA,Hexachlorobenzeneusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXHPE,Heptachlor Epoxide,1024-57-3,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXHPELA,Heptachlor Epoxideusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXMIR,Mirex,2385-85-5,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXMIRLA,Mirexusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXODT,opDDT,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXODTLA,opDDTusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXOXY,Oxychlordane,27304-13-8,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXOXYLA,Oxychlordaneusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXPDE,ppDDE,50-29-3,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXPDELA,ppDDEusted,50-29-3,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXPDT,ppDDT,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXPDTLA,ppDDTusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXTNA,Trans-nonachlor,39765-80-5,pubchem_api,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+LBXTNALA,Trans-nonachlorusted,,,serum,ng/g,2003,2003,1,Pesticides - Organochlorine Metabolites - Serum (Surplus)
+SSBHC,B-HCCH,,,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSGHC,G-HCCH,,,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSHCB,HCB,65595-90-6,pubchem_api,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSMIR,MIREX,2385-85-5,pubchem_api,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSODT,OP-DDT,,,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSOXY,OXYCHLOR,,,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSPDE,PP-DDE7,50-29-3,pubchem_api,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSPDT,PP-DDT,,,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+SSTNA,T-NONA,,,serum,,2001,2001,1,Pesticides - Organochlorine Metabolites - Serum - Pooled Samples (Surplus)
+URX14D,"2,5-dichlorophenol",583-78-8,pubchem_api,urine,ug/L,2003,2011,5,Pesticides - Environmental - Urine
+URX1TB,"2,4,5-trichlorophenol",95-95-4,pubchem_api,urine,ug/L,2003,2009,4,Pesticides - Environmental - Urine
+URX24D,"2,4-D",94-75-7,pubchem_api,urine,ug/L,1999,2003,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URX25T,"2,4,5-T",93-76-5,pubchem_api,urine,ug/L,1999,2003,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URX3TB,"2,4,6-trichlorophenol",88-06-2,pubchem_api,urine,ug/L,2003,2009,4,Pesticides - Environmental - Urine
+URX4FP,4-fluoro-3-phenoxybenzoic acid,77279-89-1,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXACE,Acetochlor mercapturate,674808-38-9,pubchem_api,unknown,,2001,2001,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXALA,Alachlor mercapturate,116482-92-9,pubchem_api,urine,ug/L,1999,1999,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXAPE,Acephate,30560-19-1,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXATZ,Atrazine mercapturate,138722-96-0,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXBSM,Bensulfuron methyl,83055-99-6,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXCB3,"cis-3-(2,2-dibromovinyl)-2,2-dimethylcyclopropane carboxylic acid",,,unknown,,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXCBF,Carbofuranphenol,1563-38-8,pubchem_api,urine,ug/L,1999,2003,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXCCC,"cis-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid",59042-49-8,pubchem_api,unknown,,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXCHS,Chlorsulfuron,64902-72-3,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXCMH,3-chloro-7-hydroxy-4-methyl-2H-chromen-2-one/ol,115-40-2,pubchem_api,unknown,,2001,2001,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXCPM,"3,5,6-trichloropyridinol",,,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXDCB,"2,4-dichlorophenol",94-75-7,pubchem_api,urine,ug/L,2003,2011,5,Pesticides - Environmental - Urine
+URXDEE,DEET,134-62-3,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXDIZ,Oxypyrimidine,,,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXDPY,2-(diethylamino)-6-methylpyrimidin-4-ol/one,,,unknown,,2001,2001,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXEMM,Ethametsulfuron methyl,97780-06-8,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXETU,Ethylenethio urea,,,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXFRM,Foramsulfuron,173159-57-4,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXHLS,Halosulfuron,135397-30-7,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXMAL,Malathion diacid,1190-28-9,pubchem_api,urine,ug/L,1999,1999,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXMET,Metolachlor mercapturate,159956-64-6,pubchem_api,urine,ug/L,2001,2001,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXMMI,Methamidaphos,,,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXMSM,Mesosulfuron methyl,208465-21-8,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXMTM,Metsulfuron methyl,74223-64-6,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXMTO,Dimethoate,60-51-5,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXNOS,Nicosulfuron,111991-09-4,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOMO,O-methoate,1113-02-6,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOP1,Dimethylphosphate,813-78-5,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOP2,Diethylphosphate,598-02-7,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOP3,Dimethylthiophosphate,59401-04-6,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOP4,Diethylthiophosphate,,,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOP5,Dimethyldithiophosphate,756-80-9,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOP6,Diethyldithiophosphate,,,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOPM,3-phenoxybenzoic acid,3739-38-6,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXOPP,O-Phenyl phenol,90-43-7,pubchem_api,urine,ug/L,2003,2009,4,Pesticides - Environmental - Urine
+URXOXS,Oxasulfuron,144651-06-9,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXPAR,Paranitrophenol,100-02-7,pubchem_api,urine,ug/L,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXPCP,Pentachlorophenol,87-86-5,pubchem_api,urine,ug/L,2003,2003,1,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXPIM,Primisulfuron methyl,86209-51-0,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXPPX,2-isopropoxyphenol,4812-20-8,pubchem_api,urine,ug/L,1999,2003,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXPRO,Prosulfuron,94125-34-5,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXPTU,Propylenethio urea,,,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXRIM,Rimsulfuron,122931-48-0,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXSMM,Sulfometuron methyl,1841-19-6,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXSSF,Sulfosulfuron,141776-32-1,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXTCC,"trans-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid",55701-09-2,pubchem_api,unknown,,1999,2001,2,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXTHF,Thifensulfuron methyl,79277-27-3,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXTRA,Triasulfuron,82097-50-5,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URXTRN,Triflusulfuron methyl,126535-15-7,pubchem_api,urine,ug/L,2003,2007,3,"Pesticides - Current Use - Urine (Formerly Priority Pesticides, Non-persistent Pesticide Metabolites)"
+URX3PBA,3-PBA,70458-82-3,,urine,ug/L,2001,2018,6,"Pyrethroid metabolite (placeholder cycles)"
+URXDMP,DMP,814-24-8,,urine,ug/L,1999,2018,5,"Organophosphate metabolite (Dimethylphosphate)"
