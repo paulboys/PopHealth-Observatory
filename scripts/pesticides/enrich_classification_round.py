@@ -1,19 +1,21 @@
 """Classification expansion evidence logging for pesticide analytes.
 
-This script identifies unclassified analytes and attempts normalization-based
-matching against CDC Fourth Report classification data. Results are logged
-to data/reference/evidence/ for reproducible manual review and enrichment.
+This script identifies unclassified analytes and attempts exact synonym-based
+matching against CDC Fourth Report classification data using PubChem synonyms.
+Results are logged to data/reference/evidence/ for reproducible manual review.
 
 Strategy:
-1. Load minimal analyte reference.
+1. Load minimal analyte reference and PubChem synonym map.
 2. Identify analytes missing chemical_class (unclassified).
-3. Normalize analyte names (lowercase, strip punctuation, collapse whitespace).
-4. Attempt substring/token matching against CDC classification list.
-5. Score matches by normalized string similarity.
-6. Log unresolved analytes with candidate matches to evidence CSV.
+3. Match analyte names against CDC classification list via exact synonym lookup.
+4. Fallback to fuzzy matching (normalized string similarity) if no synonym match.
+5. Log unresolved analytes with candidate matches to evidence CSV.
 
 Usage:
     python scripts/pesticides/enrich_classification_round.py
+
+Prerequisites:
+    - Run expand_synonyms_via_pubchem.py first to generate synonym map
 
 Output:
     data/reference/evidence/unclassified_YYYY-MM-DD.csv
@@ -120,6 +122,36 @@ CDC_CLASSIFICATIONS = [
 ]
 
 
+def load_pubchem_synonym_map(path: Path) -> dict[str, set[str]]:
+    """Load PubChem synonym map indexed by normalized synonym.
+
+    Parameters
+    ----------
+    path : Path
+        Path to pubchem_synonyms.csv (columns: cas_rn, analyte_name, synonym, synonym_normalized)
+
+    Returns
+    -------
+    dict[str, set[str]]
+        Mapping from normalized synonym → set of original analyte names
+    """
+    if not path.exists():
+        return {}
+
+    synonym_index: dict[str, set[str]] = {}
+    with path.open(encoding="utf-8") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            synonym_norm = row.get("synonym_normalized", "").strip()
+            analyte = row.get("analyte_name", "").strip()
+            if synonym_norm and analyte:
+                if synonym_norm not in synonym_index:
+                    synonym_index[synonym_norm] = set()
+                synonym_index[synonym_norm].add(analyte)
+
+    return synonym_index
+
+
 def _normalize_name(name: str) -> str:
     """Normalize analyte name for matching: lowercase, remove punctuation, collapse spaces."""
     if not name:
@@ -168,9 +200,12 @@ def _compute_similarity_score(query: str, candidate: str) -> float:
 
 
 def find_classification_candidates(
-    analyte_name: str, cdc_list: list[tuple[str, str, str]], threshold: float = 0.3
-) -> list[tuple[str, str, str, float]]:
-    """Find CDC classification candidates for an analyte above similarity threshold.
+    analyte_name: str,
+    cdc_list: list[tuple[str, str, str]],
+    synonym_map: dict[str, set[str]],
+    threshold: float = 0.3,
+) -> list[tuple[str, str, str, float, str]]:
+    """Find CDC classification candidates for an analyte using synonym matching + fallback fuzzy.
 
     Parameters
     ----------
@@ -178,22 +213,47 @@ def find_classification_candidates(
         Analyte name to classify
     cdc_list : list[tuple[str, str, str]]
         CDC classification tuples (cdc_name, chemical_class, chemical_subclass)
+    synonym_map : dict[str, set[str]]
+        PubChem synonym index (normalized synonym → set of analyte names)
     threshold : float
-        Minimum similarity score (0-1)
+        Minimum similarity score for fuzzy fallback (0-1)
 
     Returns
     -------
-    list[tuple[str, str, str, float]]
-        List of (cdc_name, chemical_class, chemical_subclass, score) sorted by score descending
+    list[tuple[str, str, str, float, str]]
+        List of (cdc_name, chemical_class, chemical_subclass, score, match_method)
+        sorted by score descending
     """
     candidates = []
-    for cdc_name, chem_class, chem_subclass in cdc_list:
-        score = _compute_similarity_score(analyte_name, cdc_name)
-        if score >= threshold:
-            candidates.append((cdc_name, chem_class, chem_subclass, score))
+    analyte_norm = _normalize_name(analyte_name)
 
-    # Sort by score descending
-    candidates.sort(key=lambda x: x[3], reverse=True)
+    # Strategy 1: Exact synonym match via PubChem (score = 1.0)
+    if analyte_norm in synonym_map:
+        matched_analytes = synonym_map[analyte_norm]
+        for cdc_name, chem_class, chem_subclass in cdc_list:
+            cdc_norm = _normalize_name(cdc_name)
+            if cdc_norm in synonym_map and synonym_map[cdc_norm] & matched_analytes:
+                # Both analyte and CDC name share common PubChem synonyms
+                candidates.append((cdc_name, chem_class, chem_subclass, 1.0, "pubchem_synonym"))
+
+    # Strategy 2: Direct CDC name in synonym map (score = 1.0)
+    for cdc_name, chem_class, chem_subclass in cdc_list:
+        cdc_norm = _normalize_name(cdc_name)
+        if cdc_norm == analyte_norm:
+            candidates.append((cdc_name, chem_class, chem_subclass, 1.0, "exact_match"))
+        elif cdc_norm in synonym_map and analyte_name in synonym_map[cdc_norm]:
+            candidates.append((cdc_name, chem_class, chem_subclass, 1.0, "pubchem_synonym"))
+
+    # Strategy 3: Fuzzy fallback (only if no synonym matches found)
+    if not candidates:
+        for cdc_name, chem_class, chem_subclass in cdc_list:
+            score = _compute_similarity_score(analyte_name, cdc_name)
+            if score >= threshold:
+                candidates.append((cdc_name, chem_class, chem_subclass, score, "fuzzy"))
+
+    # Sort by score descending, then by match method (pubchem > exact > fuzzy)
+    method_priority = {"pubchem_synonym": 0, "exact_match": 1, "fuzzy": 2}
+    candidates.sort(key=lambda x: (-x[3], method_priority.get(x[4], 99)))
     return candidates
 
 
@@ -216,7 +276,12 @@ def identify_unclassified(analytes: list[dict]) -> list[dict]:
     return unclassified
 
 
-def log_evidence(unclassified: list[dict], output_path: Path, cdc_list: list[tuple[str, str, str]]) -> None:
+def log_evidence(
+    unclassified: list[dict],
+    output_path: Path,
+    cdc_list: list[tuple[str, str, str]],
+    synonym_map: dict[str, set[str]],
+) -> None:
     """Log unclassified analytes with candidate matches to evidence CSV.
 
     Parameters
@@ -227,6 +292,8 @@ def log_evidence(unclassified: list[dict], output_path: Path, cdc_list: list[tup
         Output evidence CSV path
     cdc_list : list[tuple[str, str, str]]
         CDC classification reference
+    synonym_map : dict[str, set[str]]
+        PubChem synonym index
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -239,6 +306,7 @@ def log_evidence(unclassified: list[dict], output_path: Path, cdc_list: list[tup
             "candidate_class",
             "candidate_subclass",
             "similarity_score",
+            "match_method",
         ]
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
@@ -248,11 +316,11 @@ def log_evidence(unclassified: list[dict], output_path: Path, cdc_list: list[tup
             analyte_name = analyte.get("analyte_name", "")
             norm_name = _normalize_name(analyte_name)
 
-            candidates = find_classification_candidates(analyte_name, cdc_list, threshold=0.25)
+            candidates = find_classification_candidates(analyte_name, cdc_list, synonym_map, threshold=0.25)
 
             if candidates:
                 # Write best candidate (highest score)
-                cdc_name, chem_class, chem_subclass, score = candidates[0]
+                cdc_name, chem_class, chem_subclass, score, method = candidates[0]
                 writer.writerow(
                     {
                         "variable_name": var_name,
@@ -262,6 +330,7 @@ def log_evidence(unclassified: list[dict], output_path: Path, cdc_list: list[tup
                         "candidate_class": chem_class,
                         "candidate_subclass": chem_subclass,
                         "similarity_score": f"{score:.3f}",
+                        "match_method": method,
                     }
                 )
             else:
@@ -275,6 +344,7 @@ def log_evidence(unclassified: list[dict], output_path: Path, cdc_list: list[tup
                         "candidate_class": "",
                         "candidate_subclass": "",
                         "similarity_score": "0.000",
+                        "match_method": "none",
                     }
                 )
 
@@ -284,6 +354,7 @@ def main() -> None:
     # Paths
     root = Path(__file__).parent.parent.parent
     minimal_ref_path = root / "data" / "reference" / "minimal" / "pesticide_reference_minimal.csv"
+    synonym_map_path = root / "data" / "reference" / "config" / "pubchem_synonyms.csv"
     evidence_dir = root / "data" / "reference" / "evidence"
     today = datetime.now().strftime("%Y-%m-%d")
     output_path = evidence_dir / f"unclassified_{today}.csv"
@@ -291,6 +362,14 @@ def main() -> None:
     print(f"Loading minimal reference from: {minimal_ref_path}")
     analytes = load_minimal_reference(minimal_ref_path)
     print(f"Total analytes: {len(analytes)}")
+
+    print(f"Loading PubChem synonym map from: {synonym_map_path}")
+    synonym_map = load_pubchem_synonym_map(synonym_map_path)
+    if synonym_map:
+        print(f"Loaded {len(synonym_map)} normalized synonyms")
+    else:
+        print("⚠ Warning: No synonym map found; falling back to fuzzy matching only")
+        print("  Run expand_synonyms_via_pubchem.py first for best results")
 
     print("Identifying unclassified analytes...")
     unclassified = identify_unclassified(analytes)
@@ -301,7 +380,7 @@ def main() -> None:
         return
 
     print(f"Logging evidence to: {output_path}")
-    log_evidence(unclassified, output_path, CDC_CLASSIFICATIONS)
+    log_evidence(unclassified, output_path, CDC_CLASSIFICATIONS, synonym_map)
     print(f"Evidence logged successfully. Review {output_path} for candidate matches.")
 
     # Summary stats
@@ -310,10 +389,16 @@ def main() -> None:
         rows = list(reader)
         with_candidates = sum(1 for r in rows if r["candidate_cdc_name"])
         no_candidates = len(rows) - with_candidates
+        pubchem_matches = sum(1 for r in rows if r.get("match_method") == "pubchem_synonym")
+        exact_matches = sum(1 for r in rows if r.get("match_method") == "exact_match")
+        fuzzy_matches = sum(1 for r in rows if r.get("match_method") == "fuzzy")
 
     print("\nSummary:")
     print(f"  - Total unclassified: {len(rows)}")
     print(f"  - With candidate matches: {with_candidates}")
+    print(f"    • PubChem synonym matches: {pubchem_matches}")
+    print(f"    • Exact name matches: {exact_matches}")
+    print(f"    • Fuzzy fallback matches: {fuzzy_matches}")
     print(f"  - No candidate matches: {no_candidates}")
 
 
