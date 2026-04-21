@@ -70,6 +70,16 @@ These capabilities permit a workflow where ingestion, harmonization, derived met
 Full setup instructions (including development workflow & validation layers):
 `SETUP_GUIDE.md` (repository root) | Online: https://paulboys.github.io/PopHealth-Observatory/setup-guide/
 
+Scientific authoring prerequisites:
+- Quarto (required)
+- SciClaw 0.2.8+ (minimum supported)
+
+Validate local tooling:
+```bash
+quarto check
+sciclaw --version
+```
+
 ## Repository Structure
 
 ```
