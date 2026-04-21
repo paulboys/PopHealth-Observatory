@@ -7,7 +7,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3.10
+        language_version: python3
         args: [--check]
         exclude: ^(notebooks/|site/)
 
@@ -43,10 +43,10 @@ repos:
         entry: python scripts/sync_setup_guide.py
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
       - id: sync-changelog
         name: Sync changelog into docs
         entry: python scripts/sync_changelog.py
         language: system
         pass_filenames: false
-        stages: [commit]
+        stages: [pre-commit]
