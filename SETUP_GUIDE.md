@@ -9,10 +9,20 @@ Human-facing setup instructions for using the Python toolkit. Internal agent / g
 |-------------|-------|
 | Python 3.10+ | Tested on 3.11 / 3.12 |
 | Git | For cloning + version control |
+| Quarto (required) | Required for scientific authoring workflows and manuscript rendering |
+| SciClaw 0.2.8+ | Minimum supported version for agentic scientific authoring workflows |
 | Optional: virtual env | `python -m venv .venv` or `conda create -n pophealth python=3.11` |
 | Optional: Streamlit | For the interactive app (`pip install streamlit`) |
 
 > R is not required. A future optional R layer will use Apache Arrow for file interchange (no Python–R bridging needed).
+
+Verify system dependencies:
+```powershell
+quarto check
+sciclaw --version
+```
+
+SciClaw should report version `0.2.8` or newer.
 
 ---
 ## 2. Install

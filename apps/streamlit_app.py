@@ -42,7 +42,8 @@ def _ensure_package_import() -> tuple[object, object, str]:
         If import still fails after path injection.
     """
     try:
-        from pophealth_observatory import BRFSSExplorer, NHANESExplorer  # type: ignore
+        from pophealth_observatory.brfss import BRFSSExplorer  # type: ignore
+        from pophealth_observatory.observatory import NHANESExplorer  # type: ignore
 
         return BRFSSExplorer, NHANESExplorer, "installed"
     except ModuleNotFoundError:
@@ -50,7 +51,8 @@ def _ensure_package_import() -> tuple[object, object, str]:
         if str(repo_root) not in sys.path:
             sys.path.insert(0, str(repo_root))
         try:
-            from pophealth_observatory import BRFSSExplorer, NHANESExplorer  # type: ignore
+            from pophealth_observatory.brfss import BRFSSExplorer  # type: ignore
+            from pophealth_observatory.observatory import NHANESExplorer  # type: ignore
 
             return BRFSSExplorer, NHANESExplorer, "fallback"
         except ModuleNotFoundError as e:
@@ -1096,7 +1098,7 @@ with tab_pest:
 
     # Import pesticide functions (conditional to avoid overhead if tab not clicked)
     try:
-        from pophealth_observatory import get_pesticide_panel
+        from pophealth_observatory.laboratory_pesticides import get_pesticide_panel
     except ImportError:
         st.error(
             "Pesticide ingestion module not available. "

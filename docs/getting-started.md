@@ -3,6 +3,14 @@
 ## Prerequisites
 - Python 3.8+
 - pip / virtual environment recommended
+- Quarto (required)
+- SciClaw 0.2.8+ (required for scientific authoring workflows)
+
+Validate toolchain before running workflows:
+```bash
+quarto check
+sciclaw --version
+```
 
 ## Installation
 ```bash

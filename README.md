@@ -70,6 +70,16 @@ These capabilities permit a workflow where ingestion, harmonization, derived met
 Full setup instructions (including development workflow & validation layers):
 `SETUP_GUIDE.md` (repository root) | Online: https://paulboys.github.io/PopHealth-Observatory/setup-guide/
 
+Scientific authoring prerequisites:
+- Quarto (required)
+- SciClaw 0.2.8+ (minimum supported)
+
+Validate local tooling:
+```bash
+quarto check
+sciclaw --version
+```
+
 ## Repository Structure
 
 ```
@@ -127,7 +137,7 @@ pip install pophealth-observatory
 ## Quick Start
 
 ```python
-from pophealth_observatory import NHANESExplorer
+from pophealth_observatory.observatory import NHANESExplorer
 
 # Initialize the explorer (NHANES-focused implementation)
 explorer = NHANESExplorer()
@@ -155,7 +165,7 @@ explorer.create_demographic_visualization(data, 'bmi', 'race_ethnicity_label')
 For geographic health analysis, use the `BRFSSExplorer` to access state-level indicators:
 
 ```python
-from pophealth_observatory import BRFSSExplorer
+from pophealth_observatory.brfss import BRFSSExplorer
 
 # Initialize BRFSS explorer
 brfss = BRFSSExplorer()

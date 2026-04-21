@@ -19,6 +19,10 @@ jobs:
         with:
           python-version: '3.12'
           install-extras: 'dev'
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+      - name: Verify Quarto installation
+        run: quarto check
       - name: Ruff lint
         run: ruff check .
       - name: Black format check

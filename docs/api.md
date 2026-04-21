@@ -49,7 +49,7 @@ Returns empty DataFrame if cycle has no pesticide data or download fails.
 
 **Example:**
 ```python
-from pophealth_observatory import get_pesticide_metabolites
+from pophealth_observatory.laboratory_pesticides import get_pesticide_metabolites
 
 pest_df = get_pesticide_metabolites('2017-2018')
 print(pest_df[['participant_id', 'analyte_name', 'concentration_raw']].head())
@@ -84,7 +84,7 @@ Returns empty DataFrame if file not found.
 
 **Example:**
 ```python
-from pophealth_observatory import load_pesticide_reference
+from pophealth_observatory.laboratory_pesticides import load_pesticide_reference
 
 ref_df = load_pesticide_reference()
 pyrethroids = ref_df[ref_df['metabolite_class'] == 'Pyrethroid']
