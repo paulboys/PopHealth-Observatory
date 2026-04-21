@@ -13,7 +13,7 @@ The validation module automatically:
 ## Quick Start
 
 ```python
-from pophealth_observatory import NHANESExplorer
+from pophealth_observatory.observatory import NHANESExplorer
 
 # Initialize explorer
 explorer = NHANESExplorer()
@@ -98,7 +98,7 @@ Include validation in automated testing pipelines:
 
 ```python
 import pytest
-from pophealth_observatory import NHANESExplorer
+from pophealth_observatory.observatory import NHANESExplorer
 
 def test_nhanes_data_integrity():
     """Ensure NHANES data downloads are valid."""

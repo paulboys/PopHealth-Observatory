@@ -137,7 +137,7 @@ pip install pophealth-observatory
 ## Quick Start
 
 ```python
-from pophealth_observatory import NHANESExplorer
+from pophealth_observatory.observatory import NHANESExplorer
 
 # Initialize the explorer (NHANES-focused implementation)
 explorer = NHANESExplorer()
@@ -165,7 +165,7 @@ explorer.create_demographic_visualization(data, 'bmi', 'race_ethnicity_label')
 For geographic health analysis, use the `BRFSSExplorer` to access state-level indicators:
 
 ```python
-from pophealth_observatory import BRFSSExplorer
+from pophealth_observatory.brfss import BRFSSExplorer
 
 # Initialize BRFSS explorer
 brfss = BRFSSExplorer()

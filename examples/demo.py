@@ -4,7 +4,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 """
 
-from pophealth_observatory import NHANESExplorer
+from pophealth_observatory.observatory import NHANESExplorer
 
 
 def main():

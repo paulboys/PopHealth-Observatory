@@ -18,7 +18,7 @@ The `BRFSSExplorer` class provides access to state-level health indicators from 
 ### Basic Obesity Data
 
 ```python
-from pophealth_observatory import BRFSSExplorer
+from pophealth_observatory.brfss import BRFSSExplorer
 
 # Initialize explorer
 brfss = BRFSSExplorer()
@@ -208,7 +208,8 @@ brfss = BRFSSExplorer(config=config)
 National trends from NHANES + state-level patterns from BRFSS:
 
 ```python
-from pophealth_observatory import NHANESExplorer, BRFSSExplorer
+from pophealth_observatory.observatory import NHANESExplorer
+from pophealth_observatory.brfss import BRFSSExplorer
 
 # National average from NHANES
 nhanes = NHANESExplorer()
