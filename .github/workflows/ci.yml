@@ -17,7 +17,7 @@ jobs:
       - name: Python setup (dev)
         uses: ./.github/actions/python-setup
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           install-extras: 'dev'
       - name: Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2
