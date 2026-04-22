@@ -11,7 +11,8 @@ import pandas as pd
 import requests  # noqa: F401 - retained for test patch compatibility
 
 from .core.nhanes_adapters import NHANESAnalysisAdapter, NHANESDataProviderAdapter
-from .core.protocols import AnalysisRunner, DataProvider
+from .core.nhanes_reporting_adapters import NHANESReportAdapter, NHANESValidationAdapter
+from .core.protocols import AnalysisRunner, DataProvider, ReportGenerator
 from .nhanes_analysis_service import (
     analyze_by_demographics as analyze_by_demographics_service,
 )
@@ -147,7 +148,12 @@ class NHANESExplorer(PopHealthObservatory):
     # Manifest schema tag for emitted artifacts.
     _MANIFEST_SCHEMA_VERSION = "1.0.0"
 
-    def __init__(self, data_provider: DataProvider | None = None, analysis_runner: AnalysisRunner | None = None):
+    def __init__(
+        self,
+        data_provider: DataProvider | None = None,
+        analysis_runner: AnalysisRunner | None = None,
+        report_generator: ReportGenerator | None = None,
+    ):
         """Initialize explorer with optional protocol-backed adapters.
 
         Parameters
@@ -166,6 +172,11 @@ class NHANESExplorer(PopHealthObservatory):
             get_body_measures=self.get_body_measures,
             get_blood_pressure=self.get_blood_pressure,
             analyze_by_demographics=analyze_by_demographics_service,
+        )
+        validation_adapter = NHANESValidationAdapter(self)
+        self._report_generator = report_generator or NHANESReportAdapter(
+            generate_summary_report=generate_summary_report_service,
+            validate=validation_adapter.validate,
         )
 
     def _normalize_year_span(self, year_text: str | None) -> str:
@@ -297,7 +308,7 @@ class NHANESExplorer(PopHealthObservatory):
 
     def generate_summary_report(self, df: pd.DataFrame) -> str:
         """Generate textual summary of demographics & selected health metrics."""
-        return generate_summary_report_service(df)
+        return self._report_generator.generate_summary_report(df)
 
     def get_survey_weight(self, components: list[str]) -> str:
         """
@@ -450,7 +461,4 @@ class NHANESExplorer(PopHealthObservatory):
         >>> print(report['status'])  # 'PASS' or 'FAIL' or 'WARN'
         >>> print(report['components']['demographics']['checks']['row_count']['status'])
         """
-        from .validation import run_validation
-
-        validation_report = run_validation(self, cycle, components)
-        return validation_report.to_dict()
+        return self._report_generator.validate(cycle, components)
