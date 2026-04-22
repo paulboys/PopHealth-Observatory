@@ -164,6 +164,10 @@ class NHANESExplorer(PopHealthObservatory):
         analysis_runner : AnalysisRunner | None
             Optional injected analysis runner adapter. Defaults to a local
             NHANESAnalysisAdapter composed from explorer callables.
+        report_generator : ReportGenerator | None
+            Optional injected report/validation adapter. Defaults to a local
+            NHANESReportAdapter using the existing summary service and
+            validation orchestration workflow.
         """
         super().__init__()
         self._data_provider = data_provider or NHANESDataProviderAdapter(self)
