@@ -10,6 +10,8 @@ from importlib import import_module
 from typing import Any
 from warnings import warn
 
+from .logging_config import configure_logging
+
 # Dynamic version reading from package metadata
 try:
     from importlib.metadata import PackageNotFoundError, version
@@ -18,6 +20,9 @@ try:
 except PackageNotFoundError:
     # Fallback for development environments where package isn't installed
     __version__ = "0.0.0+unknown"
+
+# Configure package logger once at import time.
+configure_logging()
 
 # Root-level exports are maintained as backward-compatible shims.
 # New code should import from submodules directly (e.g. pophealth_observatory.observatory).

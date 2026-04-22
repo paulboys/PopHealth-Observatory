@@ -95,6 +95,14 @@ Current timeline:
 
 Full policy details: `docs/versioning.md`
 
+## Logging (Phase 1)
+
+PopHealth Observatory now initializes a centralized package logger (`pophealth_observatory`) at import time.
+
+- Set `LOGLEVEL` (for example `DEBUG`, `INFO`, `WARNING`) to control verbosity.
+- Initial rollout keeps selected print diagnostics while modules are migrated to logger calls.
+- Log format is key-value text for readability and later structured-log expansion.
+
 ## Repository Structure
 
 ```

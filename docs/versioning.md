@@ -97,6 +97,13 @@ At release tag time (`v*`), CI must pass:
 
 Publishing proceeds only after these checks succeed.
 
+### Logging Migration Note
+
+Centralized package logging starts in the current pre-1.0 cycle with `pophealth_observatory.logging_config`.
+
+- During migration, some modules may emit both logger output and legacy print diagnostics.
+- Print-based diagnostics are transitional and will be removed after migration stabilization.
+
 ### Required GitHub Secrets
 
 - `PYPI_API_TOKEN`: PyPI API token for automated publishing (already configured)
