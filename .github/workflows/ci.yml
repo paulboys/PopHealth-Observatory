@@ -28,9 +28,44 @@ jobs:
       - name: Black format check
         run: pre-commit run black --all-files
 
-  test:
+  contracts:
     runs-on: ubuntu-latest
     needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python setup (dev)
+        uses: ./.github/actions/python-setup
+        with:
+          python-version: '3.13'
+          install-extras: 'dev'
+      - name: Run decomposition contract suite
+        run: |
+          pytest -q \
+            tests/test_core_protocols.py \
+            tests/test_nhanes_adapters.py \
+            tests/test_nhanes_reporting_adapters.py \
+            tests/test_nhanes_data_access.py \
+            tests/test_nhanes_transforms_regression.py \
+            tests/test_nhanes_manifest_service.py \
+            tests/test_nhanes_analysis_service.py \
+            --cov=pophealth_observatory.core \
+            --cov=pophealth_observatory.nhanes_data_access \
+            --cov=pophealth_observatory.nhanes_transforms \
+            --cov=pophealth_observatory.nhanes_manifest_service \
+            --cov=pophealth_observatory.nhanes_analysis_service \
+            --cov-fail-under=80 \
+            --cov-report=xml:coverage-contracts.xml \
+            --cov-report=term-missing
+      - name: Upload decomposition coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-contracts
+          path: coverage-contracts.xml
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [lint, contracts]
     strategy:
       matrix:
         # Explicit compatibility targets (project uses modern typing; primary support >=3.11)
