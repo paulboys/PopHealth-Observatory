@@ -9,6 +9,7 @@
 ### [Unreleased]
 Added
 - Dedicated `1.0.0` migration release notes page (`docs/release-notes/1.0.0.md`) with compatibility and import migration guidance.
+- Centralized logging foundation (`pophealth_observatory.logging_config`) with package-level initialization and LOGLEVEL support.
 
 Changed
 - Established deprecation documentation policy: deprecations must include (1) removal target version, (2) replacement path, and (3) contract tests that lock warning behavior.
