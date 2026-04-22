@@ -135,12 +135,11 @@ pre-commit run --all-files
 ---
 ## 9. Contributing
 
-1. Open an issue describing feature/bug.
-2. Create a branch (`feat/<short>` or `fix/<short>`).
-3. Add type hints & NumPy-style docstrings for new public functions.
-4. Add tests (use `tmp_path` for filesystem side-effects). Focus on deterministic helpers.
-5. Update `CHANGELOG.md` for user-facing changes.
-6. Ensure CI passes before requesting review.
+Use the consolidated contributor guide in `CONTRIBUTING.md` for:
+- Branching and conventional commits
+- Required local quality checks (pre-commit, Ruff, Black, pytest)
+- Documentation and changelog expectations
+- PR review checklist and merge expectations
 
 ---
 ## 10. Planned R Layer (Future)
@@ -188,4 +187,4 @@ MIT License – see the [LICENSE](https://github.com/paulboys/PopHealth-Observat
 
 ---
 
-Last sync (source mtime): 2026-04-21 00:06 UTC
+Last sync (source mtime): 2026-04-22 01:20 UTC
