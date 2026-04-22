@@ -12,6 +12,7 @@ Test coverage:
 SPDX-License-Identifier: MIT
 """
 
+import logging
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -30,6 +31,15 @@ from pophealth_observatory.laboratory_pesticides import (
     get_pesticide_panel,
     load_pesticide_reference,
 )
+
+
+def _attach_package_log_capture(caplog: pytest.LogCaptureFixture) -> tuple[logging.Logger, bool]:
+    """Attach pytest's caplog handler to package logger for propagate=False config."""
+    package_logger = logging.getLogger("pophealth_observatory")
+    already_attached = caplog.handler in package_logger.handlers
+    if not already_attached:
+        package_logger.addHandler(caplog.handler)
+    return package_logger, already_attached
 
 
 class TestCycleParsing:
@@ -427,15 +437,19 @@ class TestGetPesticideMetabolitesEdgeCases:
 
     @patch("pophealth_observatory.laboratory_pesticides._download_xpt_flexible")
     @patch("pophealth_observatory.laboratory_pesticides.load_pesticide_reference")
-    def test_warns_on_missing_reference(self, mock_load_ref, mock_download, capsys):
-        """Test warning printed when reference CSV missing or empty."""
+    def test_warns_on_missing_reference(self, mock_load_ref, mock_download, caplog):
+        """Test warning is emitted when reference CSV missing or empty."""
         mock_load_ref.return_value = pd.DataFrame()  # Empty reference
         mock_download.return_value = pd.DataFrame()  # Empty to short-circuit
 
-        get_pesticide_metabolites("2017-2018", ref_path="nonexistent.csv")
-
-        captured = capsys.readouterr()
-        assert "Warning: pesticide_reference.csv not found or empty" in captured.out
+        package_logger, already_attached = _attach_package_log_capture(caplog)
+        try:
+            with caplog.at_level(logging.WARNING, logger="pophealth_observatory"):
+                get_pesticide_metabolites("2017-2018", ref_path="nonexistent.csv")
+            assert "Warning: pesticide_reference.csv not found or empty" in caplog.text
+        finally:
+            if not already_attached:
+                package_logger.removeHandler(caplog.handler)
 
     @patch("pophealth_observatory.laboratory_pesticides._download_xpt_flexible")
     @patch("pophealth_observatory.laboratory_pesticides.load_pesticide_reference")

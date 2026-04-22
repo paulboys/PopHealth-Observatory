@@ -9,10 +9,21 @@ Tests cover:
 - list_available_indicators()
 """
 
+import logging
+
 import pandas as pd
 import pytest
 
 from pophealth_observatory.brfss import BRFSSExplorer
+
+
+def _attach_package_log_capture(caplog: pytest.LogCaptureFixture) -> tuple[logging.Logger, bool]:
+    """Attach pytest's caplog handler to package logger for propagate=False config."""
+    package_logger = logging.getLogger("pophealth_observatory")
+    already_attached = caplog.handler in package_logger.handlers
+    if not already_attached:
+        package_logger.addHandler(caplog.handler)
+    return package_logger, already_attached
 
 
 class _MockResponse:
@@ -168,7 +179,7 @@ def test_empty_response(monkeypatch):
     ]
 
 
-def test_non_list_json(monkeypatch, capsys):
+def test_non_list_json(monkeypatch, caplog):
     """Test handling of non-list JSON response."""
 
     def fake_get(url, timeout):
@@ -177,15 +188,18 @@ def test_non_list_json(monkeypatch, capsys):
     explorer = BRFSSExplorer()
     monkeypatch.setattr(explorer.session, "get", fake_get)
 
-    df = explorer.get_obesity_data()
-    assert df.empty
+    package_logger, already_attached = _attach_package_log_capture(caplog)
+    try:
+        with caplog.at_level(logging.WARNING, logger="pophealth_observatory"):
+            df = explorer.get_obesity_data()
+        assert df.empty
+        assert "Unexpected BRFSS JSON structure" in caplog.text
+    finally:
+        if not already_attached:
+            package_logger.removeHandler(caplog.handler)
 
-    # Check warning message
-    captured = capsys.readouterr()
-    assert "Unexpected BRFSS JSON structure" in captured.out
 
-
-def test_http_error(monkeypatch, capsys):
+def test_http_error(monkeypatch, caplog):
     """Test handling of HTTP error response."""
 
     def fake_get(url, timeout):
@@ -194,11 +208,15 @@ def test_http_error(monkeypatch, capsys):
     explorer = BRFSSExplorer()
     monkeypatch.setattr(explorer.session, "get", fake_get)
 
-    df = explorer.get_obesity_data()
-    assert df.empty
-
-    captured = capsys.readouterr()
-    assert "failed with HTTP 500" in captured.out
+    package_logger, already_attached = _attach_package_log_capture(caplog)
+    try:
+        with caplog.at_level(logging.WARNING, logger="pophealth_observatory"):
+            df = explorer.get_obesity_data()
+        assert df.empty
+        assert "failed with HTTP 500" in caplog.text
+    finally:
+        if not already_attached:
+            package_logger.removeHandler(caplog.handler)
 
 
 def test_invalid_year_raises_error(monkeypatch):
@@ -239,7 +257,7 @@ def test_get_indicator_physical_activity(monkeypatch):
     assert df["value"].iloc[0] == 28.5
 
 
-def test_get_indicator_nonexistent(monkeypatch, capsys):
+def test_get_indicator_nonexistent(monkeypatch, caplog):
     """Test get_indicator() with nonexistent class/question."""
 
     def fake_get(url, timeout):
@@ -248,11 +266,15 @@ def test_get_indicator_nonexistent(monkeypatch, capsys):
     explorer = BRFSSExplorer()
     monkeypatch.setattr(explorer.session, "get", fake_get)
 
-    df = explorer.get_indicator(class_name="Nonexistent Class", question="Nonexistent question")
-
-    assert df.empty
-    captured = capsys.readouterr()
-    assert "No data found" in captured.out
+    package_logger, already_attached = _attach_package_log_capture(caplog)
+    try:
+        with caplog.at_level(logging.WARNING, logger="pophealth_observatory"):
+            df = explorer.get_indicator(class_name="Nonexistent Class", question="Nonexistent question")
+        assert df.empty
+        assert "No data found" in caplog.text
+    finally:
+        if not already_attached:
+            package_logger.removeHandler(caplog.handler)
 
 
 def test_summary_with_data():

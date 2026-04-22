@@ -22,9 +22,12 @@ from __future__ import annotations
 
 import csv
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+from .logging_config import log_with_fallback
 
 try:
     import yaml  # type: ignore
@@ -44,6 +47,8 @@ REFERENCE_CSV = DATA_REFERENCE_DIR / "minimal" / "pesticide_reference_minimal.cs
 REFERENCE_CSV_CLASSIFIED = DATA_REFERENCE_DIR / "classified" / "pesticide_reference_classified.csv"
 REFERENCE_CSV_SHIM = DATA_REFERENCE_DIR / "pesticide_reference.csv"  # backward compatibility shim
 SOURCES_YAML = DATA_REFERENCE_DIR / "config" / "pesticide_sources.yml"
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -155,7 +160,7 @@ def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]
         for candidate in candidates:
             if candidate.exists():
                 if candidate != path:
-                    print(f"INFO: Using reference file: {candidate}")
+                    log_with_fallback(logger, logging.INFO, f"INFO: Using reference file: {candidate}")
                 path = candidate
                 break
 
@@ -163,7 +168,7 @@ def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]
     if not path.exists():
         for candidate in [REFERENCE_CSV_SHIM, DATA_REFERENCE_DIR / "pesticide_reference_minimal.csv"]:
             if candidate.exists():
-                print(f"INFO: Fallback to reference file: {candidate}")
+                log_with_fallback(logger, logging.INFO, f"INFO: Fallback to reference file: {candidate}")
                 path = candidate
                 break
 

@@ -8,12 +8,16 @@ to PDF/HTML parsing and semantic embedding.
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+from .logging_config import log_with_fallback
 from .pesticide_context import PesticideAnalyte, load_analyte_reference
+
+logger = logging.getLogger(__name__)
 
 RAW_DIR = Path("data/raw/pesticides")
 PROCESSED_DIR = Path("data/processed/pesticides")
@@ -214,4 +218,4 @@ def ingest_text_file(path: Path, source_id: str = "sample", window: int = 1) -> 
 if __name__ == "__main__":  # manual dev test
     sample = RAW_DIR / "sample_pdp_excerpt.txt"
     result = ingest_text_file(sample, source_id="pdp_sample")
-    print("Wrote snippets ->", result)
+    log_with_fallback(logger, logging.INFO, f"Wrote snippets -> {result}")

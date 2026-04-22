@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import time
@@ -12,6 +13,10 @@ from urllib.parse import urljoin
 
 import pandas as pd
 import requests
+
+from .logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 YEAR_RANGE_REGEX = re.compile(r"(20\d{2})\s*[-–]\s*(20\d{2})")
 SIZE_TOKEN_REGEX = re.compile(r"(\d+(?:\.\d+)?)\s*(KB|MB|GB|TB)", re.I)
@@ -80,7 +85,11 @@ def parse_component_table(html: str, page_url: str) -> list[dict[str, Any]]:
     try:
         from bs4 import BeautifulSoup  # type: ignore
     except ImportError:
-        print("BeautifulSoup (bs4) not installed; metadata table parsing unavailable.")
+        log_with_fallback(
+            logger,
+            logging.WARNING,
+            "BeautifulSoup (bs4) not installed; metadata table parsing unavailable.",
+        )
         return []
 
     soup = BeautifulSoup(html, "html.parser")
