@@ -47,6 +47,7 @@ REFERENCE_CSV = DATA_REFERENCE_DIR / "minimal" / "pesticide_reference_minimal.cs
 REFERENCE_CSV_CLASSIFIED = DATA_REFERENCE_DIR / "classified" / "pesticide_reference_classified.csv"
 REFERENCE_CSV_SHIM = DATA_REFERENCE_DIR / "pesticide_reference.csv"  # backward compatibility shim
 SOURCES_YAML = DATA_REFERENCE_DIR / "config" / "pesticide_sources.yml"
+ENRICHMENT_JSONL = DATA_REFERENCE_DIR / "enrichment" / "pesticide_evidence_enrichment.jsonl"
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,88 @@ class PesticideAnalyte:
         }
 
 
+@dataclass
+class EvidenceCitation:
+    """Citation metadata supporting an enrichment statement."""
+
+    title: str
+    source_url: str
+    doi: str = ""
+    pmid: str = ""
+    year: int | None = None
+    journal: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "title": self.title,
+            "source_url": self.source_url,
+            "doi": self.doi,
+            "pmid": self.pmid,
+            "year": self.year,
+            "journal": self.journal,
+        }
+
+
+@dataclass
+class EvidenceStatement:
+    """Single evidence statement linked to one or more citations."""
+
+    statement_id: str
+    claim: str
+    direction: str = "unclear"
+    population_context: str = ""
+    study_type: str = ""
+    confidence: float = 0.0
+    citations: list[EvidenceCitation] | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "statement_id": self.statement_id,
+            "claim": self.claim,
+            "direction": self.direction,
+            "population_context": self.population_context,
+            "study_type": self.study_type,
+            "confidence": self.confidence,
+            "citations": [c.to_dict() for c in (self.citations or [])],
+        }
+
+
+@dataclass
+class EvidenceEnrichmentRecord:
+    """SciClaw-derived analyte evidence enrichment record."""
+
+    schema_version: str
+    record_id: str
+    cas_rn: str
+    analyte_name: str
+    synonyms: list[str] | None = None
+    parent_pesticide_candidates: list[str] | None = None
+    chemical_class: str = ""
+    evidence_summary: str = ""
+    exposure_routes: list[str] | None = None
+    key_health_endpoints: list[str] | None = None
+    evidence_statements: list[EvidenceStatement] | None = None
+    provenance: dict[str, Any] | None = None
+    review: dict[str, Any] | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "record_id": self.record_id,
+            "cas_rn": self.cas_rn,
+            "analyte_name": self.analyte_name,
+            "synonyms": self.synonyms or [],
+            "parent_pesticide_candidates": self.parent_pesticide_candidates or [],
+            "chemical_class": self.chemical_class,
+            "evidence_summary": self.evidence_summary,
+            "exposure_routes": self.exposure_routes or [],
+            "key_health_endpoints": self.key_health_endpoints or [],
+            "evidence_statements": [s.to_dict() for s in (self.evidence_statements or [])],
+            "provenance": self.provenance or {},
+            "review": self.review or {},
+        }
+
+
 def _normalize(s: str) -> str:
     """Normalize strings for loose matching.
 
@@ -113,6 +196,95 @@ def _normalize(s: str) -> str:
     import re  # local import to avoid global cost
 
     return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+def _is_valid_cas(cas_rn: str) -> bool:
+    """Validate CAS RN shape (1-7 digits)-(2 digits)-(1 digit)."""
+    import re
+
+    return bool(re.match(r"^\d{1,7}-\d{2}-\d$", (cas_rn or "").strip()))
+
+
+def _parse_evidence_record(payload: dict[str, Any], line_num: int) -> EvidenceEnrichmentRecord | None:
+    """Parse and validate one enrichment payload line."""
+    cas_rn = str(payload.get("cas_rn", "")).strip()
+    analyte_name = str(payload.get("analyte_name", "")).strip()
+    evidence_summary = str(payload.get("evidence_summary", "")).strip()
+
+    if not _is_valid_cas(cas_rn):
+        log_with_fallback(logger, logging.WARNING, f"Skipping enrichment line {line_num}: invalid cas_rn='{cas_rn}'")
+        return None
+    if not analyte_name:
+        log_with_fallback(logger, logging.WARNING, f"Skipping enrichment line {line_num}: missing analyte_name")
+        return None
+    if not evidence_summary:
+        log_with_fallback(logger, logging.WARNING, f"Skipping enrichment line {line_num}: missing evidence_summary")
+        return None
+
+    statements: list[EvidenceStatement] = []
+    for idx, stmt in enumerate(payload.get("evidence_statements", []) or []):
+        try:
+            confidence = float(stmt.get("confidence", 0.0))
+        except Exception:  # noqa: BLE001
+            log_with_fallback(logger, logging.WARNING, f"Line {line_num} statement {idx} skipped: invalid confidence")
+            continue
+
+        if confidence < 0.0 or confidence > 1.0:
+            log_with_fallback(
+                logger,
+                logging.WARNING,
+                f"Line {line_num} statement {idx} skipped: confidence out of range",
+            )
+            continue
+
+        citations_raw = stmt.get("citations", []) or []
+        citations = [
+            EvidenceCitation(
+                title=str(c.get("title", "")),
+                source_url=str(c.get("source_url", "")),
+                doi=str(c.get("doi", "")),
+                pmid=str(c.get("pmid", "")),
+                year=c.get("year"),
+                journal=str(c.get("journal", "")),
+            )
+            for c in citations_raw
+        ]
+
+        if not any(c.source_url or c.doi or c.pmid for c in citations):
+            log_with_fallback(
+                logger,
+                logging.WARNING,
+                f"Line {line_num} statement {idx} skipped: no citation identifiers",
+            )
+            continue
+
+        statements.append(
+            EvidenceStatement(
+                statement_id=str(stmt.get("statement_id", f"stmt_{line_num}_{idx}")),
+                claim=str(stmt.get("claim", "")).strip(),
+                direction=str(stmt.get("direction", "unclear")),
+                population_context=str(stmt.get("population_context", "")),
+                study_type=str(stmt.get("study_type", "")),
+                confidence=confidence,
+                citations=citations,
+            )
+        )
+
+    return EvidenceEnrichmentRecord(
+        schema_version=str(payload.get("schema_version", "1.0.0")),
+        record_id=str(payload.get("record_id", f"rec_{line_num}")),
+        cas_rn=cas_rn,
+        analyte_name=analyte_name,
+        synonyms=list(payload.get("synonyms", []) or []),
+        parent_pesticide_candidates=list(payload.get("parent_pesticide_candidates", []) or []),
+        chemical_class=str(payload.get("chemical_class", "")),
+        evidence_summary=evidence_summary,
+        exposure_routes=list(payload.get("exposure_routes", []) or []),
+        key_health_endpoints=list(payload.get("key_health_endpoints", []) or []),
+        evidence_statements=statements,
+        provenance=dict(payload.get("provenance", {}) or {}),
+        review=dict(payload.get("review", {}) or {}),
+    )
 
 
 def load_analyte_reference(path: Path = REFERENCE_CSV) -> list[PesticideAnalyte]:
@@ -274,6 +446,60 @@ def load_source_registry(path: Path = SOURCES_YAML) -> list[dict[str, Any]]:
     return data if isinstance(data, list) else []
 
 
+def load_evidence_enrichment(
+    path: Path = ENRICHMENT_JSONL,
+    min_confidence: float = 0.0,
+    reviewed_only: bool = False,
+) -> dict[str, EvidenceEnrichmentRecord]:
+    """Load SciClaw enrichment JSONL keyed by CAS RN.
+
+    Parameters
+    ----------
+    path : Path, default=ENRICHMENT_JSONL
+        Enrichment JSONL file path.
+    min_confidence : float, default=0.0
+        Minimum accepted confidence among parsed statements.
+    reviewed_only : bool, default=False
+        If True, keep only records with review.human_reviewed=true.
+
+    Returns
+    -------
+    dict[str, EvidenceEnrichmentRecord]
+        Parsed enrichment records keyed by CAS RN.
+    """
+    by_cas: dict[str, EvidenceEnrichmentRecord] = {}
+    if not path.exists():
+        log_with_fallback(logger, logging.INFO, f"No enrichment file found at {path}")
+        return by_cas
+
+    with path.open(encoding="utf-8") as fh:
+        for line_num, raw in enumerate(fh, start=1):
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                payload = json.loads(raw)
+            except json.JSONDecodeError:
+                log_with_fallback(logger, logging.WARNING, f"Skipping enrichment line {line_num}: malformed JSON")
+                continue
+
+            record = _parse_evidence_record(payload, line_num)
+            if record is None:
+                continue
+
+            if reviewed_only and not bool((record.review or {}).get("human_reviewed", False)):
+                continue
+
+            if record.evidence_statements:
+                best_conf = max(s.confidence for s in record.evidence_statements)
+                if best_conf < min_confidence:
+                    continue
+
+            by_cas[record.cas_rn] = record
+
+    return by_cas
+
+
 def find_analyte(query: str, analytes: list[PesticideAnalyte]) -> PesticideAnalyte | None:
     """Attempt exact analyte, CAS RN, or variable name match (normalized).
 
@@ -322,6 +548,42 @@ def suggest_analytes(partial: str, analytes: list[PesticideAnalyte], limit: int 
                 best[label] = (score, label)
     ordered = sorted(best.values(), key=lambda x: x[0])
     return [lbl for _score, lbl in ordered[:limit]]
+
+
+def merge_reference_with_enrichment(
+    analytes: list[PesticideAnalyte],
+    enrichment_by_cas: dict[str, EvidenceEnrichmentRecord],
+) -> list[dict[str, Any]]:
+    """Merge reference analytes with SciClaw enrichment records.
+
+    Parameters
+    ----------
+    analytes : list[PesticideAnalyte]
+        Reference analyte records.
+    enrichment_by_cas : dict[str, EvidenceEnrichmentRecord]
+        Enrichment map keyed by CAS RN.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        Enriched analyte dictionaries with optional enrichment fields.
+    """
+    merged: list[dict[str, Any]] = []
+    for analyte in analytes:
+        base = analyte.to_dict()
+        enrichment = enrichment_by_cas.get(analyte.cas_rn)
+        if enrichment:
+            base["evidence_enrichment"] = enrichment.to_dict()
+            base["sciclaw_synonyms"] = enrichment.synonyms or []
+            base["sciclaw_parent_pesticide_candidates"] = enrichment.parent_pesticide_candidates or []
+            base["sciclaw_evidence_summary"] = enrichment.evidence_summary
+        else:
+            base["evidence_enrichment"] = None
+            base["sciclaw_synonyms"] = []
+            base["sciclaw_parent_pesticide_candidates"] = []
+            base["sciclaw_evidence_summary"] = ""
+        merged.append(base)
+    return merged
 
 
 def as_json(obj: dict[str, Any]) -> str:
