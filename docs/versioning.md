@@ -63,6 +63,29 @@ Changes to docs, notebooks, or CI configs won't trigger version bumps unless you
    - Publishes to PyPI (requires `PYPI_API_TOKEN` secret)
    - Deploys documentation to GitHub Pages
 
+## Deprecation and Removal Policy
+
+Deprecations must be explicit, testable, and tied to semantic versioning.
+
+### Required Deprecation Contract
+
+When introducing a deprecation, include all of the following:
+
+1. Removal target version (for example: removed in `1.0.0`)
+2. Exact replacement API path or import statement
+3. Runtime warning (`DeprecationWarning`) emitted at first access/call
+4. Test coverage that asserts warning message content and behavior
+
+### Versioning Semantics for Deprecations
+
+- Adding a deprecation warning in a backward-compatible way is usually a PATCH or MINOR change.
+- Actual removal of deprecated APIs is a breaking change and must be released as MAJOR.
+
+### Current Active Timeline
+
+- Root-level compatibility exports in `pophealth_observatory.__init__` are deprecated.
+- Current warning messages communicate planned removal in `1.0.0` and point to submodule imports.
+
 ### Required GitHub Secrets
 
 - `PYPI_API_TOKEN`: PyPI API token for automated publishing (already configured)

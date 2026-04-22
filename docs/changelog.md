@@ -10,7 +10,10 @@
 
 ### [Unreleased]
 Added
-- (placeholder)
+- Explicit root-level compatibility shim deprecation guidance now includes removal target `1.0.0` and exact replacement import paths.
+
+Changed
+- Established deprecation documentation policy: deprecations must include (1) removal target version, (2) replacement path, and (3) contract tests that lock warning behavior.
 
 ### [0.7.0] - 2025-11-08
 
@@ -244,4 +247,4 @@ Guiding Principle: Reproducible, modular population health analytics from acquis
 
 ---
 
-Last sync (source mtime): 2025-11-11 09:54 UTC
+Last sync (source mtime): 2026-04-22 02:34 UTC
