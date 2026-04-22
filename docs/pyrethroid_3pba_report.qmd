@@ -1,0 +1,226 @@
+---
+title: "Temporal Trends in Urinary 3-PBA Pyrethroid Metabolite Biomonitoring"
+subtitle: "An Integrated Analysis Using NHANES Data and SciClaw Evidence Synthesis"
+author:
+  - name: "Paul Boys"
+    affiliation: "PopHealth Observatory"
+date: today
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+  pdf:
+    documentclass: article
+    number-sections: true
+bibliography: references.bib
+execute:
+  echo: false
+  warning: false
+---
+
+## Abstract {.unnumbered}
+
+3-Phenoxybenzoic acid (3-PBA, CAS 70458-82-3) is the primary urinary metabolite
+of multiple pyrethroid insecticides and serves as a non-specific biomarker of
+aggregate pyrethroid exposure. This report examines temporal trends in urinary
+3-PBA concentrations across NHANES survey cycles (2007–2018) using data ingested
+via the PopHealth Observatory toolkit, with evidence context provided by SciClaw
+agentic literature synthesis.
+
+## Introduction
+
+Pyrethroid insecticides are among the most widely used residential and agricultural
+pesticides globally. Following the phase-out of organophosphates for residential use,
+pyrethroid application has increased substantially. 3-PBA is a common metabolite
+of permethrin, cypermethrin, deltamethrin, and other pyrethroids, making it the
+most frequently measured urinary biomarker in population-level biomonitoring studies.
+
+NHANES has included urinary 3-PBA measurements since the 2007–2008 cycle as part
+of the pyrethroids, herbicides, and organophosphorus metabolites (UPHOPM) panel.
+This analysis leverages the PopHealth Observatory automated ingestion pipeline to
+harmonize 3-PBA data across multiple survey cycles.
+
+{{< include _sciclaw_introduction.qmd >}}
+
+## Methods
+
+### Data Source and Ingestion
+
+NHANES urinary pesticide metabolite data were obtained from the CDC National Center
+for Health Statistics. Data ingestion, harmonization, and quality control were
+performed using the PopHealth Observatory Python package (v1.0+).
+
+```{python}
+#| label: data-load
+#| echo: true
+
+from pathlib import Path
+import json
+
+# Load pre-computed cycle statistics from pipeline Phase 1
+summary_path = Path("data/reference/enrichment/3-pba_summary.json")
+if summary_path.exists():
+    with summary_path.open() as f:
+        summary = json.load(f)
+    cycle_stats = summary.get("cycle_stats", [])
+else:
+    cycle_stats = []
+    print("Run pyrethroid_3pba_pipeline.py first to generate data summaries.")
+```
+
+The following NHANES cycles were included in the analysis:
+
+- 2007–2008 through 2017–2018 (6 survey cycles)
+
+### Analyte Identification
+
+3-PBA was identified using CAS Registry Number 70458-82-3 and NHANES variable
+code URX3PBA. Reference metadata was loaded from the PopHealth Observatory
+curated pesticide reference:
+
+```{python}
+#| label: analyte-ref
+#| echo: true
+
+from pophealth_observatory.pesticide_context import load_analyte_reference, find_analyte
+
+analytes = load_analyte_reference()
+match = find_analyte("3-PBA", analytes)
+if match:
+    print(f"Analyte: {match.analyte_name}")
+    print(f"CAS RN: {match.cas_rn}")
+    print(f"Matrix: {match.matrix}")
+    print(f"Unit: {match.unit}")
+    print(f"Cycles: {match.cycle_first}–{match.cycle_last}")
+```
+
+### Evidence Synthesis
+
+Literature evidence was retrieved using SciClaw's `pubmed-cli` skill with search
+parameters targeting 3-PBA pyrethroid biomonitoring studies published 2015–2025.
+Evidence statements were parsed into structured enrichment records and merged with
+the analyte reference via PopHealth Observatory's evidence enrichment pipeline.
+
+{{< include _sciclaw_methods.qmd >}}
+
+### Statistical Analysis
+
+Descriptive statistics (mean, median, 25th/75th percentiles) were computed for
+urinary 3-PBA concentrations within each survey cycle. Temporal trends were
+assessed visually and through cycle-over-cycle comparison of geometric means.
+
+## Results
+
+### Cycle-Level Summary Statistics
+
+```{python}
+#| label: tbl-cycle-stats
+#| tbl-cap: "Urinary 3-PBA concentrations (µg/L) by NHANES cycle"
+
+import pandas as pd
+
+if cycle_stats:
+    stats_df = pd.DataFrame([s for s in cycle_stats if s.get("status") == "ok"])
+    if not stats_df.empty:
+        display_cols = ["cycle", "n_measured", "mean", "median", "p25", "p75", "min", "max"]
+        available = [c for c in display_cols if c in stats_df.columns]
+        print(stats_df[available].to_markdown(index=False))
+    else:
+        print("No successful cycle data available.")
+else:
+    print("No cycle statistics available. Run pipeline Phase 1 first.")
+```
+
+### Temporal Trend Visualization
+
+```{python}
+#| label: fig-trend
+#| fig-cap: "Median urinary 3-PBA concentration across NHANES cycles"
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+if cycle_stats:
+    ok_stats = [s for s in cycle_stats if s.get("status") == "ok" and s.get("median") is not None]
+    if ok_stats:
+        cycles = [s["cycle"] for s in ok_stats]
+        medians = [s["median"] for s in ok_stats]
+
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.plot(cycles, medians, marker="o", linewidth=2, color="#2c7bb6")
+        ax.set_xlabel("NHANES Cycle")
+        ax.set_ylabel("Median 3-PBA (µg/L)")
+        ax.set_title("Temporal Trend in Urinary 3-PBA")
+        ax.tick_params(axis="x", rotation=45)
+        fig.tight_layout()
+        plt.show()
+    else:
+        print("Insufficient data for trend plot.")
+else:
+    print("No data available for visualization.")
+```
+
+### Evidence Enrichment
+
+```{python}
+#| label: evidence-summary
+
+from pophealth_observatory.pesticide_context import load_evidence_enrichment, merge_reference_with_enrichment
+
+enrichment = load_evidence_enrichment()
+if enrichment and "70458-82-3" in enrichment:
+    rec = enrichment["70458-82-3"]
+    print(f"Evidence summary: {rec.evidence_summary}")
+    print(f"Key health endpoints: {', '.join(rec.key_health_endpoints or [])}")
+    print(f"Exposure routes: {', '.join(rec.exposure_routes or [])}")
+    if rec.evidence_statements:
+        print(f"\nEvidence statements ({len(rec.evidence_statements)}):")
+        for stmt in rec.evidence_statements:
+            print(f"  - {stmt.claim} (confidence: {stmt.confidence:.2f})")
+else:
+    print("No SciClaw enrichment available for 3-PBA. Run pipeline Phases 2-3 first.")
+```
+
+{{< include _sciclaw_results.qmd >}}
+
+## Discussion
+
+This analysis demonstrates the integration of automated NHANES data ingestion
+via PopHealth Observatory with agentic literature synthesis via SciClaw for a
+complete biomonitoring assessment workflow.
+
+Key observations:
+
+1. **Data accessibility**: PopHealth Observatory's harmonized ingestion pipeline
+   enables reproducible extraction of 3-PBA measurements across NHANES cycles
+   without manual file management.
+
+2. **Evidence grounding**: SciClaw's literature search and evidence extraction
+   provide structured, citation-backed context that enriches purely observational
+   data summaries.
+
+3. **Reproducibility**: The `enable_evidence_enrichment=False` flag in RAGConfig
+   allows strict reproducibility against raw snippet-only corpus when needed.
+
+{{< include _sciclaw_discussion.qmd >}}
+
+## Limitations
+
+- 3-PBA is a non-specific biomarker reflecting aggregate exposure to multiple
+  pyrethroids; source attribution is not possible from urinary metabolite data alone.
+- NHANES complex survey design weights were not applied in this descriptive analysis.
+- SciClaw evidence synthesis depends on publicly available literature and may not
+  capture all relevant unpublished data.
+
+## Conclusion
+
+The PopHealth Observatory + SciClaw integrated pipeline provides a reproducible,
+evidence-grounded workflow for pesticide biomonitoring assessment. This approach
+can be extended to other analytes in the NHANES pesticide panel.
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
