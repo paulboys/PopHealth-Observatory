@@ -120,7 +120,10 @@ class RAGPipeline:
         """Populate internal snippet, text and meta arrays from disk."""
         log_with_fallback(logger, logging.INFO, f"Loading snippets from {self.config.snippets_path}")
         self._snippets = _load_snippets(self.config.snippets_path)
-        self._attach_evidence_enrichment(self._snippets)
+        if self.config.enable_evidence_enrichment:
+            self._attach_evidence_enrichment(self._snippets)
+        else:
+            log_with_fallback(logger, logging.INFO, "Evidence enrichment disabled by RAGConfig")
         self._texts = [self._compose_retrieval_text(s) for s in self._snippets]
         self._meta = [s for s in self._snippets]
         log_with_fallback(logger, logging.INFO, f"Loaded {len(self._snippets)} snippets")

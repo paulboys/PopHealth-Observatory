@@ -188,3 +188,37 @@ def test_generate_surfaces_enrichment_in_prompt(tmp_path: Path, monkeypatch: pyt
     assert "[KEY_HEALTH_ENDPOINTS]" in out["prompt"]
     assert "neurodevelopment" in out["prompt"]
     assert out["snippets"][0]["sciclaw_evidence_summary"].startswith("DMP associated")
+
+
+def test_disable_enrichment_for_reproducibility_mode(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"cas_rn": "814-24-8", "analyte_name": "DMP", "text": "DMP findings in cohort samples."}',
+        ],
+    )
+    cfg = RAGConfig(
+        snippets_path=snippet_file,
+        embeddings_path=tmp_path / "embeddings_cache",
+        model_name="dummy",
+        enable_evidence_enrichment=False,
+    )
+
+    def _should_not_call() -> dict:
+        raise AssertionError("load_evidence_enrichment should not be called when enrichment is disabled")
+
+    monkeypatch.setattr(pipeline_module, "load_evidence_enrichment", _should_not_call)
+
+    pipe = RAGPipeline(cfg, DummyEmbedder(dim=8))
+    pipe.prepare()
+
+    def gen(question: str, snippets: list[dict], prompt: str) -> str:
+        return prompt
+
+    out = pipe.generate("What evidence exists for DMP?", gen, top_k=1)
+
+    assert "[EVIDENCE_SUMMARY]" not in out["prompt"]
+    assert "sciclaw_evidence_summary" not in out["snippets"][0]
