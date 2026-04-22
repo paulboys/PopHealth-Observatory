@@ -1,41 +1,148 @@
+from __future__ import annotations
+
 from pathlib import Path
 
+import pytest
+
 from pophealth_observatory.rag import DummyEmbedder, RAGConfig, RAGPipeline
-
-# We'll synthesize a temporary snippet file rather than depend on real ingestion.
-
-
-def _write_snippets(tmp_path: Path) -> Path:
-    content = """
-{"text": "Dimethylphosphate (DMP) levels decreased in 2022."}
-{"text": "3-PBA remained stable across cohorts."}
-{"text": "DEP findings were limited."}
-{"text": "Unrelated nutritional note."}
-""".strip()
-    f = tmp_path / "snips.jsonl"
-    f.write_text(content, encoding="utf-8")
-    return f
+from pophealth_observatory.rag.pipeline import _format_prompt, _load_snippets
 
 
-def test_rag_pipeline_dummy(tmp_path: Path):
-    snip_file = _write_snippets(tmp_path)
-    cfg = RAGConfig(
-        snippets_path=snip_file,
-        embeddings_path=tmp_path / "embeddings_cache",
-        model_name="dummy",
+def _write_lines(path: Path, lines: list[str]) -> Path:
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def test_load_snippets_skips_malformed_lines(tmp_path: Path) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"text": "valid one"}',
+            '{"text": "valid two"}',
+            "{not-json}",
+            '{"text": "valid three"}',
+        ],
     )
+
+    loaded = _load_snippets(snippet_file)
+    assert len(loaded) == 3
+    assert loaded[0]["text"] == "valid one"
+    assert loaded[-1]["text"] == "valid three"
+
+
+def test_format_prompt_respects_max_chars() -> None:
+    snippets = [
+        {"text": "a" * 120},
+        {"text": "b" * 120},
+        {"text": "c" * 120},
+    ]
+    prompt = _format_prompt("Question?", snippets, max_chars=160)
+
+    assert "Question: Question?" in prompt
+    assert "[SNIPPET]" in prompt
+    # The second and third snippets should be truncated out by char budget.
+    assert "b" * 120 not in prompt
+    assert "c" * 120 not in prompt
+
+
+def test_retrieve_requires_prepared_index(tmp_path: Path) -> None:
+    snippet_file = _write_lines(tmp_path / "snips.jsonl", ['{"text": "DMP trend text"}'])
+    cfg = RAGConfig(snippets_path=snippet_file, embeddings_path=tmp_path / "cache")
+    pipe = RAGPipeline(cfg, DummyEmbedder(dim=8))
+
+    with pytest.raises(AssertionError, match="Index not built"):
+        pipe.retrieve("DMP")
+
+
+def test_prepare_creates_cache_artifacts(tmp_path: Path) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"text": "Dimethylphosphate (DMP) levels decreased in 2022."}',
+            '{"text": "3-PBA remained stable across cohorts."}',
+            '{"text": "DEP findings were limited."}',
+        ],
+    )
+    cfg = RAGConfig(snippets_path=snippet_file, embeddings_path=tmp_path / "embeddings_cache", model_name="dummy")
     pipe = RAGPipeline(cfg, DummyEmbedder(dim=8))
     pipe.prepare()
 
-    # Simple generator echo
-    def gen(q, snippets, prompt):  # noqa: D401
-        return f"Q={q}|N={len(snippets)}"
+    assert (cfg.embeddings_path / "embeddings.npy").exists()
+    assert (cfg.embeddings_path / "metadata.json").exists()
+    assert (cfg.embeddings_path / "texts.json").exists()
+
+
+def test_prepare_loads_existing_cache(tmp_path: Path) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"text": "DMP exposure changed over time."}',
+            '{"text": "DEP findings were limited."}',
+        ],
+    )
+    cfg = RAGConfig(snippets_path=snippet_file, embeddings_path=tmp_path / "embeddings_cache", model_name="dummy")
+
+    first = RAGPipeline(cfg, DummyEmbedder(dim=8))
+    first.prepare()
+
+    second = RAGPipeline(cfg, DummyEmbedder(dim=8))
+    second.prepare()
+
+    assert second.retrieve("DMP", top_k=1)
+
+
+def test_generate_returns_expected_payload(tmp_path: Path) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"text": "Dimethylphosphate (DMP) levels decreased in 2022."}',
+            '{"text": "3-PBA remained stable across cohorts."}',
+            '{"text": "DEP findings were limited."}',
+            '{"text": "Unrelated nutritional note."}',
+        ],
+    )
+    cfg = RAGConfig(snippets_path=snippet_file, embeddings_path=tmp_path / "embeddings_cache", model_name="dummy")
+    pipe = RAGPipeline(cfg, DummyEmbedder(dim=8))
+    pipe.prepare()
+
+    def gen(question: str, snippets: list[dict], prompt: str) -> str:
+        return f"Q={question}|N={len(snippets)}|P={len(prompt)}"
 
     result = pipe.generate("What about DMP trends?", gen, top_k=2)
-    assert result["question"].startswith("What about")
-    assert result["answer"].startswith("Q=")
-    assert result["snippets"]
-    # ensure caching works
-    pipe2 = RAGPipeline(cfg, DummyEmbedder(dim=8))
-    pipe2.prepare()  # should load from cache without error
-    assert pipe2.retrieve("DMP", top_k=1)
+
+    assert result["question"] == "What about DMP trends?"
+    assert result["answer"].startswith("Q=What about DMP trends?|N=2")
+    assert len(result["snippets"]) == 2
+    assert "Question: What about DMP trends?" in result["prompt"]
+
+
+def test_retrieve_top_k_larger_than_corpus(tmp_path: Path) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"text": "snippet one"}',
+            '{"text": "snippet two"}',
+            '{"text": "snippet three"}',
+        ],
+    )
+    cfg = RAGConfig(snippets_path=snippet_file, embeddings_path=tmp_path / "embeddings_cache")
+    pipe = RAGPipeline(cfg, DummyEmbedder(dim=8))
+    pipe.prepare()
+
+    hits = pipe.retrieve("snippet", top_k=20)
+    assert len(hits) == 3
+
+
+def test_retrieve_zero_top_k_returns_empty(tmp_path: Path) -> None:
+    snippet_file = _write_lines(
+        tmp_path / "snips.jsonl",
+        [
+            '{"text": "snippet one"}',
+            '{"text": "snippet two"}',
+        ],
+    )
+    cfg = RAGConfig(snippets_path=snippet_file, embeddings_path=tmp_path / "embeddings_cache")
+    pipe = RAGPipeline(cfg, DummyEmbedder(dim=8))
+    pipe.prepare()
+
+    assert pipe.retrieve("snippet", top_k=0) == []
