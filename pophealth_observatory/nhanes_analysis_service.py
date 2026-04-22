@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+
 import pandas as pd
+
+from .logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 
 def analyze_by_demographics(df: pd.DataFrame, metric: str, demographic: str) -> pd.DataFrame:
@@ -25,7 +31,7 @@ def create_demographic_visualization(df: pd.DataFrame, metric: str, demographic:
         import matplotlib.pyplot as plt  # type: ignore
         import seaborn as sns  # type: ignore
     except Exception as exc:  # noqa: BLE001
-        print(f"Visualization dependencies not available: {exc}")
+        log_with_fallback(logger, logging.WARNING, f"Visualization dependencies not available: {exc}")
         return
 
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))

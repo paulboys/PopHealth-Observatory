@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 
 import pandas as pd
 
+from ..logging_config import log_with_fallback
 from .protocols import AnalysisRunner, DataProvider
+
+logger = logging.getLogger(__name__)
 
 
 class NHANESDataProviderAdapter(DataProvider):
@@ -38,7 +42,7 @@ class NHANESAnalysisAdapter(AnalysisRunner):
         self._analyze_by_demographics = analyze_by_demographics
 
     def create_merged_dataset(self, cycle: str = "2017-2018") -> pd.DataFrame:
-        print(f"Creating merged dataset for {cycle}...")
+        log_with_fallback(logger, logging.INFO, f"Creating merged dataset for {cycle}...")
         demo_df = self._get_demographics_data(cycle)
         body_df = self._get_body_measures(cycle)
         bp_df = self._get_blood_pressure(cycle)
@@ -49,7 +53,11 @@ class NHANESAnalysisAdapter(AnalysisRunner):
         if not bp_df.empty:
             merged = merged.merge(bp_df, on="participant_id", how="left")
 
-        print(f"Merged dataset created with {len(merged)} participants and {len(merged.columns)} variables")
+        log_with_fallback(
+            logger,
+            logging.INFO,
+            f"Merged dataset created with {len(merged)} participants and {len(merged.columns)} variables",
+        )
         return merged
 
     def analyze_by_demographics(self, df: pd.DataFrame, metric: str, demographic: str) -> pd.DataFrame:
