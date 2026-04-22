@@ -7,12 +7,12 @@ This checklist tracks final stabilization tasks before a 1.0 release.
 - [x] Deprecation policy documented in README (`Deprecation and Compatibility Policy` section)
 - [x] Deprecation/removal contract documented in `docs/versioning.md`
 - [x] Unreleased changelog entries include deprecation timeline guidance
-- [x] Root-level compatibility shim timeline documented (`planned removal in 1.0.0`)
+- [x] Root-level compatibility shim timeline documented (`no earlier than 2.0.0`; target date: `2027-06-30`)
 
 ## API and Compatibility Safeguards
 
 - [x] Root export shims emit `DeprecationWarning` with explicit replacement imports
-- [x] Root export shims include explicit planned removal version (`1.0.0`)
+- [x] Root export shims include explicit planned removal version (`2.0.0`) and firm target date (`2027-06-30`)
 - [x] Shim behavior covered by contract tests (`tests/test_init_shims.py`)
 - [x] Protocol adapter composition preserves public explorer behavior
 
@@ -25,8 +25,8 @@ This checklist tracks final stabilization tasks before a 1.0 release.
 
 ## Pre-1.0 Final Gate (To Execute at Release Time)
 
-- [ ] Decide final action for deprecated root exports: retain through 1.0 or remove in 1.0 with migration note
+- [x] Decide final action for deprecated root exports: retain through 1.0 and defer removal to no earlier than 2.0.0 (`2027-06-30` target)
 - [ ] If removing shims, update all docs/examples to submodule imports only
-- [ ] Add a dedicated `1.0.0` release-notes page with migration guidance
+- [x] Add a dedicated `1.0.0` release-notes page with migration guidance
 - [ ] Validate no unresolved deprecation-policy inconsistencies in docs
-- [ ] Run full repository test and docs build before tagging
+- [ ] Run full repository test and strict docs build at tag time (CI-enforced)

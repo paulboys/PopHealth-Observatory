@@ -90,7 +90,7 @@ Public APIs may be deprecated before removal to preserve upgrade safety.
 - Actual removals are treated as breaking changes and occur only in MAJOR releases.
 
 Current timeline:
-- Root-level compatibility exports in `pophealth_observatory` are deprecated and planned for removal in `1.0.0`.
+- Root-level compatibility exports in `pophealth_observatory` are deprecated and planned for removal no earlier than `2.0.0` (target date: `2027-06-30`).
 - Prefer direct submodule imports (for example: `from pophealth_observatory.observatory import NHANESExplorer`).
 
 Full policy details: `docs/versioning.md`

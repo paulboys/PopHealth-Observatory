@@ -19,7 +19,7 @@ def test_root_nhanesexplorer_shim_warns_and_resolves() -> None:
     pkg = _fresh_root_module()
     assert "NHANESExplorer" not in pkg.__dict__
 
-    with pytest.deprecated_call(match=r"removed in 1\.0\.0"):
+    with pytest.deprecated_call(match=r"no earlier than 2\.0\.0 \(target date: 2027-06-30\)"):
         shim_cls = pkg.NHANESExplorer
 
     from pophealth_observatory.observatory import NHANESExplorer
@@ -51,7 +51,7 @@ def test_unknown_root_attribute_raises_attribute_error() -> None:
 def test_root_shim_warning_emitted_once_after_cache() -> None:
     pkg = _fresh_root_module()
 
-    with pytest.deprecated_call(match=r"removed in 1\.0\.0"):
+    with pytest.deprecated_call(match=r"no earlier than 2\.0\.0 \(target date: 2027-06-30\)"):
         _ = pkg.BRFSSExplorer
 
     with warnings.catch_warnings(record=True) as captured:
