@@ -32,10 +32,10 @@ Invalid values fall back to `INFO`.
 
 ## Transitional Fallback Prints
 
-During logging migration, many internal call sites use `log_with_fallback(...)`.
+Logging migration is complete, and internal call sites currently use `log_with_fallback(...)` where compatibility mirroring is still needed.
 That helper logs via the package logger and mirrors messages to stdout for compatibility.
 
-- This duplication is intentional during migration.
+- This duplication is an intentional temporary compatibility behavior.
 - Removal timeline for compatibility-related transitions is documented in `docs/versioning.md`.
 
 For your own extension code, prefer direct logger calls unless you explicitly need mirrored stdout:
