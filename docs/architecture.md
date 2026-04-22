@@ -93,6 +93,8 @@ Raw pesticide text
   -> external generator callback
 ```
 
+For strict reproducibility against raw snippet-only corpus, set `enable_evidence_enrichment=False` in `RAGConfig`.
+
 ## Current Extension Seams
 
 1. Add new NHANES component loaders using existing harmonization patterns.
