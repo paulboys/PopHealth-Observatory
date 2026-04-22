@@ -7,9 +7,14 @@ multiple observatory entry points.
 from __future__ import annotations
 
 import io
+import logging
 
 import pandas as pd
 import requests
+
+from .logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 
 def build_nhanes_xpt_url_patterns(
@@ -76,16 +81,27 @@ def try_download_xpt(
         try:
             response = requests.get(url, timeout=timeout_seconds)
             if response.status_code != 200:
-                errors.append(f"Status {response.status_code} from {url}")
+                msg = f"Status {response.status_code} from {url}"
+                errors.append(msg)
+                log_with_fallback(logger, logging.WARNING, f"NHANES XPT download attempt failed: {msg}")
                 continue
 
             df = pd.read_sas(io.BytesIO(response.content), format="xport")
             if df.empty:
-                errors.append(f"Empty DataFrame from {url}")
+                msg = f"Empty DataFrame from {url}"
+                errors.append(msg)
+                log_with_fallback(logger, logging.WARNING, f"NHANES XPT download attempt failed: {msg}")
                 continue
 
             return df, url, errors
         except Exception as exc:  # noqa: BLE001
-            errors.append(f"Error with {url}: {str(exc)}")
+            msg = f"Error with {url}: {str(exc)}"
+            errors.append(msg)
+            log_with_fallback(logger, logging.WARNING, f"NHANES XPT download attempt failed: {msg}")
 
+    log_with_fallback(
+        logger,
+        logging.ERROR,
+        f"All NHANES XPT URL candidates exhausted after {len(url_patterns)} attempts.",
+    )
     return None, None, errors

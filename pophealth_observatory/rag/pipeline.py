@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
+from ..logging_config import log_with_fallback
 from .config import RAGConfig
 from .embeddings import BaseEmbedder
 from .index import VectorIndex, load_metadata, save_metadata
+
+logger = logging.getLogger(__name__)
 
 GeneratorFn = Callable[[str, list[dict], str], str]
 # signature: (question, context_snippets, prompt_text) -> answer
@@ -100,22 +104,27 @@ class RAGPipeline:
     # --- Build / load ---
     def load_snippets(self) -> None:
         """Populate internal snippet, text and meta arrays from disk."""
+        log_with_fallback(logger, logging.INFO, f"Loading snippets from {self.config.snippets_path}")
         self._snippets = _load_snippets(self.config.snippets_path)
         self._texts = [s.get("text", "") for s in self._snippets]
         self._meta = [s for s in self._snippets]
+        log_with_fallback(logger, logging.INFO, f"Loaded {len(self._snippets)} snippets")
 
     def build_or_load_embeddings(self) -> None:
         """Create embeddings index or load cached artifacts if available."""
         root = self.config.embeddings_path
         if self.config.cache and (root / "embeddings.npy").exists():
+            log_with_fallback(logger, logging.INFO, f"Loading cached embeddings/index from {root}")
             self._index = VectorIndex.load(root)
             self._texts, self._meta = load_metadata(root)
             return
         # build
+        log_with_fallback(logger, logging.INFO, f"Building embeddings/index for {len(self._texts)} texts")
         vecs = self.embedder.encode(self._texts)
         self._index = VectorIndex(vectors=vecs)
         self._index.save(root)
         save_metadata(self._texts, self._meta, root)
+        log_with_fallback(logger, logging.INFO, f"Saved embeddings/index artifacts under {root}")
 
     # --- Retrieval ---
     def retrieve(self, question: str, top_k: int = 5) -> list[dict]:
@@ -136,6 +145,7 @@ class RAGPipeline:
         q_vec = self.embedder.encode([question])[0]
         assert self._index is not None, "Index not built"
         hits = self._index.query(q_vec, top_k=top_k)
+        logger.debug("Retrieved %s snippets for question", len(hits))
         return [self._meta[i] for i, _ in hits]
 
     # --- Generation ---
@@ -158,12 +168,15 @@ class RAGPipeline:
         """
         snippets = self.retrieve(question, top_k=top_k)
         prompt = _format_prompt(question, snippets)
+        log_with_fallback(logger, logging.INFO, f"Generating answer with top_k={top_k} and {len(snippets)} snippets")
         answer = generator(question, snippets, prompt)
         return {"question": question, "answer": answer, "snippets": snippets, "prompt": prompt}
 
     # Convenience orchestrator
     def prepare(self) -> None:
         """End-to-end pipeline initialization (load snippets + embeddings)."""
+        log_with_fallback(logger, logging.INFO, "Preparing RAG pipeline")
         if not self._snippets:
             self.load_snippets()
         self.build_or_load_embeddings()
+        log_with_fallback(logger, logging.INFO, "RAG pipeline ready")

@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
+
+from ..logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 try:  # optional heavy dependency
     from sentence_transformers import SentenceTransformer  # type: ignore
@@ -78,6 +83,7 @@ class SentenceTransformerEmbedder(BaseEmbedder):
                 "sentence-transformers not installed. Install extras: pip install pophealth-observatory[rag]"
             )
         self.model_name = model_name
+        log_with_fallback(logger, logging.INFO, f"Loading sentence-transformer model: {model_name}")
         self._model = SentenceTransformer(model_name)
         # do one dummy to know dimension
         self._dim = int(self._model.get_sentence_embedding_dimension())
@@ -87,4 +93,5 @@ class SentenceTransformerEmbedder(BaseEmbedder):
         return self._dim
 
     def encode(self, texts: list[str]) -> np.ndarray:
+        log_with_fallback(logger, logging.INFO, f"Encoding {len(texts)} texts with model {self.model_name}")
         return np.asarray(self._model.encode(texts, show_progress_bar=False), dtype=np.float32)

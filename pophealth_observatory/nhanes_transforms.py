@@ -5,8 +5,21 @@ Pure transformation helpers extracted from explorer orchestration methods.
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+
+def _log_harmonization_columns(df: pd.DataFrame, mapping: dict[str, str], label: str) -> None:
+    """Emit DEBUG trace of harmonization remaps and dropped columns."""
+    remapped = [c for c in mapping if c in df.columns]
+    dropped = [c for c in df.columns if c not in mapping]
+    logger.debug("%s remapped columns: %s", label, remapped)
+    if dropped:
+        logger.debug("%s dropped/unmapped columns: %s", label, dropped)
 
 
 def harmonize_demographics(demo_df: pd.DataFrame) -> pd.DataFrame:
@@ -27,6 +40,7 @@ def harmonize_demographics(demo_df: pd.DataFrame) -> pd.DataFrame:
         "SDMVPSU": "psu",
         "SDMVSTRA": "strata",
     }
+    _log_harmonization_columns(demo_df, demo_vars, "demographics")
     available = [c for c in demo_vars if c in demo_df.columns]
     demo_clean = demo_df[available].copy().rename(columns={k: v for k, v in demo_vars.items() if k in available})
 
@@ -59,6 +73,7 @@ def harmonize_body_measures(bmx_df: pd.DataFrame) -> pd.DataFrame:
         "BMXBMI": "bmi",
         "BMXWAIST": "waist_cm",
     }
+    _log_harmonization_columns(bmx_df, body_vars, "body_measures")
     available = [c for c in body_vars if c in bmx_df.columns]
     body_clean = bmx_df[available].copy().rename(columns={k: v for k, v in body_vars.items() if k in available})
 
@@ -87,6 +102,7 @@ def harmonize_blood_pressure(bp_df: pd.DataFrame) -> pd.DataFrame:
         "BPXSY3": "systolic_bp_3",
         "BPXDI3": "diastolic_bp_3",
     }
+    _log_harmonization_columns(bp_df, bp_vars, "blood_pressure")
     available = [c for c in bp_vars if c in bp_df.columns]
     bp_clean = bp_df[available].copy().rename(columns={k: v for k, v in bp_vars.items() if k in available})
 
