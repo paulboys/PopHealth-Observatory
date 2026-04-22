@@ -10,6 +10,8 @@ from typing import Any
 import pandas as pd
 import requests  # noqa: F401 - retained for test patch compatibility
 
+from .core.nhanes_adapters import NHANESAnalysisAdapter, NHANESDataProviderAdapter
+from .core.protocols import AnalysisRunner, DataProvider
 from .nhanes_analysis_service import (
     analyze_by_demographics as analyze_by_demographics_service,
 )
@@ -145,6 +147,27 @@ class NHANESExplorer(PopHealthObservatory):
     # Manifest schema tag for emitted artifacts.
     _MANIFEST_SCHEMA_VERSION = "1.0.0"
 
+    def __init__(self, data_provider: DataProvider | None = None, analysis_runner: AnalysisRunner | None = None):
+        """Initialize explorer with optional protocol-backed adapters.
+
+        Parameters
+        ----------
+        data_provider : DataProvider | None
+            Optional injected data provider adapter. Defaults to an adapter over
+            this explorer's inherited download capabilities.
+        analysis_runner : AnalysisRunner | None
+            Optional injected analysis runner adapter. Defaults to a local
+            NHANESAnalysisAdapter composed from explorer callables.
+        """
+        super().__init__()
+        self._data_provider = data_provider or NHANESDataProviderAdapter(self)
+        self._analysis_runner = analysis_runner or NHANESAnalysisAdapter(
+            get_demographics_data=self.get_demographics_data,
+            get_body_measures=self.get_body_measures,
+            get_blood_pressure=self.get_blood_pressure,
+            analyze_by_demographics=analyze_by_demographics_service,
+        )
+
     def _normalize_year_span(self, year_text: str | None) -> str:
         """Normalize raw year span text into canonical YYYY_YYYY form."""
         return normalize_year_span(year_text)
@@ -247,36 +270,26 @@ class NHANESExplorer(PopHealthObservatory):
 
     def get_demographics_data(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Download demographics and delegate harmonization to transform helpers."""
-        demo_df = self.download_data(cycle, self.components["demographics"])
+        demo_df = self._data_provider.download_data(cycle, self.components["demographics"])
         return harmonize_demographics(demo_df)
 
     def get_body_measures(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Download body measures and delegate harmonization to transform helpers."""
-        bmx_df = self.download_data(cycle, self.components["body_measures"])
+        bmx_df = self._data_provider.download_data(cycle, self.components["body_measures"])
         return harmonize_body_measures(bmx_df)
 
     def get_blood_pressure(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Download blood pressure and delegate harmonization to transform helpers."""
-        bp_df = self.download_data(cycle, self.components["blood_pressure"])
+        bp_df = self._data_provider.download_data(cycle, self.components["blood_pressure"])
         return harmonize_blood_pressure(bp_df)
 
     def create_merged_dataset(self, cycle: str = "2017-2018") -> pd.DataFrame:
         """Merge DEMO, BMX, BPX slices on participant_id."""
-        print(f"Creating merged dataset for {cycle}...")
-        demo_df = self.get_demographics_data(cycle)
-        body_df = self.get_body_measures(cycle)
-        bp_df = self.get_blood_pressure(cycle)
-        merged = demo_df.copy()
-        if not body_df.empty:
-            merged = merged.merge(body_df, on="participant_id", how="left")
-        if not bp_df.empty:
-            merged = merged.merge(bp_df, on="participant_id", how="left")
-        print(f"Merged dataset created with {len(merged)} participants and {len(merged.columns)} variables")
-        return merged
+        return self._analysis_runner.create_merged_dataset(cycle)
 
     def analyze_by_demographics(self, df: pd.DataFrame, metric: str, demographic: str) -> pd.DataFrame:
         """Group metric by demographic and compute standard descriptive stats."""
-        return analyze_by_demographics_service(df, metric, demographic)
+        return self._analysis_runner.analyze_by_demographics(df, metric, demographic)
 
     def create_demographic_visualization(self, df: pd.DataFrame, metric: str, demographic: str):
         """Boxplot + mean bar chart for metric by demographic (if available)."""
