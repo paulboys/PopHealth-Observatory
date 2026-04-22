@@ -157,6 +157,7 @@ Comprehensive breakdown of implemented vs planned capabilities.
 | Copilot Instructions | ✅ Complete | `.github/copilot-instructions.md`, scoped files |
 | CHANGELOG | ✅ Current | `CHANGELOG.md` |
 | ROADMAP | ✅ Current | `ROADMAP.md` |
+| Pesticide Biomonitoring Plan | ✅ Current | `docs/pesticide_biomonitoring_plan.md` |
 | Auto API Reference | 🔧 Planned | MkDocs plugin integration pending |
 
 ---
@@ -169,7 +170,7 @@ Comprehensive breakdown of implemented vs planned capabilities.
 | Format (Black) | ✅ Implemented | Via pre-commit hooks and `autofix-pr` workflow |
 | Test (Pytest) | ✅ Passing | 18 tests (basic, context, RAG, validation) |
 | Coverage | 🔧 Configured | `coverage` tool installed; gating not enforced |
-| Build Artifacts | ✅ Implemented | `publish.yml` workflow handles build/publish |
+| Build Artifacts | ✅ Implemented | `release.yml` workflow handles tagged build/publish |
 | Pre-commit Hooks | ✅ Implemented | `.pre-commit-config.yaml` with Black, Ruff, etc. |
 | Auto-Versioning | ✅ Implemented | `auto-version.yml` bumps version on merge to main |
 
@@ -195,8 +196,9 @@ Comprehensive breakdown of implemented vs planned capabilities.
 
 ---
 
-**Last Updated:** 2025-11-08
-**Version Coverage:** 0.7.0
+**Last Updated:** 2026-04-22
+**Version Coverage:** 1.0.0
 
 For implementation timelines, see [ROADMAP.md](roadmap.md).
 For change history, see [CHANGELOG.md](changelog.md).
+For pesticide domain planning details, see [Pesticide Biomonitoring Plan](pesticide_biomonitoring_plan.md).

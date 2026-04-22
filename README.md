@@ -95,13 +95,15 @@ Current timeline:
 
 Full policy details: `docs/versioning.md`
 
-## Logging (Phase 1)
+## Logging
 
 PopHealth Observatory now initializes a centralized package logger (`pophealth_observatory`) at import time.
 
 - Set `LOGLEVEL` (for example `DEBUG`, `INFO`, `WARNING`) to control verbosity.
 - Initial rollout keeps selected print diagnostics while modules are migrated to logger calls.
 - Log format is key-value text for readability and later structured-log expansion.
+
+Guide: `docs/usage/logging.md`
 
 ## Repository Structure
 
@@ -243,10 +245,10 @@ Tagline updated to emphasize *exploratory analysis* rather than definitive scien
 ### New Dependency (0.6.0)
 `pillow` added for runtime logo dark/transparent variant generation.
 
-### Plan for 0.7.0 (Preview)
-- Expanded survey weight robustness (design effects)
-- Additional NHANES component loaders
-- Optional DuckDB persistent cache layer
+### 1.0 Stability Priorities
+- Preserve stable public APIs through protocol-backed composition
+- Complete logging migration from print diagnostics to structured logger calls
+- Keep compatibility shims with explicit deprecation timeline (`2.0.0` earliest removal)
 
 
 ## Metadata Manifest (NHANES Component Tables)
@@ -368,6 +370,8 @@ An optional R analytics layer will consume parquet outputs via Apache Arrow for 
 - **Adapters for Other Surveys**: Extend the framework to support other public health datasets like BRFSS.
 - **Persistent Caching**: Use DuckDB or Parquet for efficient local caching of large datasets.
 - **CLI Interface**: Develop a command-line tool for scripted data exports and manifest generation.
+
+Detailed pesticide roadmap: `docs/pesticide_biomonitoring_plan.md`
 
 ## Retrieval-Augmented Generation (RAG) Scaffolding (Experimental)
 
@@ -517,6 +521,11 @@ Semantic versioning with conventional commits. Minor bumps (`feat:`) add feature
 </details>
 
 <details>
+<summary><strong>Why am I seeing DeprecationWarning from package-root imports?</strong></summary>
+Root-level compatibility exports remain available for backward compatibility, but they are deprecated. Migrate to direct submodule imports (for example `from pophealth_observatory.observatory import NHANESExplorer`). Removal is planned no earlier than `2.0.0` (target date: `2027-06-30`).
+</details>
+
+<details>
 <summary><strong>Can I add a new NHANES component?</strong></summary>
 Yes. Follow existing loader patterns (see `observatory.py`), implement column mapping + derived metrics, add tests, update manifests if needed, and document in the README + CHANGELOG.
 </details>
@@ -541,23 +550,23 @@ On first app run Pillow generates a dark/transparent variant if possible; falls 
 No. It is an exploratory toolkit for assumption checking, hypothesis generation, and early analytic prototyping. For regulated / submission contexts perform validated workflows with full survey design and audit trails.
 </details>
 
-## What's New in 0.7.0
-Minor feature release focused on laboratory pesticide ingestion and test coverage expansion.
+## What's New in 1.0.0
+Stability milestone focused on architecture decomposition completion, compatibility hardening, and release gating.
 
 Added:
-- Laboratory pesticide ingestion module `get_pesticide_metabolites()` (UPHOPM, OPD, PP series) with harmonized schema (analyte, parent pesticide, metabolite class, matrix, units, log transform, detection flag).
-- Pesticide reference loader `load_pesticide_reference()` exposing CAS RN, matrix hints, cycle availability.
-- Expanded observatory test suite (coverage 30% → 81%) across HTML table parsing, manifest filtering, weighted mean calculations, merged dataset integrity.
+- Dedicated migration guidance page for 1.0.0 compatibility expectations.
+- Centralized logging documentation with `LOGLEVEL` controls.
 
 Changed:
-- Feature status & API docs updated to include pesticide laboratory domain.
-- README references updated to reflect new coverage level and ingestion capabilities.
+- NHANES orchestration architecture now explicitly decomposed into data access, transforms, manifest, analysis, and adapter modules.
+- Deprecation policy clarified: root compatibility shims retained through 1.x, removal no earlier than 2.0.0.
+- Tag-time release gates now require full tests and strict docs build before publish.
 
 Quality:
-- Strengthened confidence in core manifest and data derivation paths via targeted tests.
+- Logging migration expanded to low-level data access, validation, and RAG pipeline modules.
 
 Notes:
-- Non-breaking additive release; prepares for cross-cycle pesticide analytics and RAG contextual enrichment.
+- 1.0.0 is stable and backward-compatible, with explicit deprecation warnings guiding import migration.
 
 ## What's New in 0.6.0
 Minor feature release focused on UI, performance, and multi-dataset exploration.

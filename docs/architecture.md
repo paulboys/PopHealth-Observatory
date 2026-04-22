@@ -22,16 +22,17 @@ Primary responsibilities are split across:
             +-------------+-------------+
                           |
                           v
-      +-----------------------------------------+
-      | pophealth_observatory package           |
-      |-----------------------------------------|
-      | observatory.py -> NHANES ingestion      |
-      | brfss.py -> BRFSS explorer              |
-      | validation.py -> integrity checks       |
-      | pesticide_ingestion.py -> snippets      |
-      | pesticide_context.py -> reference data  |
-      | rag/* -> embed/retrieve/prompt          |
-      +-------------------+---------------------+
+  +------------------------------------------------------+
+  | pophealth_observatory package                        |
+  |------------------------------------------------------|
+  | observatory.py -> orchestration facade               |
+  | nhanes_data_access.py -> URL + resilient download    |
+  | nhanes_transforms.py -> harmonization transforms     |
+  | nhanes_manifest_service.py -> manifest normalization |
+  | nhanes_analysis_service.py -> analysis/reporting     |
+  | core/nhanes_adapters.py -> protocol composition      |
+  | logging_config.py -> centralized logger              |
+  +----------------------------+-------------------------+
                           |
           +---------------+----------------+
           |                                |
@@ -48,7 +49,14 @@ Primary responsibilities are split across:
 
 | Module | Responsibility | Key Contract Surface |
 |--------|----------------|----------------------|
-| `observatory.py` | NHANES download, harmonization, derived metrics, manifest generation | `NHANESExplorer` public methods |
+| `observatory.py` | NHANES orchestration facade over service modules | `NHANESExplorer` public methods |
+| `nhanes_data_access.py` | NHANES URL pattern generation and resilient XPT download | `build_nhanes_xpt_url_patterns`, `try_download_xpt` |
+| `nhanes_transforms.py` | Demographics, BMI, and blood pressure harmonization transforms | `harmonize_*` transform helpers |
+| `nhanes_manifest_service.py` | NHANES component-table fetch/parse/normalize utilities | manifest parsing and normalization helpers |
+| `nhanes_analysis_service.py` | Analysis helpers, visualization, and summary reporting | analysis/report helper functions |
+| `core/nhanes_adapters.py` | Protocol-based composition layer for data + analysis runners | `NHANESDataProviderAdapter`, `NHANESAnalysisAdapter` |
+| `core/nhanes_reporting_adapters.py` | Reporting and validation adapter layer | reporting/validation adapter implementations |
+| `logging_config.py` | Centralized logging bootstrap and migration helper | `configure_logging`, `log_with_fallback` |
 | `brfss.py` | State-level indicator retrieval and filtering | `BRFSSExplorer` |
 | `validation.py` | Data integrity and consistency checks | validation helpers + report outputs |
 | `laboratory_pesticides.py` | Laboratory pesticide analyte harmonization | pesticide lab loaders |
@@ -99,16 +107,16 @@ Raw pesticide text
 3. Prefer structured artifacts (JSON/JSONL; planned Parquet for broader interchange).
 4. Avoid introducing global mutable singletons beyond scoped caches.
 
-## Planned Decomposition Focus
+## Decomposition Outcome
 
-Near-term decomposition should target large multi-responsibility classes by extracting:
-- URL resolution/acquisition services
-- Schema harmonization registry and transformations
-- Derivation calculators (BMI/BP and future metrics)
-- Manifest scraping/normalization services
-- Validation orchestration layer
+The decomposition plan is complete for the NHANES orchestration path.
 
-This preserves public API behavior while enabling smaller, test-isolated units.
+- Previously monolithic responsibilities in `observatory.py` were split into focused service modules.
+- Public API behavior remains stable via adapter-backed composition and compatibility shims.
+- Protocol contracts in `core/protocols.py` now define extension seams independent of concrete implementations.
+- Centralized package logging in `logging_config.py` provides a shared diagnostic path across modules during migration.
+
+Net effect: smaller testable units, clearer ownership boundaries, and lower-risk feature extension for 1.x.
 
 ## Concrete Decomposition Slices
 
@@ -133,6 +141,13 @@ The recommended implementation order keeps risk low and preserves existing publi
 6. Completed: validation/report orchestration extraction
   - Introduce report and validation adapters implementing protocol-backed composition
   - Delegate `NHANESExplorer.validate` and summary reporting via report adapter
+
+### What Protocol Contracts Enable
+
+1. Swap implementation details without changing public explorer APIs.
+2. Test modules in isolation with lightweight adapter or provider doubles.
+3. Add new data providers and reporting strategies without inheritance coupling.
+4. Keep orchestration classes thin while preserving backwards compatibility.
 
 ## Next Hardening Slices
 

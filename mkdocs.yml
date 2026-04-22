@@ -24,6 +24,7 @@ nav:
   - License: license.md
   - Usage:
       - Quick Start: usage/quickstart.md
+      - Logging: usage/logging.md
       - Data Validation: usage/validation.md
       - Manifest: usage/manifest.md
       - BRFSS Explorer: usage/brfss.md
