@@ -10,10 +10,12 @@
 
 ### [Unreleased]
 Added
-- Explicit root-level compatibility shim deprecation guidance now includes removal target `1.0.0` and exact replacement import paths.
+- Dedicated `1.0.0` migration release notes page (`docs/release-notes/1.0.0.md`) with compatibility and import migration guidance.
 
 Changed
 - Established deprecation documentation policy: deprecations must include (1) removal target version, (2) replacement path, and (3) contract tests that lock warning behavior.
+- Deferred root compatibility shim removal by one major milestone (from `1.0.0` to no earlier than `2.0.0`) and announced a firm target date: `2027-06-30`.
+- Tag-time release workflow now enforces full repository tests and strict docs verification before publish.
 
 ### [0.7.0] - 2025-11-08
 
@@ -247,4 +249,4 @@ Guiding Principle: Reproducible, modular population health analytics from acquis
 
 ---
 
-Last sync (source mtime): 2026-04-22 02:35 UTC
+Last sync (source mtime): 2026-04-22 02:55 UTC

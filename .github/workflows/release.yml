@@ -25,7 +25,13 @@ jobs:
         uses: ./.github/actions/python-setup
         with:
           python-version: '3.11'
-          install-extras: 'docs'
+          install-extras: 'dev,docs'
+
+      - name: Run full test suite
+        run: pytest -q
+
+      - name: Verify docs build (strict)
+        run: mkdocs build --strict
 
       - name: Install build backend
         run: pip install build twine
@@ -46,9 +52,7 @@ jobs:
           twine upload dist/*
 
       - name: Generate site (MkDocs)
-        run: |
-          mkdocs --version
-          mkdocs build --strict
+        run: mkdocs build
 
       - name: List site output (debug)
         run: |

@@ -21,7 +21,8 @@ except PackageNotFoundError:
 
 # Root-level exports are maintained as backward-compatible shims.
 # New code should import from submodules directly (e.g. pophealth_observatory.observatory).
-_DEPRECATION_REMOVAL_VERSION = "1.0.0"
+_DEPRECATION_REMOVAL_VERSION = "2.0.0"
+_DEPRECATION_REMOVAL_DATE = "2027-06-30"
 
 _DEPRECATED_EXPORTS: dict[str, tuple[str, str]] = {
     "PopHealthObservatory": ("pophealth_observatory.observatory", "PopHealthObservatory"),
@@ -40,7 +41,8 @@ def __getattr__(name: str) -> Any:
         warn(
             (
                 f"Importing '{name}' from 'pophealth_observatory' is deprecated and will be removed "
-                f"in {_DEPRECATION_REMOVAL_VERSION}. Use '{replacement_import}' instead."
+                f"no earlier than {_DEPRECATION_REMOVAL_VERSION} (target date: {_DEPRECATION_REMOVAL_DATE}). "
+                f"Use '{replacement_import}' instead."
             ),
             DeprecationWarning,
             stacklevel=2,

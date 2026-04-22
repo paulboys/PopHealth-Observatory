@@ -41,6 +41,7 @@ nav:
       - Pre-1.0 Checklist: pre-1.0-checklist.md
       - Changelog: changelog.md
       - Release Notes:
+          - v1.0.0: release-notes/1.0.0.md
           - v0.7.0: release-notes/0.7.0.md
           - v0.6.0: release-notes/0.6.0.md
 extra:

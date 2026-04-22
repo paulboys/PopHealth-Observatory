@@ -84,7 +84,18 @@ When introducing a deprecation, include all of the following:
 ### Current Active Timeline
 
 - Root-level compatibility exports in `pophealth_observatory.__init__` are deprecated.
-- Current warning messages communicate planned removal in `1.0.0` and point to submodule imports.
+- Removal has been deferred by one major milestone: no earlier than `2.0.0`.
+- Firm target date for removal planning: `2027-06-30`.
+- Current warning messages point to submodule imports for migration.
+
+### Tag-Time Release Verification
+
+At release tag time (`v*`), CI must pass:
+
+1. Full repository test suite (`pytest -q`)
+2. Strict docs build (`mkdocs build --strict`)
+
+Publishing proceeds only after these checks succeed.
 
 ### Required GitHub Secrets
 
