@@ -136,9 +136,10 @@ The recommended implementation order keeps risk low and preserves existing publi
 
 ## Next Hardening Slices
 
-1. Compatibility cleanup and deprecation tightening
+1. Completed: compatibility cleanup and deprecation tightening
   - Remove redundant internal indirection where compatibility is no longer needed
   - Keep explicit, documented adapter defaults for constructor injection points
+  - Tighten root export shim deprecation warnings with explicit removal-version guidance
 2. Completed: architecture drift guardrails in CI
   - Maintain targeted contract tests for protocol-backed adapters
   - Add focused coverage expectations for decomposition modules (CI fail-under for decomposition slice)

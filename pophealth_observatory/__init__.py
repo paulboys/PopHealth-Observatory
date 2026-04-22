@@ -21,6 +21,8 @@ except PackageNotFoundError:
 
 # Root-level exports are maintained as backward-compatible shims.
 # New code should import from submodules directly (e.g. pophealth_observatory.observatory).
+_DEPRECATION_REMOVAL_VERSION = "1.0.0"
+
 _DEPRECATED_EXPORTS: dict[str, tuple[str, str]] = {
     "PopHealthObservatory": ("pophealth_observatory.observatory", "PopHealthObservatory"),
     "NHANESExplorer": ("pophealth_observatory.observatory", "NHANESExplorer"),
@@ -34,10 +36,11 @@ _DEPRECATED_EXPORTS: dict[str, tuple[str, str]] = {
 def __getattr__(name: str) -> Any:
     if name in _DEPRECATED_EXPORTS:
         module_name, symbol_name = _DEPRECATED_EXPORTS[name]
+        replacement_import = f"from {module_name} import {symbol_name}"
         warn(
             (
                 f"Importing '{name}' from 'pophealth_observatory' is deprecated and will be removed "
-                f"in a future release. Import from '{module_name}' instead."
+                f"in {_DEPRECATION_REMOVAL_VERSION}. Use '{replacement_import}' instead."
             ),
             DeprecationWarning,
             stacklevel=2,
@@ -53,12 +56,4 @@ def __dir__() -> list[str]:
     return sorted(list(globals().keys()) + list(_DEPRECATED_EXPORTS.keys()))
 
 
-__all__ = [
-    "PopHealthObservatory",
-    "NHANESExplorer",
-    "BRFSSExplorer",
-    "get_pesticide_metabolites",
-    "get_pesticide_panel",
-    "load_pesticide_reference",
-    "__version__",
-]
+__all__ = [*list(_DEPRECATED_EXPORTS.keys()), "__version__"]
