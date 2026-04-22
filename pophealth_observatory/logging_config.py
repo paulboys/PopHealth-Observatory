@@ -46,3 +46,28 @@ def configure_logging(level: str | None = None, stream: TextIO | None = None) ->
     # Avoid duplicate output from root logger handlers in notebooks/apps.
     logger.propagate = False
     return logger
+
+
+def log_with_fallback(
+    logger: logging.Logger,
+    level: int,
+    message: str,
+    *,
+    fallback_print: bool = True,
+) -> None:
+    """Emit a log message and optionally mirror it to stdout during migration.
+
+    Parameters
+    ----------
+    logger : logging.Logger
+        Logger instance for emitting diagnostic events.
+    level : int
+        Logging severity level.
+    message : str
+        Preformatted message text.
+    fallback_print : bool
+        Whether to mirror the message via ``print`` for transitional compatibility.
+    """
+    logger.log(level, message)
+    if fallback_print:
+        print(message)

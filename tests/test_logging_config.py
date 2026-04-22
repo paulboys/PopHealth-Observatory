@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from pophealth_observatory.logging_config import configure_logging
+from pophealth_observatory.logging_config import configure_logging, log_with_fallback
 
 
 @pytest.fixture(autouse=True)
@@ -49,3 +49,21 @@ def test_configure_logging_falls_back_on_invalid_level() -> None:
     logger = configure_logging(level="not-a-level")
 
     assert logger.level == logging.INFO
+
+
+def test_log_with_fallback_emits_log_and_stdout(capsys: pytest.CaptureFixture[str]) -> None:
+    logger = configure_logging(level="INFO")
+
+    log_with_fallback(logger, logging.INFO, "hello-log", fallback_print=True)
+    captured = capsys.readouterr()
+
+    assert "hello-log" in captured.err
+    assert "hello-log" in captured.out
+
+
+def test_log_with_fallback_can_disable_stdout(capsys: pytest.CaptureFixture[str]) -> None:
+    logger = configure_logging(level="INFO")
+
+    log_with_fallback(logger, logging.INFO, "log-only", fallback_print=False)
+
+    assert capsys.readouterr().out == ""

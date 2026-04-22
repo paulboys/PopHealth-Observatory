@@ -4,6 +4,7 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 """
 
+import logging
 import warnings
 from typing import Any
 
@@ -13,6 +14,7 @@ import requests  # noqa: F401 - retained for test patch compatibility
 from .core.nhanes_adapters import NHANESAnalysisAdapter, NHANESDataProviderAdapter
 from .core.nhanes_reporting_adapters import NHANESReportAdapter, NHANESValidationAdapter
 from .core.protocols import AnalysisRunner, DataProvider, ReportGenerator
+from .logging_config import log_with_fallback
 from .nhanes_analysis_service import (
     analyze_by_demographics as analyze_by_demographics_service,
 )
@@ -33,6 +35,8 @@ from .nhanes_manifest_service import (
     parse_component_table,
 )
 from .nhanes_transforms import harmonize_blood_pressure, harmonize_body_measures, harmonize_demographics
+
+logger = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore")
 
@@ -124,12 +128,16 @@ class PopHealthObservatory:
 
         df, success_url, errors = try_download_xpt(url_patterns, timeout_seconds=30)
         if df is not None and success_url is not None:
-            print(f"✓ Success loading {component} from: {success_url}")
+            log_with_fallback(logger, logging.INFO, f"✓ Success loading {component} from: {success_url}")
             self.data_cache[key] = df
             return df
 
-        print(f"Failed to download {component} for {cycle}. Tried {len(url_patterns)} URLs.")
-        print(f"Sample errors: {errors[:3]}")  # Show first 3 errors to avoid spam
+        log_with_fallback(
+            logger,
+            logging.WARNING,
+            f"Failed to download {component} for {cycle}. Tried {len(url_patterns)} URLs.",
+        )
+        log_with_fallback(logger, logging.WARNING, f"Sample errors: {errors[:3]}")  # Show first 3 errors to avoid spam
         return pd.DataFrame()
 
     # Reuse logic from legacy NHANESExplorer below for compatibility
@@ -400,7 +408,7 @@ class NHANESExplorer(PopHealthObservatory):
             for candidate in weight_candidates:
                 if candidate in data.columns:
                     weight_var = candidate
-                    print(f"Auto-detected weight variable: {weight_var}")
+                    log_with_fallback(logger, logging.INFO, f"Auto-detected weight variable: {weight_var}")
                     break
 
         if weight_var is None:

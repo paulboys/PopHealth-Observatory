@@ -18,11 +18,16 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import io
+import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import requests
+
+from .logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 
 def load_analyte_code_map(map_path: Path | None = None) -> dict[str, str]:
@@ -403,7 +408,11 @@ def get_pesticide_metabolites(cycle: str, ref_path: Path | None = None, timeout:
     ref_df = load_pesticide_reference(ref_path)
 
     if ref_df.empty:
-        print("Warning: pesticide_reference.csv not found or empty. Proceeding without metadata.")
+        log_with_fallback(
+            logger,
+            logging.WARNING,
+            "Warning: pesticide_reference.csv not found or empty. Proceeding without metadata.",
+        )
 
     # Load analyte code mapping for URX*/LBX* → canonical name translation
     code_map = load_analyte_code_map()
@@ -528,7 +537,11 @@ def get_pesticide_panel(cycles: list[str], ref_path: Path | None = None, timeout
         # Silently skip empty cycles (already logged by get_pesticide_metabolites)
 
     if not frames:
-        print(f"⚠ No valid data retrieved for any of the {len(cycles)} requested cycles.")
+        log_with_fallback(
+            logger,
+            logging.WARNING,
+            f"⚠ No valid data retrieved for any of the {len(cycles)} requested cycles.",
+        )
         return pd.DataFrame()
 
     # Concatenate all cycles

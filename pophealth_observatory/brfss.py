@@ -7,11 +7,16 @@ indicators from the CDC BRFSS Nutrition, Physical Activity, and Obesity dataset.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
 import requests
+
+from .logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -177,7 +182,11 @@ class BRFSSExplorer:
         indicator_rows = raw[(raw["class"] == class_name) & (raw["question"] == question)].copy()
 
         if indicator_rows.empty:
-            print(f"⚠ No data found for class='{class_name}', question='{question}'")
+            log_with_fallback(
+                logger,
+                logging.WARNING,
+                f"⚠ No data found for class='{class_name}', question='{question}'",
+            )
             return self._empty_indicator_df()
 
         # Determine target year
@@ -295,12 +304,12 @@ class BRFSSExplorer:
         try:
             resp = self.session.get(url, timeout=self.config.timeout)
             if resp.status_code != 200:
-                print(f"⚠ BRFSS request failed with HTTP {resp.status_code}")
+                log_with_fallback(logger, logging.WARNING, f"⚠ BRFSS request failed with HTTP {resp.status_code}")
                 return pd.DataFrame()
 
             data = resp.json()
             if not isinstance(data, list):
-                print("⚠ Unexpected BRFSS JSON structure (not a list).")
+                log_with_fallback(logger, logging.WARNING, "⚠ Unexpected BRFSS JSON structure (not a list).")
                 return pd.DataFrame()
 
             df = pd.DataFrame(data)
@@ -310,7 +319,7 @@ class BRFSSExplorer:
 
             return df
         except Exception as e:
-            print(f"❌ BRFSS request error: {e}")
+            log_with_fallback(logger, logging.ERROR, f"❌ BRFSS request error: {e}")
             return pd.DataFrame()
 
     def _latest_year(self, raw: pd.DataFrame) -> int:
