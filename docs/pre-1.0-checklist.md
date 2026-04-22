@@ -28,5 +28,5 @@ This checklist tracks final stabilization tasks before a 1.0 release.
 - [x] Decide final action for deprecated root exports: retain through 1.0 and defer removal to no earlier than 2.0.0 (`2027-06-30` target)
 - [ ] If removing shims, update all docs/examples to submodule imports only
 - [x] Add a dedicated `1.0.0` release-notes page with migration guidance
-- [ ] Validate no unresolved deprecation-policy inconsistencies in docs
+- [x] Validate no unresolved deprecation-policy inconsistencies in docs
 - [ ] Run full repository test and strict docs build at tag time (CI-enforced)
