@@ -114,7 +114,7 @@ The decomposition plan is complete for the NHANES orchestration path.
 - Previously monolithic responsibilities in `observatory.py` were split into focused service modules.
 - Public API behavior remains stable via adapter-backed composition and compatibility shims.
 - Protocol contracts in `core/protocols.py` now define extension seams independent of concrete implementations.
-- Centralized package logging in `logging_config.py` provides a shared diagnostic path across modules during migration.
+- Centralized package logging in `logging_config.py` now provides a shared diagnostic path across modules.
 
 Net effect: smaller testable units, clearer ownership boundaries, and lower-risk feature extension for 1.x.
 

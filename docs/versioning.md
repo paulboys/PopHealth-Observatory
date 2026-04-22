@@ -99,10 +99,10 @@ Publishing proceeds only after these checks succeed.
 
 ### Logging Migration Note
 
-Centralized package logging starts in the current pre-1.0 cycle with `pophealth_observatory.logging_config`.
+Centralized package logging has been completed across the package with `pophealth_observatory.logging_config`.
 
-- During migration, some modules may emit both logger output and legacy print diagnostics.
-- Print-based diagnostics are transitional and will be removed after migration stabilization.
+- Current compatibility behavior uses `log_with_fallback(...)` in selected call sites, which logs and mirrors to stdout.
+- The stdout fallback remains temporary and will be retired in a follow-on post-1.0 cleanup.
 
 ### Required GitHub Secrets
 
