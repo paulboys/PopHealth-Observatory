@@ -39,7 +39,6 @@ nav:
       - Pre-commit Hooks: pre-commit.md
   - Project:
       - Roadmap: roadmap.md
-      - Pre-1.0 Checklist: pre-1.0-checklist.md
       - Changelog: changelog.md
       - Release Notes:
           - v1.0.0: release-notes/1.0.0.md
