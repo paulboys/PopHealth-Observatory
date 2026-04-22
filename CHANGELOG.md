@@ -15,6 +15,7 @@ Changed
 - Established deprecation documentation policy: deprecations must include (1) removal target version, (2) replacement path, and (3) contract tests that lock warning behavior.
 - Deferred root compatibility shim removal by one major milestone (from `1.0.0` to no earlier than `2.0.0`) and announced a firm target date: `2027-06-30`.
 - Tag-time release workflow now enforces full repository tests and strict docs verification before publish.
+- Tier-1 diagnostics migration now routes `observatory`, `brfss`, and `laboratory_pesticides` runtime messages through centralized logger calls with temporary print fallback output.
 
 ### [0.7.0] - 2025-11-08
 
