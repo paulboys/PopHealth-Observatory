@@ -10,6 +10,15 @@ from typing import Any
 import pandas as pd
 import requests  # noqa: F401 - retained for test patch compatibility
 
+from .nhanes_analysis_service import (
+    analyze_by_demographics as analyze_by_demographics_service,
+)
+from .nhanes_analysis_service import (
+    create_demographic_visualization as create_demographic_visualization_service,
+)
+from .nhanes_analysis_service import (
+    generate_summary_report as generate_summary_report_service,
+)
 from .nhanes_data_access import build_nhanes_xpt_url_patterns, try_download_xpt
 from .nhanes_manifest_service import (
     build_detailed_component_manifest,
@@ -267,82 +276,15 @@ class NHANESExplorer(PopHealthObservatory):
 
     def analyze_by_demographics(self, df: pd.DataFrame, metric: str, demographic: str) -> pd.DataFrame:
         """Group metric by demographic and compute standard descriptive stats."""
-        if metric not in df.columns or demographic not in df.columns:
-            return pd.DataFrame()
-        sub = df[[demographic, metric]].dropna()
-        stats = sub.groupby(demographic)[metric].agg(["count", "mean", "median", "std", "min", "max"]).round(2)
-        stats.columns = ["Count", "Mean", "Median", "Std Dev", "Min", "Max"]
-        return stats
+        return analyze_by_demographics_service(df, metric, demographic)
 
     def create_demographic_visualization(self, df: pd.DataFrame, metric: str, demographic: str):
         """Boxplot + mean bar chart for metric by demographic (if available)."""
-        if metric not in df.columns or demographic not in df.columns:
-            return
-        try:
-            import matplotlib.pyplot as plt  # type: ignore
-            import seaborn as sns  # type: ignore
-        except Exception as e:
-            print(f"Visualization dependencies not available: {e}")
-            return
-        fig, axes = plt.subplots(1, 2, figsize=(15, 6))
-        sub = df[[demographic, metric]].dropna()
-        sns.boxplot(data=sub, x=demographic, y=metric, ax=axes[0])
-        axes[0].set_title(f"{metric} by {demographic}")
-        axes[0].tick_params(axis="x", rotation=45)
-        means = sub.groupby(demographic)[metric].mean()
-        means.plot(kind="bar", ax=axes[1], color="skyblue")
-        axes[1].set_title(f"Mean {metric} by {demographic}")
-        axes[1].tick_params(axis="x", rotation=45)
-        axes[1].set_ylabel(f"Mean {metric}")
-        plt.tight_layout()
-        plt.show()
+        return create_demographic_visualization_service(df, metric, demographic)
 
     def generate_summary_report(self, df: pd.DataFrame) -> str:
         """Generate textual summary of demographics & selected health metrics."""
-        report = [
-            "PopHealth Observatory Summary Report",
-            "=" * 40,
-            f"Total Participants: {len(df):,}",
-            f"Total Variables: {len(df.columns)}",
-            "",
-        ]
-        if "age_years" in df.columns:
-            age_stats = df["age_years"].describe()
-            report += [
-                "Age Distribution:",
-                f"  Mean age: {age_stats['mean']:.1f} years",
-                f"  Age range: {age_stats['min']:.0f} - {age_stats['max']:.0f} years",
-                "",
-            ]
-        if "gender_label" in df.columns:
-            gender_counts = df["gender_label"].value_counts()
-            report.append("Gender Distribution:")
-            for g, c in gender_counts.items():
-                pct = (c / len(df)) * 100
-                report.append(f"  {g}: {c:,} ({pct:.1f}%)")
-            report.append("")
-        if "race_ethnicity_label" in df.columns:
-            race_counts = df["race_ethnicity_label"].value_counts()
-            report.append("Race/Ethnicity Distribution:")
-            for r, c in race_counts.items():
-                pct = (c / len(df)) * 100
-                report.append(f"  {r}: {c:,} ({pct:.1f}%)")
-            report.append("")
-        metrics = ["bmi", "avg_systolic", "avg_diastolic", "weight_kg", "height_cm"]
-        avail = [m for m in metrics if m in df.columns]
-        if avail:
-            report.append("Health Metrics Summary:")
-            for m in avail:
-                stats = df[m].describe()
-                miss = df[m].isna().sum()
-                report += [
-                    f"  {m}:",
-                    f"    Mean: {stats['mean']:.2f}",
-                    f"    Range: {stats['min']:.2f} - {stats['max']:.2f}",
-                    f"    Missing: {miss:,} ({(miss / len(df)) * 100:.1f}%)",
-                ]
-            report.append("")
-        return "\n".join(report)
+        return generate_summary_report_service(df)
 
     def get_survey_weight(self, components: list[str]) -> str:
         """
