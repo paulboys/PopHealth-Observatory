@@ -5,12 +5,17 @@ Provides programmatic validation of downloaded NHANES data against official CDC 
 Validates URL correctness, row counts, and data integrity.
 """
 
+import logging
 import re
 from dataclasses import dataclass
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+
+from .logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -207,10 +212,25 @@ def validate_component(
     """
     checks = []
 
+    def _append_check(check: ValidationCheck) -> None:
+        checks.append(check)
+        if check.status == "FAIL":
+            log_with_fallback(
+                logger,
+                logging.ERROR,
+                f"Validation check failed for {component}/{check.name}: {check.details}",
+            )
+        elif check.status == "WARN":
+            log_with_fallback(
+                logger,
+                logging.WARNING,
+                f"Validation check warning for {component}/{check.name}: {check.details}",
+            )
+
     # Get the component URL from the explorer's component mapping
     component_info = explorer.components.get(component)
     if component_info is None:
-        checks.append(
+        _append_check(
             ValidationCheck(
                 name="component_exists",
                 status="FAIL",
@@ -240,7 +260,7 @@ def validate_component(
             actual_url_pattern = f"{component_code}_{cycle_letter}.XPT"
 
             if actual_url_pattern.upper() in expected_url.upper():
-                checks.append(
+                _append_check(
                     ValidationCheck(
                         name="url_pattern_match",
                         status="PASS",
@@ -250,7 +270,7 @@ def validate_component(
                     )
                 )
             else:
-                checks.append(
+                _append_check(
                     ValidationCheck(
                         name="url_pattern_match",
                         status="WARN",
@@ -273,7 +293,7 @@ def validate_component(
                 elif component == "blood_pressure":
                     downloaded_data = explorer.get_blood_pressure(cycle)
                 else:
-                    checks.append(
+                    _append_check(
                         ValidationCheck(
                             name="data_download",
                             status="WARN",
@@ -281,7 +301,7 @@ def validate_component(
                         )
                     )
             except Exception as e:
-                checks.append(
+                _append_check(
                     ValidationCheck(name="data_download", status="FAIL", details=f"Failed to download data: {str(e)}")
                 )
 
@@ -289,7 +309,7 @@ def validate_component(
             actual_count = len(downloaded_data)
 
             if actual_count == expected_count:
-                checks.append(
+                _append_check(
                     ValidationCheck(
                         name="row_count",
                         status="PASS",
@@ -299,7 +319,7 @@ def validate_component(
                     )
                 )
             else:
-                checks.append(
+                _append_check(
                     ValidationCheck(
                         name="row_count",
                         status="FAIL",
@@ -309,16 +329,16 @@ def validate_component(
                     )
                 )
         elif expected_count is None:
-            checks.append(
+            _append_check(
                 ValidationCheck(
                     name="row_count", status="WARN", details="Could not determine expected row count from CDC page"
                 )
             )
 
     except requests.RequestException as e:
-        checks.append(ValidationCheck(name="cdc_scrape", status="FAIL", details=f"Failed to access CDC page: {str(e)}"))
+        _append_check(ValidationCheck(name="cdc_scrape", status="FAIL", details=f"Failed to access CDC page: {str(e)}"))
     except Exception as e:
-        checks.append(ValidationCheck(name="validation_error", status="FAIL", details=f"Validation error: {str(e)}"))
+        _append_check(ValidationCheck(name="validation_error", status="FAIL", details=f"Validation error: {str(e)}"))
 
     # Determine overall component status
     if any(check.status == "FAIL" for check in checks):
@@ -349,6 +369,11 @@ def run_validation(explorer, cycle: str, components: list[str]) -> ValidationRep
     ValidationReport
         Complete validation report
     """
+    log_with_fallback(
+        logger,
+        logging.INFO,
+        f"Starting validation run for cycle {cycle} across {len(components)} components.",
+    )
     component_validations = []
 
     for component in components:
@@ -363,4 +388,9 @@ def run_validation(explorer, cycle: str, components: list[str]) -> ValidationRep
     else:
         overall_status = "PASS"
 
+    log_with_fallback(
+        logger,
+        logging.INFO,
+        f"Completed validation run for cycle {cycle} with overall status {overall_status}.",
+    )
     return ValidationReport(cycle=cycle, status=overall_status, components=component_validations)

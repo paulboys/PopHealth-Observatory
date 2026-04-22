@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+
+from ..logging_config import log_with_fallback
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -24,10 +29,12 @@ class VectorIndex:
     def save(self, root: Path) -> None:
         root.mkdir(parents=True, exist_ok=True)
         np.save(root / "embeddings.npy", self.vectors)
+        log_with_fallback(logger, logging.INFO, f"Saved vector index to {root / 'embeddings.npy'}")
 
     @classmethod
     def load(cls, root: Path) -> VectorIndex:  # type: ignore[name-defined]
         arr = np.load(root / "embeddings.npy")
+        log_with_fallback(logger, logging.INFO, f"Loaded vector index from {root / 'embeddings.npy'}")
         return cls(vectors=arr)
 
 

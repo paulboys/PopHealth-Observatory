@@ -342,4 +342,4 @@ def as_json(obj: dict[str, Any]) -> str:
 
 if __name__ == "__main__":  # manual quick test
     info = get_pesticide_info("3-PBA")
-    print(as_json(info))
+    log_with_fallback(logger, logging.INFO, as_json(info))
