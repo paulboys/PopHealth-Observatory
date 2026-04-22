@@ -16,3 +16,21 @@ manifest = exp.get_detailed_component_manifest(
 )
 print(manifest['summary_counts'])
 ```
+
+## Pesticide Laboratory Quick Start
+```python
+from pophealth_observatory.laboratory_pesticides import (
+    get_pesticide_metabolites,
+    load_pesticide_reference,
+)
+
+ref = load_pesticide_reference()
+df = get_pesticide_metabolites("2017-2018")
+
+print(f"Reference analytes: {len(ref)}")
+print(df[["participant_id", "analyte_name", "concentration_raw"]].head())
+```
+
+## Logging Controls
+
+See `usage/logging.md` for logger setup, `LOGLEVEL`, and migration-era fallback print behavior.

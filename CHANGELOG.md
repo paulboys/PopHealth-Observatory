@@ -4,19 +4,26 @@
 - **MAJOR** (`x.0.0`): Breaking changes — commit message contains `[major]` or `BREAKING CHANGE`
 - **MINOR** (`0.x.0`): New features — commit message starts with `feat` or contains `[minor]` or `[feature]`
 - **PATCH** (`0.0.x`): Bug fixes, docs, refactoring — all other commits to main
-- Automatic version tagging triggers PyPI publish via existing `publish.yml` workflow
+- Release tags (`v*`) trigger PyPI publish via `release.yml`
 
 ### [Unreleased]
+
+### [1.0.0] - 2026-04-22
 Added
 - Dedicated `1.0.0` migration release notes page (`docs/release-notes/1.0.0.md`) with compatibility and import migration guidance.
 - Centralized logging foundation (`pophealth_observatory.logging_config`) with package-level initialization and LOGLEVEL support.
+- Logging documentation for users (`docs/usage/logging.md`) including environment configuration and migration behavior.
 
 Changed
 - Established deprecation documentation policy: deprecations must include (1) removal target version, (2) replacement path, and (3) contract tests that lock warning behavior.
 - Deferred root compatibility shim removal by one major milestone (from `1.0.0` to no earlier than `2.0.0`) and announced a firm target date: `2027-06-30`.
-- Tag-time release workflow now enforces full repository tests and strict docs verification before publish.
-- Tier-1 diagnostics migration now routes `observatory`, `brfss`, and `laboratory_pesticides` runtime messages through centralized logger calls with temporary print fallback output.
+- Release workflow enforces full repository tests and strict docs verification before publish.
+- Completed diagnostics migration to centralized logger calls across NHANES data access, validation, RAG modules, and service/adapter layers.
+- Architecture documentation now reflects completed decomposition modules and protocol-based composition.
 
+Notes
+- 1.0.0 is a stability milestone with compatibility shims retained and explicitly deprecated.
+- Removal of root-level shims remains planned for no earlier than `2.0.0`.
 ### [0.7.0] - 2025-11-08
 
 #### Summary
