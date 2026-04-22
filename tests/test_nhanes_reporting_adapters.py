@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from unittest.mock import Mock, patch
+
 import pandas as pd
 
 from pophealth_observatory.core import NHANESReportAdapter
@@ -21,27 +23,21 @@ def test_nhanes_report_adapter_delegates_summary_and_validate() -> None:
     assert report["cycle"] == "2017-2018"
 
 
-def test_nhanes_validation_adapter_returns_dict_report() -> None:
+@patch("pophealth_observatory.validation.run_validation")
+def test_nhanes_validation_adapter_returns_dict_report(mock_run_validation: Mock) -> None:
     class _ExplorerStub:
         pass
 
-    explorer = _ExplorerStub()
-    adapter = NHANESValidationAdapter(explorer)
+    mock_report = Mock()
+    mock_report.to_dict.return_value = {"cycle": "2017-2018", "status": "PASS", "components": {}}
+    mock_run_validation.return_value = mock_report
 
-    # Use monkeypatch-like local override by replacing imported function target at runtime.
-    import pophealth_observatory.core.nhanes_reporting_adapters as mod
+    adapter = NHANESValidationAdapter(_ExplorerStub())
+    result = adapter.validate("2017-2018", ["demographics"])
 
-    original_import = mod.NHANESValidationAdapter.validate
-
-    def _fake_validate(self, cycle, components):  # noqa: ANN001
-        return {"cycle": cycle, "status": "PASS", "components": {}}
-
-    try:
-        mod.NHANESValidationAdapter.validate = _fake_validate  # type: ignore[method-assign]
-        result = adapter.validate("2017-2018", ["demographics"])
-        assert result["status"] == "PASS"
-    finally:
-        mod.NHANESValidationAdapter.validate = original_import  # type: ignore[method-assign]
+    assert result["status"] == "PASS"
+    mock_run_validation.assert_called_once()
+    mock_report.to_dict.assert_called_once()
 
 
 def test_nhanes_explorer_uses_injected_report_generator() -> None:
@@ -59,3 +55,10 @@ def test_nhanes_explorer_uses_injected_report_generator() -> None:
 
     assert summary == "stub-summary"
     assert validation["status"] == "WARN"
+
+
+def test_nhanes_explorer_default_report_paths_work() -> None:
+    explorer = NHANESExplorer()
+    summary = explorer.generate_summary_report(pd.DataFrame({"age_years": [25, 40]}))
+
+    assert "PopHealth Observatory Summary Report" in summary

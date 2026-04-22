@@ -117,16 +117,28 @@ The recommended implementation order keeps risk low and preserves existing publi
 1. Completed: extract NHANES URL pattern + resilient XPT download helpers
   - New module: `pophealth_observatory/nhanes_data_access.py`
   - Call sites updated: `PopHealthObservatory.download_data`, `NHANESExplorer.get_demographics_data`
-2. Next: extract harmonization transforms into dedicated functions
+2. Completed: extract harmonization transforms into dedicated functions
   - Demographics column mapping and label derivations
   - Body measures BMI categorization
   - Blood pressure averaging and stage classification
-3. Next: extract manifest scraping pipeline into a focused service module
+3. Completed: extract manifest scraping pipeline into a focused service module
   - Fetch, parse, normalize, filter, summarize
   - Keep `NHANESExplorer.get_detailed_component_manifest` as thin orchestration facade
-4. Next: split reporting/analysis helpers from ingestion class
+4. Completed: split reporting/analysis helpers from ingestion class
   - `analyze_by_demographics`, visualization, summary reporting
   - Move toward composition over inheritance for explorer workflows
-5. Next: adapter layer over protocol contracts
+5. Completed: adapter layer over protocol contracts
   - Introduce provider objects implementing protocol interfaces
   - Keep compatibility shims for root imports while deprecating legacy access paths
+6. Completed: validation/report orchestration extraction
+  - Introduce report and validation adapters implementing protocol-backed composition
+  - Delegate `NHANESExplorer.validate` and summary reporting via report adapter
+
+## Next Hardening Slices
+
+1. Compatibility cleanup and deprecation tightening
+  - Remove redundant internal indirection where compatibility is no longer needed
+  - Keep explicit, documented adapter defaults for constructor injection points
+2. Architecture drift guardrails in CI
+  - Maintain targeted contract tests for protocol-backed adapters
+  - Add focused coverage expectations for decomposition modules
