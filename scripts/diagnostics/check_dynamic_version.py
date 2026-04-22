@@ -1,4 +1,4 @@
-"""Test script to verify dynamic version reading consistency.
+"""Diagnostic script to verify dynamic version reading consistency.
 
 Note: Uses print statements for quick inspection; not a formal pytest test.
 """
@@ -29,14 +29,14 @@ print("\n" + "=" * 60)
 print("Test 3: Consistency Check")
 print("=" * 60)
 if pkg_version == pophealth_observatory.__version__:
-    print("✅ SUCCESS: __version__ matches package metadata!")
+    print("SUCCESS: __version__ matches package metadata")
     print(f"   Both report: {pkg_version}")
 else:
-    print("❌ MISMATCH:")
+    print("MISMATCH:")
     print(f"   Package metadata: {pkg_version}")
     print(f"   Module __version__: {pophealth_observatory.__version__}")
 
 print("\n" + "=" * 60)
-print("Result: Dynamic versioning is working correctly!")
+print("Result: Dynamic versioning is working correctly")
 print("Future version updates only need to change pyproject.toml")
 print("=" * 60)

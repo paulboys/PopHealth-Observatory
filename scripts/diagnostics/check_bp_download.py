@@ -3,7 +3,7 @@
 Note: Intended for manual troubleshooting; not part of automated test suite.
 """
 
-from pophealth_observatory import NHANESExplorer
+from pophealth_observatory.observatory import NHANESExplorer
 
 explorer = NHANESExplorer()
 cycle = "2017-2018"  # Known working cycle
@@ -24,7 +24,7 @@ print(list(bp_df.columns))
 expected_cols = ["SEQN", "BPXSY1", "BPXDI1", "BPXSY2", "BPXDI2", "BPXSY3", "BPXDI3"]
 print("\n2. Checking for expected columns...")
 for col in expected_cols:
-    status = "✓" if col in bp_df.columns else "✗"
+    status = "OK" if col in bp_df.columns else "MISSING"
     print(f"  {status} {col}")
 
 # Try get_blood_pressure
@@ -35,9 +35,9 @@ print("Cleaned DataFrame columns:")
 print(list(bp_clean.columns))
 
 if bp_clean.empty or len(bp_clean.columns) <= 1:
-    print("\n❌ PROBLEM CONFIRMED: get_blood_pressure returns empty or nearly-empty DataFrame")
+    print("\nPROBLEM CONFIRMED: get_blood_pressure returns empty or nearly-empty DataFrame")
     print("   Even though download_data reported 'Success'")
 else:
-    print("\n✓ Blood pressure data looks OK")
+    print("\nBlood pressure data looks OK")
     print("Sample data:")
     print(bp_clean.head())
