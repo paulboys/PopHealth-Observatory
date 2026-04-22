@@ -3,10 +3,10 @@
 ## Near-Term (Q4 2025)
 Status legend: (planned) not yet started; (in progress); (done)
 
-- **Programmatic Data Validation**: Implement `validate()` method to check data integrity against CDC metadata.
-- **Analytical Validation Framework**: Establish a process and tools (`reproducibility/`) to validate against published research.
-- **Survey-Weighted Analysis Helpers**: Add helpers for `get_survey_weight()` and `calculate_weighted_mean()`.
-- **Pre-commit Hooks**: Integrate automated linting and formatting.
+- **Programmatic Data Validation**: Implement `validate()` method to check data integrity against CDC metadata. (done)
+- **Analytical Validation Framework**: Establish a process and tools (`reproducibility/`) to validate against published research. (in progress)
+- **Survey-Weighted Analysis Helpers**: Add helpers for `get_survey_weight()` and `calculate_weighted_mean()`. (done)
+- **Pre-commit Hooks**: Integrate automated linting and formatting. (done)
 - **Laboratory Panel Expansion**: Add dedicated loaders for lipids, glucose, and other common lab panels.
 - **Parquet/DuckDB Caching**: Introduce an optional, persistent local cache for large, multi-cycle datasets.
 - **CLI Utility**: Create a command-line interface for core functions like manifest generation and data downloads.
@@ -28,9 +28,14 @@ Status legend: (planned) not yet started; (in progress); (done)
 
 ## Quality & Tooling Enhancements
 - Sphinx or MkDocs auto API reference from docstrings (partially—MkDocs site exists; auto API not yet implemented) (planned)
-- Coverage gating (fail under threshold) (planned)
-- Pre-commit hooks (ruff, black, mypy optional) (planned)
+- Coverage gating (fail under threshold) (done)
+- Pre-commit hooks (ruff, black, mypy optional) (done)
 - Example notebooks gallery (binder / codespaces link) (planned)
+
+## Release Readiness (Pre-1.0)
+- Deprecation timeline policy documented across README, changelog, and versioning docs (done)
+- Compatibility shim warnings include explicit removal target and replacement imports (done)
+- Pre-1.0 final checklist maintained in `docs/pre-1.0-checklist.md` (done)
 
 ## Stretch Ideas
 - Web UI (Next.js + FastAPI) for manifest browsing (planned)
