@@ -401,7 +401,12 @@ hybrid lexical + vector retrieval, snippet ranking refinement, streaming answer 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
 ## Contributing
-Contributions are welcome. Open issues for: feature requests, new NHANES components, performance improvements, documentation gaps. Use conventional commits where possible.
+Contributions are welcome. For full contribution workflow, quality gates, and PR expectations, see `CONTRIBUTING.md`.
+
+Quick start:
+- Open an issue for non-trivial changes.
+- Create a focused branch (`feat/<short>`, `fix/<short>`, `docs/<short>`, or `chore/<short>`).
+- Run local checks before opening a PR.
 
 ### Dev Workflow
 ```bash
@@ -428,6 +433,7 @@ coverage run -m pytest && coverage report -m
 - Add/extend tests for new logic
 - Update `CHANGELOG.md` if user-facing changes
 - Ensure CI passes (lint, tests, build)
+- Follow the full checklist in `CONTRIBUTING.md`
 
 ## Acknowledgments & Disclaimer
 

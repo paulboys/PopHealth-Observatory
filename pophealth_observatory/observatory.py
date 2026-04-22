@@ -4,7 +4,6 @@ SPDX-License-Identifier: MIT
 Copyright (c) 2025 Paul Boys and PopHealth Observatory contributors
 """
 
-import io
 import os
 import re
 import warnings
@@ -15,6 +14,8 @@ from urllib.parse import urljoin
 import numpy as np
 import pandas as pd
 import requests
+
+from .nhanes_data_access import build_nhanes_xpt_url_patterns, try_download_xpt
 
 warnings.filterwarnings("ignore")
 
@@ -96,46 +97,19 @@ class PopHealthObservatory:
             return self.data_cache[key]
 
         letter = self.cycle_suffix_map.get(cycle, "")
-        cycle_year = cycle.split("-")[0] if "-" in cycle else cycle
+        url_patterns = build_nhanes_xpt_url_patterns(
+            cycle=cycle,
+            component=component,
+            letter=letter,
+            base_url=self.base_url,
+            alt_base_url=self.alt_base_url,
+        )
 
-        # Define URL patterns to try (in order of preference)
-        url_patterns = [
-            # 2021+ pattern with Public subdirectory
-            f"{self.alt_base_url}/{cycle_year}/DataFiles/{component}_{letter}.xpt",
-            # Standard pattern (2007-2018)
-            f"{self.base_url}/{cycle}/{component}_{letter}.XPT",
-            # Lowercase variant
-            f"{self.base_url}/{cycle}/{component}_{letter}.xpt",
-            # Pre-2007 pattern (lowercase component)
-            f"{self.base_url}/{cycle}/{component.lower()}_{letter}.XPT",
-            # Pre-2007 pattern (lowercase component and extension)
-            f"{self.base_url}/{cycle}/{component.lower()}_{letter}.xpt",
-            # Alternative Data/Nhanes path
-            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.XPT",
-            # Variant with cycle year suffix
-            f"{self.base_url}/{cycle}/{component}_{cycle[-2:]}.XPT",
-        ]
-
-        # Try each URL pattern
-        errors = []
-
-        for url in url_patterns:
-            try:
-                response = requests.get(url, timeout=30)
-
-                if response.status_code == 200:
-                    # Try to parse as XPT before claiming success
-                    df = pd.read_sas(io.BytesIO(response.content), format="xport")
-                    if not df.empty:
-                        print(f"✓ Success loading {component} from: {url}")
-                        self.data_cache[key] = df
-                        return df
-                    else:
-                        errors.append(f"Empty DataFrame from {url}")
-                else:
-                    errors.append(f"Status {response.status_code} from {url}")
-            except Exception as e:
-                errors.append(f"Error with {url}: {str(e)}")
+        df, success_url, errors = try_download_xpt(url_patterns, timeout_seconds=30)
+        if df is not None and success_url is not None:
+            print(f"✓ Success loading {component} from: {success_url}")
+            self.data_cache[key] = df
+            return df
 
         print(f"Failed to download {component} for {cycle}. Tried {len(url_patterns)} URLs.")
         print(f"Sample errors: {errors[:3]}")  # Show first 3 errors to avoid spam
@@ -459,37 +433,19 @@ class NHANESExplorer(PopHealthObservatory):
         component = self.components["demographics"]
         letter = self.cycle_suffix_map.get(cycle, "")
 
-        # List of URL patterns to try (in order of preference)
-        url_patterns = [
-            # Newest pattern (2021+) - confirmed working
-            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/{cycle.split('-')[0]}/DataFiles/{component}_{letter}.xpt",
-            # Older cycles (pre-2021) - standard pattern
-            f"https://wwwn.cdc.gov/Nchs/Nhanes/{cycle}/{component}_{letter}.XPT",
-            # Other variations
-            f"https://wwwn.cdc.gov/Nchs/Nhanes/{cycle.replace('-', '')}/{component}_{cycle[-2:]}.XPT",
-            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.XPT",
-            f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/{cycle}/{component}_{letter}.xpt",
-        ]
+        url_patterns = build_nhanes_xpt_url_patterns(
+            cycle=cycle,
+            component=component,
+            letter=letter,
+            base_url=self.base_url,
+            alt_base_url=self.alt_base_url,
+        )
 
-        # Try each URL pattern
-        demo_df = pd.DataFrame()
-        errors = []
-
-        for url in url_patterns:
-            try:
-                response = requests.get(url, timeout=30)
-                if response.status_code == 200:
-                    # Try to parse as XPT before claiming success
-                    demo_df = pd.read_sas(io.BytesIO(response.content), format="xport")
-                    if not demo_df.empty:
-                        print(f"✓ Success loading demographics from: {url}")
-                        break
-                    else:
-                        errors.append(f"Empty DataFrame from {url}")
-                else:
-                    errors.append(f"Status {response.status_code} from {url}")
-            except Exception as e:
-                errors.append(f"Error with {url}: {str(e)}")
+        demo_df, success_url, errors = try_download_xpt(url_patterns, timeout_seconds=30)
+        if demo_df is None:
+            demo_df = pd.DataFrame()
+        elif success_url is not None:
+            print(f"✓ Success loading demographics from: {success_url}")
 
         if demo_df.empty:
             print(f"Failed to download demographics for {cycle}. Tried {len(url_patterns)} URLs.")

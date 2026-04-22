@@ -31,7 +31,9 @@ nav:
   - Feature Status: features.md
   - API Reference: api.md
   - Pesticide Biomonitoring Plan: pesticide_biomonitoring_plan.md
+  - Architecture: architecture.md
   - Contributing:
+      - How to Contribute: contributing.md
       - Versioning & Releases: versioning.md
       - Pre-commit Hooks: pre-commit.md
   - Project:
