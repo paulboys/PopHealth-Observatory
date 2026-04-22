@@ -404,7 +404,7 @@ def test_cache_independence_between_indicators(monkeypatch):
     assert obesity_df["class_name"].iloc[0] != activity_df["class_name"].iloc[0]
 
 
-def test_network_exception_handling(monkeypatch, capsys):
+def test_network_exception_handling(monkeypatch, caplog):
     """Test handling of network exceptions."""
 
     def fake_get(url, timeout):
@@ -413,11 +413,15 @@ def test_network_exception_handling(monkeypatch, capsys):
     explorer = BRFSSExplorer()
     monkeypatch.setattr(explorer.session, "get", fake_get)
 
-    df = explorer.get_obesity_data()
-    assert df.empty
-
-    captured = capsys.readouterr()
-    assert "BRFSS request error" in captured.out
+    package_logger, already_attached = _attach_package_log_capture(caplog)
+    try:
+        with caplog.at_level(logging.ERROR, logger="pophealth_observatory"):
+            df = explorer.get_obesity_data()
+        assert df.empty
+        assert "BRFSS request error" in caplog.text
+    finally:
+        if not already_attached:
+            package_logger.removeHandler(caplog.handler)
 
 
 def test_latest_year_with_empty_dataframe():
