@@ -2,6 +2,9 @@
 
 This checklist tracks final stabilization tasks before a 1.0 release.
 
+> Archived after v1.0.0 release.
+> This page is retained as release history evidence and no longer reflects active work.
+
 ## Documentation and Deprecation Policy
 
 - [x] Deprecation policy documented in README (`Deprecation and Compatibility Policy` section)
@@ -26,7 +29,7 @@ This checklist tracks final stabilization tasks before a 1.0 release.
 ## Pre-1.0 Final Gate (To Execute at Release Time)
 
 - [x] Decide final action for deprecated root exports: retain through 1.0 and defer removal to no earlier than 2.0.0 (`2027-06-30` target)
-- [ ] If removing shims, update all docs/examples to submodule imports only
+- [x] If removing shims, update all docs/examples to submodule imports only (N/A: shims retained through 1.x)
 - [x] Add a dedicated `1.0.0` release-notes page with migration guidance
 - [x] Validate no unresolved deprecation-policy inconsistencies in docs
-- [ ] Run full repository test and strict docs build at tag time (CI-enforced)
+- [x] Run full repository test and strict docs build at tag time (CI-enforced)
