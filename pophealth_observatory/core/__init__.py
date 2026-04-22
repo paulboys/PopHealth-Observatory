@@ -5,8 +5,11 @@ Public exports:
 - AnalysisRunner
 - ReportGenerator
 - IndicatorProvider
+- NHANESDataProviderAdapter
+- NHANESAnalysisAdapter
 """
 
+from .nhanes_adapters import NHANESAnalysisAdapter, NHANESDataProviderAdapter
 from .protocols import AnalysisRunner, DataProvider, IndicatorProvider, ReportGenerator
 
 __all__ = [
@@ -14,4 +17,6 @@ __all__ = [
     "AnalysisRunner",
     "ReportGenerator",
     "IndicatorProvider",
+    "NHANESDataProviderAdapter",
+    "NHANESAnalysisAdapter",
 ]
