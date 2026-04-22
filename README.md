@@ -80,6 +80,21 @@ quarto check
 sciclaw --version
 ```
 
+## Deprecation and Compatibility Policy
+
+Public APIs may be deprecated before removal to preserve upgrade safety.
+
+- Deprecation warnings include an explicit removal target version.
+- Warnings include an exact replacement import path or API location.
+- Deprecated APIs remain functional until the documented removal version.
+- Actual removals are treated as breaking changes and occur only in MAJOR releases.
+
+Current timeline:
+- Root-level compatibility exports in `pophealth_observatory` are deprecated and planned for removal in `1.0.0`.
+- Prefer direct submodule imports (for example: `from pophealth_observatory.observatory import NHANESExplorer`).
+
+Full policy details: `docs/versioning.md`
+
 ## Repository Structure
 
 ```
