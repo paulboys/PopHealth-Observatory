@@ -1,0 +1,8 @@
+# MANIFEST.in — ensure sdist includes all reference assets bundled inside the package.
+# Wheel builds use pyproject.toml [tool.setuptools.package-data]; this file covers sdist.
+
+recursive-include pophealth_observatory/data/reference *.csv *.yml *.md *.jsonl
+
+# Exclude workspace-only data that should NOT be distributed
+prune data/raw
+prune data/processed

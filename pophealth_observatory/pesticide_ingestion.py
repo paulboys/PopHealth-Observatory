@@ -19,6 +19,8 @@ from .pesticide_context import PesticideAnalyte, load_analyte_reference
 
 logger = logging.getLogger(__name__)
 
+# Workspace-only paths for local development; NOT bundled in the package.
+# Users running scripts should invoke them from the repository root.
 RAW_DIR = Path("data/raw/pesticides")
 PROCESSED_DIR = Path("data/processed/pesticides")
 

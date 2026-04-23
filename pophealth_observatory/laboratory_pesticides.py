@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 import requests
 
+from ._paths import get_reference_dir
 from .logging_config import log_with_fallback
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ def load_analyte_code_map(map_path: Path | None = None) -> dict[str, str]:
     Parameters
     ----------
     map_path : Path | None
-        Path to analyte_code_map.csv; defaults to data/reference/config/analyte_code_map.csv
+        Path to analyte_code_map.csv; defaults to package-bundled config.
 
     Returns
     -------
@@ -44,7 +45,7 @@ def load_analyte_code_map(map_path: Path | None = None) -> dict[str, str]:
         Mapping from variable_name (e.g., 'URX3PBA') to analyte_name (e.g., '3-PBA')
     """
     if map_path is None:
-        map_path = Path(__file__).parent.parent / "data" / "reference" / "config" / "analyte_code_map.csv"
+        map_path = get_reference_dir() / "config" / "analyte_code_map.csv"
 
     if not map_path.exists():
         return {}
@@ -62,7 +63,7 @@ def load_pesticide_reference(ref_path: Path | None = None) -> pd.DataFrame:
     Parameters
     ----------
     ref_path : Path | None
-        Path to pesticide_reference.csv; defaults to data/reference/pesticide_reference.csv
+        Path to pesticide_reference.csv; defaults to package-bundled reference.
 
     Returns
     -------
@@ -71,7 +72,7 @@ def load_pesticide_reference(ref_path: Path | None = None) -> pd.DataFrame:
         cas_rn, typical_matrix, unit, first_cycle_measured, last_cycle_measured, etc.
     """
     if ref_path is None:
-        ref_path = Path(__file__).parent.parent / "data" / "reference" / "pesticide_reference.csv"
+        ref_path = get_reference_dir() / "pesticide_reference.csv"
 
     if not ref_path.exists():
         return pd.DataFrame()

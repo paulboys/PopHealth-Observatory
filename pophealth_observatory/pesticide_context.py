@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ._paths import get_reference_dir
 from .logging_config import log_with_fallback
 
 try:
@@ -35,7 +36,7 @@ except Exception:  # pragma: no cover
     yaml = None  # type: ignore
 
 
-DATA_REFERENCE_DIR = Path("data/reference")
+DATA_REFERENCE_DIR = get_reference_dir()
 # Updated directory layout after cleanup:
 #  minimal/      -> minimal reference
 #  classified/   -> enriched classified reference

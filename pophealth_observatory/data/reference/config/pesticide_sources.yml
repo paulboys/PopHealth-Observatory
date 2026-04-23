@@ -1,0 +1,83 @@
+# Registry of external pesticide narrative / structured sources
+# Fields: source_id, name, type, access, update_frequency, license, base_url, notes
+
+- source_id: usda_pdp
+  name: USDA Pesticide Data Program
+  type: annual_residue_report
+  access: pdf
+  update_frequency: annual
+  license: public_domain
+  base_url: https://www.ams.usda.gov/datasets/pdp/pdpdata
+  notes: Commodity residue detection frequencies and trends.
+
+- source_id: epa_pcs
+  name: EPA Pesticide Chemical Search
+  type: fact_sheets_risk
+  access: web_html
+  update_frequency: rolling
+  license: public_domain
+  base_url: https://ordspub.epa.gov/ords/pesticides/f?p=chemicalsearch:1
+  notes: Fact sheets, registration review documents.
+
+- source_id: epa_reg_review
+  name: EPA Registration Review Dockets
+  type: risk_assessment
+  access: web_html_pdf
+  update_frequency: rolling
+  license: public_domain
+  base_url: https://www.regulations.gov/
+  notes: Use docket search by PC Code or chemical name.
+
+- source_id: usgs_pesticide_use
+  name: USGS National Pesticide Synthesis
+  type: usage_estimates
+  access: csv
+  update_frequency: annual
+  license: public_domain
+  base_url: https://water.usgs.gov/nawqa/pnsp/usage/maps/
+  notes: County/state-level agricultural use estimates.
+
+- source_id: fda_tds
+  name: FDA Total Diet Study
+  type: residue_study
+  access: pdf
+  update_frequency: periodic
+  license: public_domain
+  base_url: https://www.fda.gov/food/total-diet-study
+  notes: Prepared food residue composite results.
+
+- source_id: jmpr
+  name: FAO/WHO JMPR Monographs
+  type: toxicology_residue
+  access: pdf
+  update_frequency: annual
+  license: attribution
+  base_url: https://www.fao.org/fao-who-codexalimentarius/meetings/jmpr/en/
+  notes: ADI, ARfD, residue evaluations.
+
+- source_id: efsa_pesticides
+  name: EFSA Pesticide Opinions
+  type: risk_assessment
+  access: pdf
+  update_frequency: rolling
+  license: attribution
+  base_url: https://www.efsa.europa.eu/en/topics/topic/pesticides
+  notes: EU dietary exposure and risk conclusions.
+
+- source_id: pubchem
+  name: PubChem Summaries
+  type: compound_summary
+  access: api_json
+  update_frequency: rolling
+  license: public_domain
+  base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+  notes: Mechanism, properties, safety info.
+
+- source_id: pan_pesticides
+  name: PAN Pesticide Database
+  type: regulatory_hazard
+  access: web_html
+  update_frequency: periodic
+  license: attribution
+  base_url: https://www.pesticideinfo.org/
+  notes: Hazard flags, regulatory status.
