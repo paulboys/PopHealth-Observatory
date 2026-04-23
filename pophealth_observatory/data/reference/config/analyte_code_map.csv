@@ -1,0 +1,111 @@
+variable_name,analyte_name
+LBCBHC,Beta-hexachlorocyclohexane
+LBCBHCLA,B-hexachlorocyclohexane
+LBCGHC,Gamma-hexachlorocyclohexane
+LBCGHCLA,G-hexachlorocyclohexane
+LBCHCB,Hexachlorobenzene
+LBCHCBLA,Hexachlorobenzene
+LBCMIR,Mirex
+LBCMIRLA,Mirex
+LBCODT,"o,p'-DDT"
+LBCODTLA,"o,p'-DDT"
+LBCOXY,Oxychlordane
+LBCOXYLA,Oxychlordane
+LBCPDE,"p,p'-DDE"
+LBCPDELA,"p,p'-DDE"
+LBCPDT,"p,p'-DDT"
+LBCPDTLA,"p,p'-DDT"
+LBCTNA,trans-Nonachlor
+LBCTNALA,trans-Nonachlor
+LBXALD,Aldrin
+LBXALDLA,Aldrinusted
+LBXBHC,Beta-hexachloro-cyclohexane
+LBXBHCLA,Beta-hexachlorocyclohexaneusted
+LBXDIE,Dieldrin
+LBXDIELA,Dieldrinusted
+LBXEND,Endrin
+LBXENDLA,Endrinusted
+LBXGHC,Gamma-hexachloro-cyclohexane
+LBXGHCLA,Gamma-hexachlorocyclohexaneusted
+LBXHCB,Hexachlorobenzene
+LBXHCBLA,Hexachlorobenzeneusted
+LBXHPE,Heptachlor Epoxide
+LBXHPELA,Heptachlor Epoxideusted
+LBXMIR,Mirex
+LBXMIRLA,Mirexusted
+LBXODT,opDDT
+LBXODTLA,opDDTusted
+LBXOXY,Oxychlordane
+LBXOXYLA,Oxychlordaneusted
+LBXPDE,ppDDE
+LBXPDELA,ppDDEusted
+LBXPDT,ppDDT
+LBXPDTLA,ppDDTusted
+LBXTNA,Trans-nonachlor
+LBXTNALA,Trans-nonachlorusted
+SSBHC,B-HCCH
+SSGHC,G-HCCH
+SSHCB,HCB
+SSMIR,MIREX
+SSODT,OP-DDT
+SSOXY,OXYCHLOR
+SSPDE,PP-DDE7
+SSPDT,PP-DDT
+SSTNA,T-NONA
+URX14D,"2,5-dichlorophenol"
+URX1TB,"2,4,5-trichlorophenol"
+URX24D,"2,4-D"
+URX25T,"2,4,5-T"
+URX3TB,"2,4,6-trichlorophenol"
+URX4FP,4-fluoro-3-phenoxybenzoic acid
+URXACE,Acetochlor mercapturate
+URXALA,Alachlor mercapturate
+URXAPE,Acephate
+URXATZ,Atrazine mercapturate
+URXBSM,Bensulfuron methyl
+URXCB3,"cis-3-(2,2-dibromovinyl)-2,2-dimethylcyclopropane carboxylic acid"
+URXCBF,Carbofuranphenol
+URXCCC,"cis-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid"
+URXCHS,Chlorsulfuron
+URXCMH,3-chloro-7-hydroxy-4-methyl-2H-chromen-2-one/ol
+URXCPM,"3,5,6-trichloropyridinol"
+URXDCB,"2,4-dichlorophenol"
+URXDEE,DEET
+URXDIZ,Oxypyrimidine
+URXDPY,2-(diethylamino)-6-methylpyrimidin-4-ol/one
+URXEMM,Ethametsulfuron methyl
+URXETU,Ethylenethio urea
+URXFRM,Foramsulfuron
+URXHLS,Halosulfuron
+URXMAL,Malathion diacid
+URXMET,Metolachlor mercapturate
+URXMMI,Methamidaphos
+URXMSM,Mesosulfuron methyl
+URXMTM,Metsulfuron methyl
+URXMTO,Dimethoate
+URXNOS,Nicosulfuron
+URXOMO,O-methoate
+URXOP1,Dimethylphosphate
+URX3PBA,3-PBA
+URXDMP,DMP
+URXOP2,Diethylphosphate
+URXOP3,Dimethylthiophosphate
+URXOP4,Diethylthiophosphate
+URXOP5,Dimethyldithiophosphate
+URXOP6,Diethyldithiophosphate
+URXOPM,3-phenoxybenzoic acid
+URXOPP,O-Phenyl phenol
+URXOXS,Oxasulfuron
+URXPAR,Paranitrophenol
+URXPCP,Pentachlorophenol
+URXPIM,Primisulfuron methyl
+URXPPX,2-isopropoxyphenol
+URXPRO,Prosulfuron
+URXPTU,Propylenethio urea
+URXRIM,Rimsulfuron
+URXSMM,Sulfometuron methyl
+URXSSF,Sulfosulfuron
+URXTCC,"trans-3-(2,2-dichlorovinyl)-2,2-dimethylcyclopropane carboxylic acid"
+URXTHF,Thifensulfuron methyl
+URXTRA,Triasulfuron
+URXTRN,Triflusulfuron methyl

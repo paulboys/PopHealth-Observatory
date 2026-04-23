@@ -76,6 +76,7 @@ Thumbs.db
 *.csv
 !data/reference/pesticide_reference.csv
 !data/reference/*.yml
+!pophealth_observatory/data/reference/**/*.csv
 *.xpt
 *.sas7bdat
 *.pkl
