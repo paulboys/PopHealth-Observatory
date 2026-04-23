@@ -1,0 +1,161 @@
+variable_name,variable_description,data_file_description,data_file_name,cycle
+URX14D,URX14D,Environmental Phenols & Parabens,PP_D,2005-2006
+URX14D,URX14D,Environmental Phenols & Parabens,PP_E,2007-2008
+URX14D,URX14D,Environmental Phenols & Parabens,PP_F,2009-2010
+URX14D,URX14D,Environmental Phenols & Parabens,PP_G,2011-2012
+URX1TB,URX1TB,Environmental Phenols & Parabens,PP_D,2005-2006
+URX1TB,URX1TB,Environmental Phenols & Parabens,PP_E,2007-2008
+URX1TB,URX1TB,Environmental Phenols & Parabens,PP_F,2009-2010
+URX24D,URX24D,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URX24D,URX24D,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URX24D,URX24D,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_G,2011-2012
+URX24D,URX24D,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URX24D,URX24D,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URX24D,URX24D,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URX25T,URX25T,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URX25T,URX25T,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URX3TB,URX3TB,Environmental Phenols & Parabens,PP_D,2005-2006
+URX3TB,URX3TB,Environmental Phenols & Parabens,PP_E,2007-2008
+URX3TB,URX3TB,Environmental Phenols & Parabens,PP_F,2009-2010
+URX4FP,URX4FP,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URX4FP,URX4FP,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URX4FP,URX4FP,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_G,2011-2012
+URX4FP,URX4FP,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URX4FP,URX4FP,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URX4FP,URX4FP,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URX4TO,URX4TO,Environmental Phenols,EPH_D,2005-2006
+URX4TO,URX4TO,Environmental Phenols,EPH_E,2007-2008
+URX4TO,URX4TO,Environmental Phenols,EPH_F,2009-2010
+URXBP3,URXBP3,Environmental Phenols,EPH_D,2005-2006
+URXBP3,URXBP3,Environmental Phenols,EPH_E,2007-2008
+URXBP3,URXBP3,Environmental Phenols,EPH_F,2009-2010
+URXBP3,URXBP3,Environmental Phenols,EPH_G,2011-2012
+URXBPH,URXBPH,Environmental Phenols,EPH_D,2005-2006
+URXBPH,URXBPH,Environmental Phenols,EPH_E,2007-2008
+URXBPH,URXBPH,Environmental Phenols,EPH_F,2009-2010
+URXBPH,URXBPH,Environmental Phenols,EPH_G,2011-2012
+URXBUP,URXBUP,Environmental Phenols,EPH_D,2005-2006
+URXBUP,URXBUP,Environmental Phenols,EPH_E,2007-2008
+URXBUP,URXBUP,Environmental Phenols,EPH_F,2009-2010
+URXBUP,URXBUP,Environmental Phenols,EPH_G,2011-2012
+URXCB3,URXCB3,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXCB3,URXCB3,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXCPM,URXCPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXCPM,URXCPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXCPM,URXCPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URXCPM,URXCPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URXCPM,URXCPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URXDAZ,URXDAZ,Phytoestrogens,PHYTO_D,2005-2006
+URXDAZ,URXDAZ,Phytoestrogens,PHYTO_E,2007-2008
+URXDAZ,URXDAZ,Phytoestrogens,PHYTO_F,2009-2010
+URXDCB,URXDCB,Environmental Phenols & Parabens,PP_D,2005-2006
+URXDCB,URXDCB,Environmental Phenols & Parabens,PP_E,2007-2008
+URXDCB,URXDCB,Environmental Phenols & Parabens,PP_F,2009-2010
+URXDCB,URXDCB,Environmental Phenols & Parabens,PP_G,2011-2012
+URXDMA,URXDMA,Phytoestrogens,PHYTO_D,2005-2006
+URXDMA,URXDMA,Phytoestrogens,PHYTO_E,2007-2008
+URXDMA,URXDMA,Phytoestrogens,PHYTO_F,2009-2010
+URXEPB,URXEPB,Environmental Phenols,EPH_D,2005-2006
+URXEPB,URXEPB,Environmental Phenols,EPH_E,2007-2008
+URXEPB,URXEPB,Environmental Phenols,EPH_F,2009-2010
+URXEPB,URXEPB,Environmental Phenols,EPH_G,2011-2012
+URXEQU,URXEQU,Phytoestrogens,PHYTO_D,2005-2006
+URXEQU,URXEQU,Phytoestrogens,PHYTO_E,2007-2008
+URXEQU,URXEQU,Phytoestrogens,PHYTO_F,2009-2010
+URXETD,URXETD,Phytoestrogens,PHYTO_D,2005-2006
+URXETD,URXETD,Phytoestrogens,PHYTO_E,2007-2008
+URXETD,URXETD,Phytoestrogens,PHYTO_F,2009-2010
+URXETL,URXETL,Phytoestrogens,PHYTO_D,2005-2006
+URXETL,URXETL,Phytoestrogens,PHYTO_E,2007-2008
+URXETL,URXETL,Phytoestrogens,PHYTO_F,2009-2010
+URXGNS,URXGNS,Phytoestrogens,PHYTO_D,2005-2006
+URXGNS,URXGNS,Phytoestrogens,PHYTO_E,2007-2008
+URXGNS,URXGNS,Phytoestrogens,PHYTO_F,2009-2010
+URXMAL,URXMAL,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXMAL,URXMAL,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXMAL,URXMAL,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URXMAL,URXMAL,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URXMPB,URXMPB,Environmental Phenols,EPH_D,2005-2006
+URXMPB,URXMPB,Environmental Phenols,EPH_E,2007-2008
+URXMPB,URXMPB,Environmental Phenols,EPH_F,2009-2010
+URXMPB,URXMPB,Environmental Phenols,EPH_G,2011-2012
+URXOP1,URXOP1,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXOP1,URXOP1,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXOP1,URXOP1,Organophosphate Dialkyl Phosphate Metabolites,OPD_G,2011-2012
+URXOP1,URXOP1,Organophosphate Dialkyl Phosphate Metabolites,OPD_I,2015-2016
+URXOP1,URXOP1,Organophosphate Dialkyl Phosphate Metabolites,OPD_J,2017-2018
+URXOP2,URXOP2,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXOP2,URXOP2,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXOP2,URXOP2,Organophosphate Dialkyl Phosphate Metabolites,OPD_G,2011-2012
+URXOP2,URXOP2,Organophosphate Dialkyl Phosphate Metabolites,OPD_I,2015-2016
+URXOP2,URXOP2,Organophosphate Dialkyl Phosphate Metabolites,OPD_J,2017-2018
+URXOP3,URXOP3,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXOP3,URXOP3,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXOP3,URXOP3,Organophosphate Dialkyl Phosphate Metabolites,OPD_G,2011-2012
+URXOP3,URXOP3,Organophosphate Dialkyl Phosphate Metabolites,OPD_I,2015-2016
+URXOP3,URXOP3,Organophosphate Dialkyl Phosphate Metabolites,OPD_J,2017-2018
+URXOP4,URXOP4,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXOP4,URXOP4,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXOP4,URXOP4,Organophosphate Dialkyl Phosphate Metabolites,OPD_G,2011-2012
+URXOP4,URXOP4,Organophosphate Dialkyl Phosphate Metabolites,OPD_I,2015-2016
+URXOP4,URXOP4,Organophosphate Dialkyl Phosphate Metabolites,OPD_J,2017-2018
+URXOP5,URXOP5,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXOP5,URXOP5,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXOP5,URXOP5,Organophosphate Dialkyl Phosphate Metabolites,OPD_G,2011-2012
+URXOP5,URXOP5,Organophosphate Dialkyl Phosphate Metabolites,OPD_I,2015-2016
+URXOP5,URXOP5,Organophosphate Dialkyl Phosphate Metabolites,OPD_J,2017-2018
+URXOP6,URXOP6,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXOP6,URXOP6,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXOP6,URXOP6,Organophosphate Dialkyl Phosphate Metabolites,OPD_G,2011-2012
+URXOP6,URXOP6,Organophosphate Dialkyl Phosphate Metabolites,OPD_I,2015-2016
+URXOP6,URXOP6,Organophosphate Dialkyl Phosphate Metabolites,OPD_J,2017-2018
+URXOPM,URXOPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXOPM,URXOPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXOPM,URXOPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_G,2011-2012
+URXOPM,URXOPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URXOPM,URXOPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URXOPM,URXOPM,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URXOPP,URXOPP,Environmental Phenols & Parabens,PP_D,2005-2006
+URXOPP,URXOPP,Environmental Phenols & Parabens,PP_E,2007-2008
+URXOPP,URXOPP,Environmental Phenols & Parabens,PP_F,2009-2010
+URXOXY,URXOXY,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXOXY,URXOXY,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXOXY,URXOXY,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_G,2011-2012
+URXOXY,URXOXY,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URXOXY,URXOXY,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URXOXY,URXOXY,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URXPAR,URXPAR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXPAR,URXPAR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXPAR,URXPAR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_G,2011-2012
+URXPAR,URXPAR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URXPAR,URXPAR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URXPAR,URXPAR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URXPPB,URXPPB,Environmental Phenols,EPH_D,2005-2006
+URXPPB,URXPPB,Environmental Phenols,EPH_E,2007-2008
+URXPPB,URXPPB,Environmental Phenols,EPH_F,2009-2010
+URXPPB,URXPPB,Environmental Phenols,EPH_G,2011-2012
+URXTCC,URXTCC,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXTCC,URXTCC,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXTCC,URXTCC,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_G,2011-2012
+URXTCC,URXTCC,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_H,2013-2014
+URXTCC,URXTCC,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_I,2015-2016
+URXTCC,URXTCC,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_J,2017-2018
+URXTRS,URXTRS,Environmental Phenols,EPH_D,2005-2006
+URXTRS,URXTRS,Environmental Phenols,EPH_E,2007-2008
+URXTRS,URXTRS,Environmental Phenols,EPH_F,2009-2010
+URXTRS,URXTRS,Environmental Phenols,EPH_G,2011-2012
+URXUCR,URXUCR,Environmental Phenols,EPH_D,2005-2006
+URXUCR,URXUCR,Organophosphate Dialkyl Phosphate Metabolites,OPD_D,2005-2006
+URXUCR,URXUCR,Phytoestrogens,PHYTO_D,2005-2006
+URXUCR,URXUCR,Environmental Phenols & Parabens,PP_D,2005-2006
+URXUCR,URXUCR,Environmental Phenols,EPH_E,2007-2008
+URXUCR,URXUCR,Organophosphate Dialkyl Phosphate Metabolites,OPD_E,2007-2008
+URXUCR,URXUCR,Phytoestrogens,PHYTO_E,2007-2008
+URXUCR,URXUCR,Environmental Phenols & Parabens,PP_E,2007-2008
+URXUCR,URXUCR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_E,2007-2008
+URXUCR,URXUCR,Environmental Phenols,EPH_F,2009-2010
+URXUCR,URXUCR,Phytoestrogens,PHYTO_F,2009-2010
+URXUCR,URXUCR,Environmental Phenols & Parabens,PP_F,2009-2010
+URXUCR,URXUCR,"Pyrethroids, Herbicides, & Organophosphate Metabolites",UPHOPM_F,2009-2010
+URXUCR,URXUCR,Environmental Phenols,EPH_G,2011-2012
+URXUCR,URXUCR,Environmental Phenols & Parabens,PP_G,2011-2012
