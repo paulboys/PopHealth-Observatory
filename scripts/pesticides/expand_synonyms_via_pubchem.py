@@ -186,9 +186,11 @@ def expand_reference_synonyms(input_csv: Path, output_csv: Path) -> None:
 
 def main() -> None:
     """Run PubChem synonym expansion."""
-    root = Path(__file__).parent.parent.parent
-    input_path = root / "data" / "reference" / "minimal" / "pesticide_reference_minimal.csv"
-    output_path = root / "data" / "reference" / "config" / "pubchem_synonyms.csv"
+    from pophealth_observatory._paths import get_reference_dir
+
+    ref_dir = get_reference_dir()
+    input_path = ref_dir / "minimal" / "pesticide_reference_minimal.csv"
+    output_path = ref_dir / "config" / "pubchem_synonyms.csv"
 
     print("=" * 80)
     print("PubChem Synonym Expansion for Pesticide Analytes")

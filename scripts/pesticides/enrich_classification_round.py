@@ -351,11 +351,13 @@ def log_evidence(
 
 def main() -> None:
     """Run classification expansion evidence logging."""
+    from pophealth_observatory._paths import get_reference_dir
+
     # Paths
-    root = Path(__file__).parent.parent.parent
-    minimal_ref_path = root / "data" / "reference" / "minimal" / "pesticide_reference_minimal.csv"
-    synonym_map_path = root / "data" / "reference" / "config" / "pubchem_synonyms.csv"
-    evidence_dir = root / "data" / "reference" / "evidence"
+    ref_dir = get_reference_dir()
+    minimal_ref_path = ref_dir / "minimal" / "pesticide_reference_minimal.csv"
+    synonym_map_path = ref_dir / "config" / "pubchem_synonyms.csv"
+    evidence_dir = ref_dir / "evidence"
     today = datetime.now().strftime("%Y-%m-%d")
     output_path = evidence_dir / f"unclassified_{today}.csv"
 

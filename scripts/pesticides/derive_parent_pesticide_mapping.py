@@ -26,8 +26,11 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-ROOT = Path(__file__).resolve().parent.parent
-DISCOVERED = ROOT / "data" / "reference" / "discovery" / "nhanes_pesticide_variables_discovered.csv"
+from pophealth_observatory._paths import get_reference_dir
+
+ROOT = Path(__file__).resolve().parents[2]
+
+DISCOVERED = get_reference_dir() / "discovery" / "nhanes_pesticide_variables_discovered.csv"
 CACHE_DIR = ROOT / "data" / "raw" / "codebooks"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -186,7 +189,7 @@ def main():
     ap.add_argument("--verification-date", default="2025-11-08")
     ap.add_argument(
         "--output-jsonl",
-        default="data/reference/parent_pesticide_mapping_raw.jsonl",
+        default=str(get_reference_dir() / "evidence" / "parent_pesticide_mapping_raw.jsonl"),
     )
     ap.add_argument("--limit", type=int, default=0, help="Process only first N unique variables (debug)")
     args = ap.parse_args()

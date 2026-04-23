@@ -22,8 +22,9 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-ROOT = Path(__file__).resolve().parent.parent
-MINIMAL_REF = ROOT / "data" / "reference" / "minimal" / "pesticide_reference_minimal.csv"
+from pophealth_observatory._paths import get_reference_dir
+
+MINIMAL_REF = get_reference_dir() / "minimal" / "pesticide_reference_minimal.csv"
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 

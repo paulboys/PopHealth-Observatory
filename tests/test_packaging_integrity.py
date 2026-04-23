@@ -1,15 +1,15 @@
 """Packaging integrity tests ensuring critical reference files are present.
 
 These tests verify that essential data files required by the ingestion pipeline
-are properly included in distribution artifacts. Passing these tests allows safe
-removal of runtime placeholder injection logic in pesticide_context.py.
+are properly included in distribution artifacts. They use the package-relative
+path helper so they work both in-repo and after ``pip install``.
 
 SPDX-License-Identifier: MIT
 """
 
-from pathlib import Path
-
 import pytest
+
+from pophealth_observatory._paths import get_reference_dir
 
 
 class TestReferenceDataPresence:
@@ -17,29 +17,29 @@ class TestReferenceDataPresence:
 
     def test_minimal_reference_exists(self):
         """Minimal pesticide reference CSV must be present."""
-        minimal_path = Path("data/reference/minimal/pesticide_reference_minimal.csv")
+        minimal_path = get_reference_dir() / "minimal" / "pesticide_reference_minimal.csv"
         assert minimal_path.exists(), (
             f"Missing required file: {minimal_path}. "
-            "Ensure pyproject.toml [tool.setuptools.package-data] includes 'data/reference/minimal/*.csv'"
+            "Ensure pyproject.toml [tool.setuptools.package-data] includes reference data."
         )
         # Verify non-empty
         assert minimal_path.stat().st_size > 0, f"{minimal_path} exists but is empty"
 
     def test_classified_reference_exists(self):
         """Classified pesticide reference CSV with CDC enrichment must be present."""
-        classified_path = Path("data/reference/classified/pesticide_reference_classified.csv")
+        classified_path = get_reference_dir() / "classified" / "pesticide_reference_classified.csv"
         assert classified_path.exists(), (
             f"Missing required file: {classified_path}. "
-            "Ensure pyproject.toml [tool.setuptools.package-data] includes 'data/reference/classified/*.csv'"
+            "Ensure pyproject.toml [tool.setuptools.package-data] includes reference data."
         )
         assert classified_path.stat().st_size > 0, f"{classified_path} exists but is empty"
 
     def test_compatibility_shim_exists(self):
         """Backward compatibility shim (flat reference CSV) must be present."""
-        shim_path = Path("data/reference/pesticide_reference.csv")
+        shim_path = get_reference_dir() / "pesticide_reference.csv"
         assert shim_path.exists(), (
             f"Missing required file: {shim_path}. "
-            "Ensure pyproject.toml [tool.setuptools.package-data] includes 'data/reference/*.csv'"
+            "Ensure pyproject.toml [tool.setuptools.package-data] includes reference data."
         )
         assert shim_path.stat().st_size > 0, f"{shim_path} exists but is empty"
 
@@ -47,7 +47,7 @@ class TestReferenceDataPresence:
         """Minimal reference must include key analytes required by tests."""
         import csv
 
-        minimal_path = Path("data/reference/minimal/pesticide_reference_minimal.csv")
+        minimal_path = get_reference_dir() / "minimal" / "pesticide_reference_minimal.csv"
         if not minimal_path.exists():
             pytest.skip("Minimal reference not present; skipping key analyte check")
 
@@ -68,8 +68,8 @@ class TestReferenceDataPresence:
         """Classified reference analytes should be a subset of minimal reference."""
         import csv
 
-        minimal_path = Path("data/reference/minimal/pesticide_reference_minimal.csv")
-        classified_path = Path("data/reference/classified/pesticide_reference_classified.csv")
+        minimal_path = get_reference_dir() / "minimal" / "pesticide_reference_minimal.csv"
+        classified_path = get_reference_dir() / "classified" / "pesticide_reference_classified.csv"
 
         if not (minimal_path.exists() and classified_path.exists()):
             pytest.skip("Both references not present; skipping subset check")
@@ -92,7 +92,7 @@ class TestConfigDirectoryStructure:
 
     def test_reference_subdirectories_exist(self):
         """Expected subdirectories under data/reference/ must be present."""
-        base = Path("data/reference")
+        base = get_reference_dir()
         required_dirs = ["minimal", "classified", "legacy", "discovery", "evidence", "config"]
 
         for subdir in required_dirs:
@@ -102,7 +102,7 @@ class TestConfigDirectoryStructure:
 
     def test_config_yaml_present(self):
         """Source registry YAML should exist in config directory."""
-        yaml_path = Path("data/reference/config/pesticide_sources.yml")
+        yaml_path = get_reference_dir() / "config" / "pesticide_sources.yml"
         # Note: This file may be optional in early phases; marking as soft assertion
         if yaml_path.exists():
             assert yaml_path.stat().st_size > 0, f"{yaml_path} exists but is empty"
