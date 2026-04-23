@@ -274,8 +274,15 @@ def _extract_analyte_columns(df: pd.DataFrame, ref_df: pd.DataFrame) -> pd.DataF
     if df.empty or "seqn" not in df.columns:
         return pd.DataFrame()
 
+    # Non-analyte URX/LBX columns that should never be treated as pesticide concentrations
+    _EXCLUDE_COLS = {"urxucr"}  # urine creatinine
+
     # Identify concentration columns (URX* or LBX* pattern)
-    conc_cols = [c for c in df.columns if c.startswith(("urx", "lbx")) and not c.endswith(("lc", "si"))]
+    conc_cols = [
+        c
+        for c in df.columns
+        if c.startswith(("urx", "lbx")) and not c.endswith(("lc", "si")) and c not in _EXCLUDE_COLS
+    ]
 
     if not conc_cols:
         return pd.DataFrame()

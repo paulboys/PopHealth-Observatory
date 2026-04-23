@@ -1,8 +1,8 @@
 variable_name,analyte_name
 LBCBHC,Beta-hexachlorocyclohexane
-LBCBHCLA,B-hexachlorocyclohexane
+LBCBHCLA,Beta-hexachlorocyclohexane
 LBCGHC,Gamma-hexachlorocyclohexane
-LBCGHCLA,G-hexachlorocyclohexane
+LBCGHCLA,Gamma-hexachlorocyclohexane
 LBCHCB,Hexachlorobenzene
 LBCHCBLA,Hexachlorobenzene
 LBCMIR,Mirex
@@ -18,40 +18,40 @@ LBCPDTLA,"p,p'-DDT"
 LBCTNA,trans-Nonachlor
 LBCTNALA,trans-Nonachlor
 LBXALD,Aldrin
-LBXALDLA,Aldrinusted
-LBXBHC,Beta-hexachloro-cyclohexane
-LBXBHCLA,Beta-hexachlorocyclohexaneusted
+LBXALDLA,Aldrin
+LBXBHC,Beta-hexachlorocyclohexane
+LBXBHCLA,Beta-hexachlorocyclohexane
 LBXDIE,Dieldrin
-LBXDIELA,Dieldrinusted
+LBXDIELA,Dieldrin
 LBXEND,Endrin
-LBXENDLA,Endrinusted
-LBXGHC,Gamma-hexachloro-cyclohexane
-LBXGHCLA,Gamma-hexachlorocyclohexaneusted
+LBXENDLA,Endrin
+LBXGHC,Gamma-hexachlorocyclohexane
+LBXGHCLA,Gamma-hexachlorocyclohexane
 LBXHCB,Hexachlorobenzene
-LBXHCBLA,Hexachlorobenzeneusted
+LBXHCBLA,Hexachlorobenzene
 LBXHPE,Heptachlor Epoxide
-LBXHPELA,Heptachlor Epoxideusted
+LBXHPELA,Heptachlor Epoxide
 LBXMIR,Mirex
-LBXMIRLA,Mirexusted
-LBXODT,opDDT
-LBXODTLA,opDDTusted
+LBXMIRLA,Mirex
+LBXODT,"o,p'-DDT"
+LBXODTLA,"o,p'-DDT"
 LBXOXY,Oxychlordane
-LBXOXYLA,Oxychlordaneusted
-LBXPDE,ppDDE
-LBXPDELA,ppDDEusted
-LBXPDT,ppDDT
-LBXPDTLA,ppDDTusted
-LBXTNA,Trans-nonachlor
-LBXTNALA,Trans-nonachlorusted
-SSBHC,B-HCCH
-SSGHC,G-HCCH
-SSHCB,HCB
-SSMIR,MIREX
-SSODT,OP-DDT
-SSOXY,OXYCHLOR
-SSPDE,PP-DDE7
-SSPDT,PP-DDT
-SSTNA,T-NONA
+LBXOXYLA,Oxychlordane
+LBXPDE,"p,p'-DDE"
+LBXPDELA,"p,p'-DDE"
+LBXPDT,"p,p'-DDT"
+LBXPDTLA,"p,p'-DDT"
+LBXTNA,trans-Nonachlor
+LBXTNALA,trans-Nonachlor
+SSBHC,Beta-hexachlorocyclohexane
+SSGHC,Gamma-hexachlorocyclohexane
+SSHCB,Hexachlorobenzene
+SSMIR,Mirex
+SSODT,"o,p'-DDT"
+SSOXY,Oxychlordane
+SSPDE,"p,p'-DDE"
+SSPDT,"p,p'-DDT"
+SSTNA,trans-Nonachlor
 URX14D,"2,5-dichlorophenol"
 URX1TB,"2,4,5-trichlorophenol"
 URX24D,"2,4-D"
@@ -72,6 +72,7 @@ URXCPM,"3,5,6-trichloropyridinol"
 URXDCB,"2,4-dichlorophenol"
 URXDEE,DEET
 URXDIZ,Oxypyrimidine
+URXDMP,Dimethylphosphate
 URXDPY,2-(diethylamino)-6-methylpyrimidin-4-ol/one
 URXEMM,Ethametsulfuron methyl
 URXETU,Ethylenethio urea
@@ -86,8 +87,6 @@ URXMTO,Dimethoate
 URXNOS,Nicosulfuron
 URXOMO,O-methoate
 URXOP1,Dimethylphosphate
-URX3PBA,3-PBA
-URXDMP,DMP
 URXOP2,Diethylphosphate
 URXOP3,Dimethylthiophosphate
 URXOP4,Diethylthiophosphate
@@ -96,7 +95,8 @@ URXOP6,Diethyldithiophosphate
 URXOPM,3-phenoxybenzoic acid
 URXOPP,O-Phenyl phenol
 URXOXS,Oxasulfuron
-URXPAR,Paranitrophenol
+URXOXY,2-isopropyl-4-methyl-pyrimidinol
+URXPAR,para-Nitrophenol
 URXPCP,Pentachlorophenol
 URXPIM,Primisulfuron methyl
 URXPPX,2-isopropoxyphenol
