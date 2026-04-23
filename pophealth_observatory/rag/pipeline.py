@@ -6,6 +6,11 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from ..logging_config import log_with_fallback
+from ..pesticide_context import (
+    load_analyte_reference,
+    load_evidence_enrichment,
+    merge_reference_with_enrichment,
+)
 from .config import RAGConfig
 from .embeddings import BaseEmbedder
 from .index import VectorIndex, load_metadata, save_metadata
@@ -64,6 +69,15 @@ def _format_prompt(question: str, snippets: Sequence[dict], max_chars: int = 300
     for s in snippets:
         t = s.get("text", "")
         chunk = f"[SNIPPET]\n{t}\n"
+        evidence_summary = str(s.get("sciclaw_evidence_summary", "")).strip()
+        if evidence_summary:
+            chunk += f"[EVIDENCE_SUMMARY]\n{evidence_summary}\n"
+        endpoints = s.get("key_health_endpoints") or []
+        if endpoints:
+            chunk += f"[KEY_HEALTH_ENDPOINTS]\n{', '.join(str(e) for e in endpoints)}\n"
+        parents = s.get("sciclaw_parent_pesticide_candidates") or []
+        if parents:
+            chunk += f"[PARENT_CANDIDATES]\n{', '.join(str(p) for p in parents)}\n"
         if total + len(chunk) > max_chars:
             break
         pieces.append(chunk)
@@ -106,9 +120,53 @@ class RAGPipeline:
         """Populate internal snippet, text and meta arrays from disk."""
         log_with_fallback(logger, logging.INFO, f"Loading snippets from {self.config.snippets_path}")
         self._snippets = _load_snippets(self.config.snippets_path)
-        self._texts = [s.get("text", "") for s in self._snippets]
+        if self.config.enable_evidence_enrichment:
+            self._attach_evidence_enrichment(self._snippets)
+        else:
+            log_with_fallback(logger, logging.INFO, "Evidence enrichment disabled by RAGConfig")
+        self._texts = [self._compose_retrieval_text(s) for s in self._snippets]
         self._meta = [s for s in self._snippets]
         log_with_fallback(logger, logging.INFO, f"Loaded {len(self._snippets)} snippets")
+
+    def _compose_retrieval_text(self, snippet: dict) -> str:
+        """Compose retrieval text including optional enrichment evidence fields."""
+        text = str(snippet.get("text", ""))
+        parts = [text]
+        summary = str(snippet.get("sciclaw_evidence_summary", "")).strip()
+        if summary:
+            parts.append(summary)
+        endpoints = snippet.get("key_health_endpoints") or []
+        if endpoints:
+            parts.append(" ".join(str(e) for e in endpoints))
+        return " \n".join(p for p in parts if p)
+
+    def _attach_evidence_enrichment(self, snippets: list[dict]) -> None:
+        """Attach SciClaw enrichment fields to snippets by CAS RN when available."""
+        try:
+            enrichment_by_cas = load_evidence_enrichment()
+            if not enrichment_by_cas:
+                return
+            merged_reference = merge_reference_with_enrichment(load_analyte_reference(), enrichment_by_cas)
+            by_cas: dict[str, dict] = {
+                str(r.get("cas_rn", "")).strip(): r
+                for r in merged_reference
+                if r.get("evidence_enrichment") and r.get("cas_rn")
+            }
+            for snippet in snippets:
+                cas_rn = str(snippet.get("cas_rn", "")).strip()
+                if not cas_rn:
+                    continue
+                enriched = by_cas.get(cas_rn)
+                if not enriched:
+                    continue
+                snippet["evidence_enrichment"] = enriched.get("evidence_enrichment")
+                snippet["sciclaw_synonyms"] = enriched.get("sciclaw_synonyms", [])
+                snippet["sciclaw_parent_pesticide_candidates"] = enriched.get("sciclaw_parent_pesticide_candidates", [])
+                snippet["sciclaw_evidence_summary"] = enriched.get("sciclaw_evidence_summary", "")
+                evidence = snippet.get("evidence_enrichment") or {}
+                snippet["key_health_endpoints"] = evidence.get("key_health_endpoints", [])
+        except Exception as exc:  # noqa: BLE001
+            log_with_fallback(logger, logging.WARNING, f"Failed to attach evidence enrichment: {exc}")
 
     def build_or_load_embeddings(self) -> None:
         """Create embeddings index or load cached artifacts if available."""

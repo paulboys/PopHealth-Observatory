@@ -22,10 +22,13 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent
-MINIMAL_REF = ROOT / "data" / "reference" / "minimal" / "pesticide_reference_minimal.csv"
+from pophealth_observatory._paths import get_reference_dir
+
+ROOT = Path(__file__).resolve().parents[2]
+
+MINIMAL_REF = get_reference_dir() / "minimal" / "pesticide_reference_minimal.csv"
 CDC_CLASSES = ROOT / "data" / "raw" / "cdc" / "fourth_report_pesticide_classes.csv"
-OUTPUT_REF = ROOT / "data" / "reference" / "classified" / "pesticide_reference_classified.csv"
+OUTPUT_REF = get_reference_dir() / "classified" / "pesticide_reference_classified.csv"
 
 
 def load_minimal_reference(path: Path) -> pd.DataFrame:

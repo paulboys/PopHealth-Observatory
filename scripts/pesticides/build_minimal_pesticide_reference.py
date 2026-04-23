@@ -19,11 +19,12 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent.parent
+from pophealth_observatory._paths import get_reference_dir
+
 # Updated structured paths after directory cleanup
-DISCOVERED = ROOT / "data" / "reference" / "discovery" / "nhanes_pesticide_variables_discovered.csv"
-CURATED = ROOT / "data" / "reference" / "legacy" / "pesticide_reference_curated.csv"
-OUTPUT = ROOT / "data" / "reference" / "minimal" / "pesticide_reference_minimal.csv"
+DISCOVERED = get_reference_dir() / "discovery" / "nhanes_pesticide_variables_discovered.csv"
+CURATED = get_reference_dir() / "legacy" / "pesticide_reference_curated.csv"
+OUTPUT = get_reference_dir() / "minimal" / "pesticide_reference_minimal.csv"
 
 
 def infer_matrix(data_file_name: str, variable_description: str) -> str:

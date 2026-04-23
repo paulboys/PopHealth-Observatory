@@ -14,12 +14,15 @@ class RAGConfig:
     embeddings_path: Directory to store embedding matrix (.npy) and metadata (.json).
     model_name: Name of sentence-transformer model (only used if SentenceTransformerEmbedder is chosen).
     cache: Whether to reuse existing embedding artifacts if present.
+    enable_evidence_enrichment: Toggle SciClaw evidence enrichment attachment during
+        snippet loading. Disable for strict reproducibility against raw snippet-only corpus.
     """
 
     snippets_path: Path
     embeddings_path: Path
     model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     cache: bool = True
+    enable_evidence_enrichment: bool = True
 
     def ensure_dirs(self) -> None:
         """Create embeddings directory if missing."""

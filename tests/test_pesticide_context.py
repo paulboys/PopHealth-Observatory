@@ -4,6 +4,8 @@ from pophealth_observatory.pesticide_context import (
     as_json,
     get_pesticide_info,
     load_analyte_reference,
+    load_evidence_enrichment,
+    merge_reference_with_enrichment,
     suggest_analytes,
 )
 
@@ -84,3 +86,80 @@ def test_as_json_roundtrip():
     restored = json.loads(js)
     assert restored == payload
     assert "\n" in js  # pretty formatting contains newlines
+
+
+def test_load_evidence_enrichment_and_merge(tmp_path):
+    enrich_file = tmp_path / "enrichment.jsonl"
+    good = {
+        "schema_version": "1.0.0",
+        "record_id": "rec_1",
+        "cas_rn": "814-24-8",
+        "analyte_name": "DMP",
+        "synonyms": ["Dimethylphosphate"],
+        "parent_pesticide_candidates": ["Organophosphates"],
+        "chemical_class": "Organophosphate metabolite",
+        "evidence_summary": "Evidence links DMP to OP exposure biomarkers.",
+        "exposure_routes": ["dietary"],
+        "key_health_endpoints": ["neurodevelopment"],
+        "evidence_statements": [
+            {
+                "statement_id": "s1",
+                "claim": "Higher DMP may track OP exposure.",
+                "direction": "increase",
+                "population_context": "Adults",
+                "study_type": "cross-sectional",
+                "confidence": 0.8,
+                "citations": [
+                    {
+                        "title": "Example",
+                        "source_url": "https://example.org/paper",
+                        "doi": "",
+                        "pmid": "",
+                        "year": 2020,
+                        "journal": "Env Health",
+                    }
+                ],
+            }
+        ],
+        "provenance": {"generated_by": "SciClaw"},
+        "review": {"human_reviewed": True},
+    }
+    bad = {"schema_version": "1.0.0", "record_id": "bad_1", "cas_rn": "invalid-cas", "analyte_name": "X"}
+    enrich_file.write_text(json.dumps(good) + "\n" + json.dumps(bad) + "\n", encoding="utf-8")
+
+    enrichments = load_evidence_enrichment(enrich_file, min_confidence=0.5, reviewed_only=True)
+    assert "814-24-8" in enrichments
+    assert len(enrichments) == 1
+
+    merged = merge_reference_with_enrichment(load_analyte_reference(), enrichments)
+    dmp_row = next(row for row in merged if row["cas_rn"] == "814-24-8")
+    assert dmp_row["sciclaw_synonyms"] == ["Dimethylphosphate"]
+    assert "evidence_enrichment" in dmp_row
+    assert dmp_row["evidence_enrichment"]["record_id"] == "rec_1"
+
+
+def test_load_evidence_enrichment_review_filter(tmp_path):
+    enrich_file = tmp_path / "enrichment_unreviewed.jsonl"
+    payload = {
+        "schema_version": "1.0.0",
+        "record_id": "rec_2",
+        "cas_rn": "70458-82-3",
+        "analyte_name": "3-PBA",
+        "evidence_summary": "Example summary",
+        "evidence_statements": [
+            {
+                "statement_id": "s2",
+                "claim": "Example claim",
+                "confidence": 0.9,
+                "citations": [{"title": "Example", "source_url": "https://example.org"}],
+            }
+        ],
+        "review": {"human_reviewed": False},
+    }
+    enrich_file.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    reviewed_only = load_evidence_enrichment(enrich_file, reviewed_only=True)
+    all_records = load_evidence_enrichment(enrich_file, reviewed_only=False)
+
+    assert reviewed_only == {}
+    assert "70458-82-3" in all_records

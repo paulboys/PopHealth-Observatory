@@ -383,6 +383,7 @@ Key pieces:
 - `pesticide_ingestion.py` – builds JSONL snippet files from raw narrative text.
 - `pophealth_observatory.rag` package – lightweight embedding + retrieval utilities.
    - `RAGConfig` – paths & settings.
+   - Set `enable_evidence_enrichment=False` for strict reproducibility against raw snippet-only corpus.
    - `DummyEmbedder` – deterministic CPU-only test embedder (no external downloads).
    - `SentenceTransformerEmbedder` – optional (install with `pip install pophealth-observatory[rag]`).
    - `RAGPipeline` – orchestrates loading snippets, embedding (with caching), retrieval, and prompt assembly.
