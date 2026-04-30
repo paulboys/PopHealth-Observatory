@@ -108,6 +108,19 @@ class PopHealthObservatory:
         # Return first candidate; download will iterate if needed (implemented there)
         return candidates[0]
 
+    def _get_cycle_suffix(self, cycle: str) -> str:
+        """Return the NHANES file letter suffix for a survey cycle (e.g., '2017-2018' -> 'J').
+
+        Raises
+        ------
+        ValueError
+            If the cycle is not present in ``cycle_suffix_map``.
+        """
+        try:
+            return self.cycle_suffix_map[cycle]
+        except KeyError as exc:
+            raise ValueError(f"Unsupported NHANES cycle: {cycle}") from exc
+
     def download_data(self, cycle: str, component: str) -> pd.DataFrame:
         """Download data for a specific component and cycle with flexible URL handling.
 

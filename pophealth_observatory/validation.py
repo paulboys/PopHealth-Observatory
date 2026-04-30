@@ -143,7 +143,18 @@ def _scrape_cdc_component_metadata(component_url: str, timeout: int = 10) -> dic
     ValueError
         If metadata cannot be parsed from the page
     """
-    response = requests.get(component_url, timeout=timeout)
+    response = requests.get(
+        component_url,
+        timeout=timeout,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0 Safari/537.36"
+            ),
+            "Accept": "text/html,application/xhtml+xml",
+        },
+    )
     response.raise_for_status()
 
     # Use built-in html.parser to avoid external lxml dependency
@@ -243,10 +254,15 @@ def validate_component(
     # For now, we'll construct the expected CDC URL pattern
     # This is a simplified approach; in production you'd want more robust URL resolution
     cycle_letter = explorer._get_cycle_suffix(cycle)
-    component_code = component_info["code"]
+    # ``explorer.components`` may store either a plain code string (e.g. "DEMO") or a
+    # dict with a "code" key. Support both shapes.
+    if isinstance(component_info, dict):
+        component_code = component_info["code"]
+    else:
+        component_code = component_info
 
     # Common CDC URL patterns
-    base_url = f"https://wwwn.cdc.gov/nchs/nhanes/{cycle.replace('-', '/')}/{component_code}_{cycle_letter}.htm"
+    base_url = f"https://wwwn.cdc.gov/Nchs/Nhanes/{cycle}/{component_code}_{cycle_letter}.htm"
 
     try:
         # Scrape official CDC metadata
