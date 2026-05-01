@@ -58,7 +58,7 @@ report = explorer.validate(cycle="2017-2018", components=["demographics", "body_
 print(f"Validation status: {report['status']}")
 
 # Weighted mean (experimental survey helper - auto-detects survey weights)
-result = explorer.calculate_weighted_mean(df, variable="body_mass_index")
+result = explorer.calculate_weighted_mean(df, variable="bmi")
 print(f"Weighted BMI mean: {result['weighted_mean']:.2f}")
 ```
 

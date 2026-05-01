@@ -61,7 +61,7 @@ report = explorer.validate(cycle="2017-2018", components=["demographics", "body_
 print(f"Validation status: {report['status']}")
 
 # Weighted mean (experimental survey helper - auto-detects survey weights)
-result = explorer.calculate_weighted_mean(df, variable="body_mass_index")
+result = explorer.calculate_weighted_mean(df, variable="bmi")
 print(f"Weighted BMI mean: {result['weighted_mean']:.2f}")
 ```
 
@@ -187,4 +187,4 @@ MIT License – see the [LICENSE](https://github.com/paulboys/PopHealth-Observat
 
 ---
 
-Last sync (source mtime): 2026-04-22 12:23 UTC
+Last sync (source mtime): 2026-05-01 00:01 UTC

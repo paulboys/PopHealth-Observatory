@@ -22,8 +22,8 @@ Fundamental building blocks beyond the Streamlit UI—each designed for repeatab
 | Domain | What It Does | Key Objects / Functions | Output Artifacts |
 |--------|--------------|-------------------------|------------------|
 | Resilient Acquisition | Attempts multiple URL patterns for NHANES SAS transport files, applies timeouts, returns empty DataFrame (not exception crash) on failure | `PopHealthObservatory._download_xpt`, `NHANESExplorer.get_<component>()` | In‑memory DataFrames |
-| Schema Harmonization | Column subset + semantic renaming, derived gender/race labels applied uniformly across cycles | `NHANESExplorer._standardize_columns`, `create_merged_dataset()` | Cycle‑merged DataFrames |
-| Derived Health Metrics | BMI, BMI category, averaged BP (systolic/diastolic), BP stage classification | `NHANESExplorer._derive_metrics` | Enriched analytic columns |
+| Schema Harmonization | Column subset + semantic renaming, derived gender/race labels applied uniformly across cycles | `harmonize_demographics`, `harmonize_body_measures`, `harmonize_blood_pressure`, `NHANESExplorer.create_merged_dataset()` | Cycle‐merged DataFrames |
+| Derived Health Metrics | BMI category, averaged BP (systolic/diastolic), BP stage classification | `harmonize_body_measures`, `harmonize_blood_pressure` | Enriched analytic columns |
 | Component Metadata Manifesting | Parses component listing HTML tables, normalizes spans, attaches file URLs, sizes, publish dates, schema versioning | `NHANESExplorer.get_detailed_component_manifest()` | JSON / JSONL manifests under `manifests/` |
 | Validation Layer | Programmatic dataset integrity (row counts, source availability) + expanding reproducibility notebooks | `NHANESExplorer.validate()`; notebooks in `reproducibility/` | Structured validation dict + notebooks |
 | BRFSS Indicator Exploration | Local Parquet snapshot + indicator/year filtering; animated choropleth playback | `BRFSSExplorer` methods, `scripts/fetch_brfss_data.py` | Parquet cache + interactive plots |

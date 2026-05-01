@@ -7,7 +7,11 @@ Open-source population health & nutrition analytics toolkit focused initially on
 ## Features
 - Resilient multi-pattern XPT downloads
 - Rich metadata manifest generation with filtering
-- Convenience merging & analytic helpers
+- Convenience merging & analytic helpers (incl. survey-weighted means)
+- CDC-metadata validation with structured `ValidationReport`
+- Pesticide analyte ingestion + JSONL snippet extraction
+- Experimental retrieval-augmented (RAG) pipeline over snippets
+- BRFSS state-level indicator client
 - Streamlit exploratory app
 - Versioned schema for component manifests
 
